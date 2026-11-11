@@ -1,0 +1,13 @@
+# Dependencies (Jangan di-upload ke GitHub - Vercel akan otomatis meng-install)
+node_modules/
+
+# Cache Audio Lokal
+audio_cache/
+
+# Vercel & Environment
+.vercel/
+
+# Logs & OS artifacts
+*.log
+.DS_Store
+Thumbs.db

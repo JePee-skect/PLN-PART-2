@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Visitor Management System – PT PLN (Persero)</title>
+  
+  <!-- Favicon Logo Resmi PLN -->
+  <link rel="icon" type="image/png" href="img/pln-logo.png">
+  
+  <!-- Font Google Poppins -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheets Terpisah & Rapi -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/assistant.css">
+</head>
+<body>
+
+<!-- ================= 1. BILAH SAMPING (SIDEBAR) ================= -->
+<aside>
+  <div class="brand">
+    <img src="img/pln-logo.png" alt="Logo PT PLN (Persero)" class="brand-logo-img">
+    <div style="line-height:1.25;">
+      <div style="font-weight:700;font-size:14px;letter-spacing:0.3px;color:#fff;">PLN PUSHARLIS</div>
+      <div style="font-size:11.5px;opacity:0.85;color:#e0f2fe;">Visitor Management System</div>
+    </div>
+  </div>
+
+  <nav>
+    <a href="#registrasi" id="nav-registrasi" class="on">☺ Registrasi Tamu</a>
+    <a href="#dashboard" id="nav-dashboard" class="hide">⌂ Dashboard Admin</a>
+  </nav>
+
+  <div class="sidebar-footer" style="margin-top:auto;padding:14px;border-top:1px solid rgba(255,255,255,0.12);">
+    <!-- Tombol saat mode Tamu (User) -->
+    <button id="btn-open-login" style="width:100%;padding:11px 14px;border:1px solid rgba(255,255,255,0.25);border-radius:8px;background:rgba(255,255,255,0.08);color:#fff;font:inherit;font-size:13px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background 0.2s;" title="Khusus petugas PLN">
+      <span style="font-size:15px;">🔐</span>
+      <span style="font-weight:500;">Login Admin</span>
+    </button>
+
+    <!-- Info akun saat login sebagai Admin -->
+    <div id="admin-session-box" class="hide" style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="av" style="width:34px;height:34px;border-radius:8px;background:#ffe600;color:#17435a;font-weight:700;display:grid;place-items:center;flex-shrink:0;">A</span>
+        <div style="line-height:1.25;min-width:0;">
+          <div style="font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Petugas Admin</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.7);">PLN PUSHARLIS</div>
+        </div>
+      </div>
+      <button id="btn-logout" style="width:100%;padding:8px 12px;border:0;border-radius:6px;background:rgba(226,35,26,0.85);color:#fff;font:inherit;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background 0.2s;">
+        <span>🚪</span>
+        <span>Keluar (Logout)</span>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- ================= 2. KONTEN UTAMA ================= -->
+<main>
+  <!-- ========== HALAMAN: DASHBOARD ADMIN ========== -->
+  <section class="card hide" id="v-dashboard">
+    <h1 style="font-size:21px; margin-bottom:12px;">Daftar Tamu</h1>
+
+    <div class="stats">
+      <div class="stat"><b id="s1">0</b>Tamu Hari Ini</div>
+      <div class="stat"><b id="s2">0</b>Check In Hari Ini</div>
+      <div class="stat"><b id="s3">0</b>Check Out Hari Ini</div>
+    </div>
+
+    <h2>Data Tamu</h2>
+    <div class="filters">
+      <div>
+        <label for="d1">Tanggal Awal Data:</label>
+        <input type="date" id="d1">
+      </div>
+      <div>
+        <label for="d2">Tanggal Akhir Data:</label>
+        <input type="date" id="d2">
+      </div>
+      <div>
+        <label for="q">Cari Nama Tamu:</label>
+        <input type="text" id="q" placeholder="Ketik nama tamu...">
+      </div>
+      <button class="btn sm" id="xl">Export to Excel</button>
+    </div>
+
+    <div class="tw">
+      <table>
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Tanggal Kunjungan</th>
+            <th>Nama Tamu</th>
+            <th>Nama Pegawai Tujuan</th>
+            <th>Keperluan</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tb"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ========== HALAMAN: REGISTRASI TAMU ========== -->
+  <section class="card hide" id="v-registrasi">
+    <h1>Formulir Tamu PLN PUSHARLIS UP2WVI</h1>
+    <form id="f">
+      <!-- Pengambilan Foto Wajah Tamu -->
+      <div class="photo">
+        <img class="ph" id="pv" alt="Foto tamu" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 168 233'%3E%3Crect width='168' height='233' fill='%23bdbdbd'/%3E%3Ccircle cx='84' cy='70' r='34' fill='%238a8a8a'/%3E%3Cpath d='M20 170c0-45 30-60 64-60s64 15 64 60z' fill='%238a8a8a'/%3E%3Ctext x='84' y='195' font-size='22' fill='%23f2f2f2' text-anchor='middle' font-family='sans-serif'%3ENo Image%3C/text%3E%3Ctext x='84' y='220' font-size='22' fill='%23f2f2f2' text-anchor='middle' font-family='sans-serif'%3EAvailable%3C/text%3E%3C/svg%3E">
+        <button type="button" class="btn" id="pb" style="padding:16px 30px">Ambil Foto</button>
+        <input type="file" id="pf" accept="image/*" class="hide">
+      </div>
+
+      <!-- Isian Data Diri Tamu -->
+      <label for="nama">Nama Tamu*</label>
+      <input type="text" id="nama" required placeholder="Masukkan nama lengkap">
+
+      <label for="usaha">Nama Perusahaan*</label>
+      <input type="text" id="usaha" required placeholder="Instansi / perusahaan asal">
+
+      <label for="alamat">Alamat Perusahaan Tamu*</label>
+      <input type="text" id="alamat" required placeholder="Alamat lengkap perusahaan">
+
+      <label for="pegawai">Nama Pegawai Yang Dituju*</label>
+      <input type="text" id="pegawai" required placeholder="Nama pegawai PLN tujuan">
+
+      <!-- Pilihan APD Standar K3LH -->
+      <label id="apdl">Pemakaian APD*</label>
+      <div class="apd" id="apd">
+        <label class="chk">
+          <input type="checkbox" value="Safety Helmet">
+          <span>Safety Helmet</span>
+        </label>
+        <label class="chk">
+          <input type="checkbox" value="Safety Shoes">
+          <span>Safety Shoes</span>
+        </label>
+        <label class="chk">
+          <input type="checkbox" value="Seragam Kerja">
+          <span>Seragam Kerja</span>
+        </label>
+        <label class="chk">
+          <input type="checkbox" id="apdall">
+          <span>Pilih semua</span>
+        </label>
+        <label class="chk none">
+          <input type="checkbox" id="apdnone">
+          <span>Tidak memakai APD</span>
+        </label>
+      </div>
+
+      <label for="perlu">Keperluan Kunjungan*</label>
+      <input type="text" id="perlu" required placeholder="Tujuan berkunjung">
+
+      <label for="ktp">No. KTP atau Identitas Lainnya*</label>
+      <input type="text" id="ktp" required autocomplete="off" maxlength="20" placeholder="16 digit NIK KTP atau identitas lain">
+      <div class="err" id="ktp-e"></div>
+
+      <label for="kend">Kendaraan (Jenis / No.Pol)*</label>
+      <input type="text" id="kend" required placeholder="Contoh: Avanza B 1234 CD">
+
+      <label for="tag">No Name Tag Tamu*</label>
+      <input type="text" id="tag" required placeholder="Nomor pada kartu tamu">
+
+      <label for="jml">Jumlah Tamu*</label>
+      <select id="jml" required></select>
+
+      <!-- ========== SAFETY AND SECURITY INDUCTION (PLN PUSHARLIS) ========== -->
+      <div class="induction-container" id="induction-container">
+        <div class="induction-header-text">
+          Selama Anda Berada di Area PT PLN (Persero) Pusharlis : Peraturan dan Tata Tertib Selama Anda Berada di Area PT PLN (Persero) Pusharlis :
+        </div>
+
+        <div class="induction-poster-wrapper" id="induction-poster-wrapper">
+          <img src="img/safety-induction.jpg" alt="Safety and Security Induction PT PLN (Persero) Pusharlis" class="induction-poster-img" id="img-induction" title="Klik untuk memperbesar poster">
+          <div class="induction-zoom-hint">🔍 Klik gambar untuk memperbesar</div>
+        </div>
+
+        <div class="induction-agree-box">
+          <label class="induction-agree-label" for="agree-induction">
+            <input type="checkbox" id="agree-induction" required>
+            <span>Saya telah membaca dan memahami Safety and Security Induction di atas<span style="color:#e5483b">*</span></span>
+          </label>
+          <div class="err" id="agree-e" style="display:none;margin-top:8px;font-size:13px;color:#e5483b;font-weight:600;">
+            ⚠️ Harap baca dan centang persetujuan Safety and Security Induction sebelum mengirim formulir.
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:28px;text-align:center;">
+        <button class="btn btn-submit" id="sub" type="button">Kirim Registrasi</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ========== HALAMAN: TERIMA KASIH ========== -->
+  <section class="card thanks hide" id="v-terima">
+    <div class="tick">✓</div>
+    <h1 id="thanks-title">Terima Kasih</h1>
+    <p id="thanks-text"></p>
+    <p>Silakan menuju petugas keamanan untuk mengambil name tag.</p>
+    <button class="btn" id="again">Isi Formulir Lagi</button>
+  </section>
+</main>
+
+<!-- ================= 3. MODAL & DIALOG ================= -->
+<!-- Dialog Konfirmasi / Lightbox -->
+<div id="ov" class="hide">
+  <div class="dlg">
+    <h2 id="ovt"></h2>
+    <div id="ovb"></div>
+    <div class="acts" id="ova"></div>
+  </div>
+</div>
+
+<!-- Modal Login Admin Petugas -->
+<div id="modal-login" class="hide" style="position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);">
+  <div class="card" style="width:100%;max-width:390px;padding:28px 24px;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,0.4);animation:pop 0.3s ease-out;">
+    <div style="text-align:center;margin-bottom:18px;">
+      <img src="img/pln-logo.png" alt="Logo PT PLN (Persero)" style="width:48px;height:auto;margin:0 auto 12px;display:block;filter:drop-shadow(0 3px 8px rgba(0,0,0,0.18));">
+      <h2 style="margin:0 0 4px;font-size:19px;font-weight:700;">Login Petugas Admin</h2>
+      <p style="margin:0;font-size:12px;color:var(--muted);">Hanya untuk petugas berwenang PLN PUSHARLIS</p>
+    </div>
+
+    <form id="form-login">
+      <label for="admin-user" style="margin:0 0 6px;font-size:13px;font-weight:600;">Username:</label>
+      <input type="text" id="admin-user" required placeholder="Masukkan username" autocomplete="username" style="padding:10px 12px;font-size:13px;margin-bottom:12px;border-radius:8px;">
+
+      <label for="admin-pass" style="margin:0 0 6px;font-size:13px;font-weight:600;">Password:</label>
+      <div style="position:relative;margin-bottom:12px;">
+        <input type="password" id="admin-pass" required placeholder="Masukkan password" autocomplete="current-password" style="padding:10px 38px 10px 12px;font-size:13px;border-radius:8px;">
+        <button type="button" id="btn-toggle-pass" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:0;cursor:pointer;font-size:14px;color:var(--muted);" title="Lihat/Sembunyikan password">👁️</button>
+      </div>
+
+      <div id="login-err" class="err" style="margin-bottom:12px;display:none;font-size:12px;">Username atau password salah!</div>
+
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button type="button" class="btn ghost" id="btn-cancel-login" style="flex:1;padding:10px;font-size:13px;">Batal</button>
+        <button type="submit" class="btn" style="flex:1;padding:10px;font-size:13px;">Masuk</button>
+      </div>
+
+      <div style="margin-top:16px;padding-top:10px;border-top:1px solid var(--line);text-align:center;font-size:11.5px;color:var(--muted);">
+        🔒 Sistem dilindungi. Akses terbatas untuk petugas PLN.
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ================= 4. ASISTEN ROBOT 3D & WIDGET ================= -->
+<div id="bot">
+  <div id="bub" class="hide"></div>
+  <div id="panel" class="hide">
+    <div id="stage">
+      <div class="stage-brand">
+        <img src="img/pln-logo.png" alt="Logo PT PLN (Persero)" class="stage-logo">
+        <div style="line-height:1.2;">
+          <div class="stage-title">Safety Buddy</div>
+          <div class="stage-subtitle">PLN PUSHARLIS UP2WVI</div>
+        </div>
+      </div>
+      <button id="spk" title="Nyalakan / Matikan Suara">🔊 Aktif</button>
+      <button id="vcfg" title="Pengaturan Suara">⚙️</button>
+    </div>
+
+    <!-- Drawer Pengaturan Suara -->
+    <div id="voice-settings" class="hide" style="padding:12px;background:var(--input);border-bottom:1px solid var(--line);font-size:12px;max-height:360px;overflow-y:auto;">
+      <div style="font-weight:600;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <img src="img/pln-logo.png" alt="PLN" style="width:18px;height:18px;object-fit:contain;background:#fff;border-radius:3px;padding:1px;box-shadow:0 1px 3px rgba(0,0,0,0.2);">
+          <span>Pengaturan Suara Asisten PLN</span>
+        </div>
+        <button id="vclose" style="background:none;border:0;font-size:14px;cursor:pointer;color:var(--muted);">✕</button>
+      </div>
+
+      <!-- Tab Mode Suara -->
+      <div style="display:flex;gap:4px;margin-bottom:10px;">
+        <button id="tab-vonline" class="btn sm" style="flex:1;padding:6px 2px;font-size:10.5px;">🌟 Gadis Neural (ID Asli)</button>
+        <button id="tab-vbrowser" class="btn sm ghost" style="flex:1;padding:6px 2px;font-size:10.5px;">🔊 Browser Edge</button>
+        <button id="tab-veasyvoice" class="btn sm ghost" style="flex:1;padding:6px 2px;font-size:10.5px;">✨ EasyVoice</button>
+        <button id="tab-veleven" class="btn sm ghost" style="flex:1;padding:6px 2px;font-size:10.5px;">🎙️ ElevenLabs</button>
+      </div>
+
+      <!-- Mode 1: Online TTS Wanita Indonesia (Microsoft Gadis Neural) -->
+      <div id="sec-vonline">
+        <div style="background:rgba(46,204,113,0.12);border:1px solid rgba(46,204,113,0.3);padding:8px;border-radius:6px;margin-bottom:8px;font-size:11px;line-height:1.45;">
+          ✅ <b>Suara Asli Wanita Indonesia (Microsoft Gadis Neural)</b><br>
+          Pelafalan 100% fasih, alami, sopan, dan ramah khas asisten resmi PLN Pusharlis (Bebas logat asing/bule).
+        </div>
+        <button class="btn sm" id="btn-test-online" style="width:100%;padding:7px 10px;font-size:12px;background:#27ae60;">
+          ▶️ Tes Suara Safety Buddy (Gadis Neural)
+        </button>
+      </div>
+
+      <!-- Mode 2: EasyVoice AI Studio -->
+      <div id="sec-veasyvoice" class="hide">
+        <div style="background:rgba(230,126,34,0.12);border:1px solid rgba(230,126,34,0.3);padding:8px;border-radius:6px;margin-bottom:8px;font-size:11px;line-height:1.4;color:var(--text);">
+          ℹ️ <b>Catatan EasyVoice (Kokoro-82m):</b> Model AI EasyVoice dilatih untuk bahasa Inggris/Jepang, sehingga pelafalan Bahasa Indonesia berlogat bule/asing. Untuk pelafalan bahasa Indonesia normal &amp; fasih, disarankan menggunakan tab <b>🌟 Gadis Neural</b>.
+        </div>
+
+        <label style="margin:0 0 4px;font-size:11px;color:var(--muted);">EasyVoice API Key:</label>
+        <input type="text" id="ev-api-key" placeholder="ev_..." value="ev_a8dd782ce24e59571a03d3cbda4039cd73c68d9a0013647a9d295a6e7cc87e16" style="padding:6px;font-size:11px;margin-bottom:6px;border-radius:6px;font-family:monospace;">
+
+        <label style="margin:0 0 4px;font-size:11px;color:var(--muted);">Karakter Suara (Kokoro AI):</label>
+        <select id="ev-voice-select" style="width:100%;padding:6px;font-size:12px;margin-bottom:8px;border-radius:6px;">
+          <option value="af_heart">💖 Heart (Ramah &amp; Hangat - Rekomendasi)</option>
+          <option value="af_bella">🌸 Bella (Lembut &amp; Ceria)</option>
+          <option value="af_sarah">✨ Sarah (Profesional &amp; Jelas)</option>
+          <option value="af_nicole">💫 Nicole (Natural &amp; Elegan)</option>
+          <option value="af_sky">🌟 Sky (Energik &amp; Terang)</option>
+        </select>
+
+        <div style="display:flex;gap:6px;margin-bottom:6px;">
+          <button class="btn sm" id="btn-save-easyvoice" style="flex:1;padding:6px;font-size:11px;">💾 Simpan API Key</button>
+          <button class="btn sm ghost" id="btn-test-easyvoice" style="flex:1;padding:6px;font-size:11px;">▶️ Tes Suara</button>
+        </div>
+        <div id="ev-status" style="font-size:11px;min-height:16px;color:#2ecc71;">✅ API Key tersimpan.</div>
+      </div>
+
+      <!-- Mode 2: Suara Browser TTS (Ardi Natural / Gadis) -->
+      <div id="sec-vbrowser" class="hide">
+        <label style="margin:0 0 4px;font-size:11px;color:var(--muted);">Pilih Suara Browser:</label>
+        <select id="voice-select" style="width:100%;padding:6px;font-size:12px;margin-bottom:8px;border-radius:6px;"></select>
+        
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+          <label style="margin:0;font-size:11px;color:var(--muted);white-space:nowrap;">Kecepatan:</label>
+          <input type="range" id="voice-rate" min="0.8" max="1.2" step="0.05" value="1.0" style="flex:1;">
+          <span id="rate-val" style="font-size:11px;min-width:28px;">1.0x</span>
+        </div>
+        
+        <button class="btn sm" id="btn-test-voice" style="width:100%;padding:6px 10px;font-size:12px;">▶️ Tes Suara Browser</button>
+        
+        <div id="voice-tip" style="margin-top:8px;font-size:11px;line-height:1.4;color:var(--muted);background:rgba(27,99,120,0.08);padding:6px 8px;border-radius:6px;">
+          💡 Buka di <b>Microsoft Edge</b> untuk suara wanita <b>Microsoft Gadis (Natural)</b> yang paling jernih &amp; ramah.
+        </div>
+      </div>
+
+      <!-- Mode 2: ElevenLabs Voice Cloning -->
+      <div id="sec-veleven" class="hide">
+        <p style="margin:0 0 8px;font-size:11px;line-height:1.4;color:var(--muted);">
+          Gunakan API Key dan Voice ID dari akun ElevenLabs tempat Anda mengkloning suara sendiri.
+        </p>
+
+        <label style="margin:0 0 4px;font-size:11px;color:var(--muted);">ElevenLabs API Key:</label>
+        <input type="password" id="el-api-key" placeholder="sk_..." style="padding:6px;font-size:12px;margin-bottom:6px;border-radius:6px;">
+
+        <label style="margin:0 0 4px;font-size:11px;color:var(--muted);">Voice ID Kloning:</label>
+        <input type="text" id="el-voice-id" placeholder="Contoh: 21m00Tcm4TlvDq8ikWAM" style="padding:6px;font-size:12px;margin-bottom:8px;border-radius:6px;">
+
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <button class="btn sm" id="btn-save-eleven" style="flex:1;padding:6px;font-size:11px;">💾 Simpan & Aktifkan</button>
+          <button class="btn sm ghost" id="btn-test-eleven" style="flex:1;padding:6px;font-size:11px;">▶️ Tes Bicara</button>
+        </div>
+
+        <div id="el-status" style="font-size:11px;min-height:16px;"></div>
+
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line);">
+          <div style="font-weight:600;font-size:11px;margin-bottom:4px;">Atau putar rekaman lokal:</div>
+          <p style="margin:0 0 6px;font-size:10.5px;color:var(--muted);">
+            Memutar file <code>audio/my-voice.mp3</code> yang Anda unggah tanpa perlu kuota API.
+          </p>
+          <button class="btn sm" id="btn-play-mp3" style="width:100%;padding:7px;font-size:12px;background:#27ae60;">
+            ▶️ Putar File Rekaman Suara Saya
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Messages, Quick Chips & Input -->
+    <div id="msgs"></div>
+    <div id="chips"></div>
+    <div id="cf">
+      <input type="text" id="ci" placeholder="Tanya asisten...">
+      <button class="btn sm" id="cs">Kirim</button>
+    </div>
+  </div>
+
+  <!-- Tombol Pemicu Kanvas 3D Robot -->
+  <button id="fab" aria-label="Buka asisten">
+    <canvas id="fabc" width="156" height="156" style="width:100%;height:100%"></canvas>
+    <div class="fab-badge">
+      <span>Safety Buddy</span>
+    </div>
+  </button>
+</div>
+
+<!-- ================= 5. SCRIPTS MODULAR ================= -->
+<!-- Library Eksternal Three.js untuk Model 3D -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<!-- Skrip Terpisah & Modular -->
+<script src="js/xlsx.full.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/voice.js"></script>
+<script src="js/robot3d.js"></script>
+<script src="js/form.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/assistant.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

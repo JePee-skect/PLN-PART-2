@@ -1,0 +1,3034 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Visitor Management System – PLN</title>
+<link rel="icon" type="image/png" href="img/pln-logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* =============================================================
+   TEMA & VARIABEL
+   ============================================================= */
+:root {
+  --card:  #ffffff;
+  --text:  #1e293b;
+  --muted: #475569;
+  --input: #ffffff;
+  --line:  #d1d5db;
+  --th:    #fff;
+  --side:  #17435a;
+  --bg:    #f3f6f9;
+  --acc:   #1b6378;
+
+  box-sizing: border-box;
+  padding-top:    env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Dark mode otomatis */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme=light]) {
+    --bg:    #11191f;
+    --card:  #1f2a30;
+    --text:  #eef2f3;
+    --muted: #b5c0c5;
+    --input: #17212626;
+    --line:  #3b4a52;
+  }
+}
+
+/* Dark mode manual */
+:root[data-theme=dark] {
+  --bg:    #11191f;
+  --card:  #1f2a30;
+  --text:  #eef2f3;
+  --muted: #b5c0c5;
+  --input: #17212626;
+  --line:  #3b4a52;
+}
+
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+*    { box-sizing: border-box; }
+.hide { display: none !important; }
+
+/* =============================================================
+   LAYOUT
+   ============================================================= */
+body {
+  margin: 0;
+  display: flex;
+  min-height: 100vh;
+  font-family: Poppins, system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+aside {
+  width: 250px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  background: var(--side);
+  color: #fff;
+}
+
+main {
+  flex: 1;
+  min-width: 0;
+  padding: 28px 40px;
+}
+
+.card {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 36px 44px;
+  border-radius: 12px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+h1 { font-size: 23px; margin: 0 0 24px; }
+h2 { font-size: 20px; margin: 26px 0 12px; }
+
+/* =============================================================
+   SIDEBAR
+   ============================================================= */
+.brand {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 22px 20px;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.brand-logo-img {
+  width: 44px;
+  height: auto;
+  max-height: 58px;
+  display: block;
+  flex: none;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25));
+}
+
+nav a {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 22px;
+  color: #fff;
+  font-size: 14px;
+  text-decoration: none;
+  opacity: .9;
+}
+
+nav a.on { background: rgba(255, 255, 255, .12); }
+
+.me {
+  width: 100%;
+  margin-top: auto;
+  padding: 16px 20px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  border: 0;
+  background: none;
+  color: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.av {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #e8eef0;
+  color: var(--side);
+  font-weight: 600;
+}
+
+/* =============================================================
+   FORM & INPUT
+   ============================================================= */
+label {
+  display: block;
+  margin: 18px 0 8px;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+input[type=text],
+input[type=date],
+select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--input);
+  color: var(--text);
+  font: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input[type=text]:focus,
+input[type=date]:focus,
+select:focus {
+  border-color: var(--acc);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(27, 99, 120, 0.15);
+}
+
+.bad {
+  border-color: #e5483b !important;
+}
+
+.err {
+  margin-top: 6px;
+  color: #e5483b;
+  font-size: 13px;
+}
+
+.err:empty {
+  display: none;
+}
+
+.err.hint {
+  color: var(--muted);
+}
+
+.btn {
+  padding: 12px 28px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--acc);
+  color: #fff;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+.btn.sm {
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
+.btn.ghost {
+  background: none;
+  border: 2px solid var(--acc);
+  color: var(--acc);
+}
+
+.photo {
+  text-align: center;
+}
+
+.ph {
+  display: block;
+  width: 168px;
+  height: 233px;
+  margin: 0 auto 14px;
+  object-fit: cover;
+  background: #bdbdbd;
+}
+
+/* =============================================================
+   CHECKBOX APD (ALAT PELINDUNG DIRI)
+   ============================================================= */
+.apd {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.apd label {
+  margin: 0;
+}
+
+.chk {
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+
+.chk input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.chk span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 18px;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  user-select: none;
+  transition: 0.15s;
+}
+
+.chk span::before {
+  content: "";
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--muted);
+  border-radius: 6px;
+  text-align: center;
+  font-size: 16px;
+  line-height: 18px;
+}
+
+.chk input:checked + span {
+  background: var(--acc);
+  border-color: var(--acc);
+  color: #fff;
+}
+
+.chk input:checked + span::before {
+  content: "✓";
+  background: #fff;
+  border-color: #fff;
+  color: var(--acc);
+}
+
+.chk input:focus-visible + span {
+  outline: 3px solid #ffe600;
+}
+
+.chk.none input:checked + span {
+  background: #c0392b;
+  border-color: #c0392b;
+}
+
+.chk.none input:checked + span::before {
+  color: #c0392b;
+}
+
+/* =============================================================
+   SAFETY AND SECURITY INDUCTION (PLN PUSHARLIS)
+   ============================================================= */
+.induction-container {
+  margin-top: 36px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.induction-header-text {
+  text-align: center;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.induction-poster-wrapper {
+  max-width: 680px;
+  margin: 0 auto;
+  border: 2px solid #1a202c;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.induction-poster-wrapper:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.16);
+}
+
+.induction-poster-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.induction-zoom-hint {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(15, 23, 42, 0.75);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+  opacity: 0.85;
+  transition: opacity 0.2s;
+}
+
+.induction-poster-wrapper:hover .induction-zoom-hint {
+  opacity: 1;
+}
+
+.induction-agree-box {
+  max-width: 680px;
+  margin: 16px auto 0;
+  padding: 14px 18px;
+  background: rgba(27, 99, 120, 0.05);
+  border: 1px solid rgba(27, 99, 120, 0.22);
+  border-radius: 8px;
+}
+
+.induction-agree-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.induction-agree-label input[type="checkbox"] {
+  width: 19px;
+  height: 19px;
+  cursor: pointer;
+  accent-color: var(--acc);
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.induction-agree-label span {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.btn-submit {
+  min-width: 240px;
+  padding: 14px 42px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(27, 99, 120, 0.3);
+  transition: transform 0.15s ease, opacity 0.2s ease;
+}
+
+.btn-submit:hover {
+  transform: translateY(-2px);
+  opacity: 0.95;
+}
+
+/* =============================================================
+   HALAMAN TERIMA KASIH
+   ============================================================= */
+.thanks {
+  max-width: 640px;
+  margin: 8vh auto 0;
+  text-align: center;
+}
+
+.thanks .tick {
+  width: 88px;
+  height: 88px;
+  margin: 0 auto 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--acc);
+  color: #fff;
+  font-size: 46px;
+  animation: pop 0.5s ease-out;
+}
+
+.thanks p {
+  margin: 0 0 8px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.thanks .btn {
+  margin-top: 24px;
+  padding: 16px 34px;
+  font-size: 16px;
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* =============================================================
+   DASHBOARD & STATISTIK
+   ============================================================= */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.stat {
+  padding: 26px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--input);
+  text-align: center;
+  box-shadow: 0 1px 2px #0002;
+}
+
+.stat b {
+  display: block;
+  font-size: 34px;
+  font-weight: 400;
+  color: var(--acc);
+}
+
+.filters {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.filters label {
+  margin: 0 0 6px;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.filters input {
+  width: auto;
+}
+
+.filters .btn {
+  margin-left: auto;
+}
+
+.tw {
+  margin-top: 22px;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+th {
+  padding: 14px 12px;
+  border-left: 1px solid #fff5;
+  background: var(--acc);
+  color: var(--th);
+  text-align: left;
+}
+
+td {
+  padding: 12px;
+  border: 1px solid var(--line);
+}
+
+td.e {
+  padding: 16px;
+  text-align: center;
+}
+
+/* =============================================================
+   DIALOG OVERLAY / MODAL
+   ============================================================= */
+#ov {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: #0009;
+}
+
+.dlg {
+  width: 100%;
+  max-width: 420px;
+  max-height: 85vh;
+  overflow: auto;
+  padding: 24px;
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--text);
+}
+
+.dlg h2 {
+  margin: 0 0 14px;
+  font-size: 19px;
+}
+
+.dlg p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.dlg dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 14px;
+  margin: 0;
+  font-size: 14px;
+}
+
+.dlg dt {
+  color: var(--muted);
+}
+
+.dlg dd {
+  margin: 0;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.acts {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+/* =============================================================
+   ASISTEN ROBOT (WIDGET, BALON & PANEL CHAT)
+   ============================================================= */
+#bot {
+  position: fixed;
+  z-index: 40;
+  right: max(18px, env(safe-area-inset-right, 0px));
+  bottom: max(18px, env(safe-area-inset-bottom, 0px));
+  font-size: 14px;
+}
+
+#fab {
+  display: block;
+  width: 130px;
+  height: 190px;
+  margin-left: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  filter: drop-shadow(0 8px 10px #0006);
+}
+
+#bot.drag #fab {
+  cursor: grabbing;
+}
+
+#bot.drag #bub {
+  opacity: 0.4;
+}
+
+#panel {
+  position: absolute;
+  right: 0;
+  bottom: 198px;
+  width: 270px;
+  max-width: calc(100vw - 36px);
+  max-height: calc(100vh - 250px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: 0 10px 40px #0007;
+}
+
+#stage {
+  position: relative;
+  flex: none;
+  height: 42px;
+  background: linear-gradient(var(--side), var(--acc));
+}
+
+#stage span {
+  position: absolute;
+  left: 12px;
+  top: 10px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+#spk {
+  position: absolute;
+  right: 40px;
+  top: 8px;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 20px;
+  background: #fff3;
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#spk:hover {
+  background: #fff5;
+}
+
+#vcfg {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 20px;
+  background: #fff3;
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#vcfg:hover {
+  background: #fff5;
+}
+
+#msgs {
+  flex: 1;
+  height: 110px;
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: auto;
+  padding: 8px 10px;
+  font-size: 12.5px;
+}
+
+.m {
+  max-width: 88%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  line-height: 1.4;
+}
+
+.m.b {
+  align-self: flex-start;
+  background: var(--input);
+  border: 1px solid var(--line);
+}
+
+.m.u {
+  align-self: flex-end;
+  background: var(--acc);
+  color: #fff;
+}
+
+#chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 0 12px 8px;
+}
+
+#chips button {
+  padding: 4px 12px;
+  border: 1px solid var(--acc);
+  border-radius: 16px;
+  background: none;
+  color: var(--acc);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+#cf {
+  display: flex;
+  gap: 6px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--line);
+}
+
+#cf input {
+  padding: 9px;
+  font-size: 13px;
+}
+
+#bub {
+  position: absolute;
+  right: 122px;
+  bottom: 62px;
+  width: max-content;
+  max-width: min(270px, calc(100vw - 180px));
+  padding: 12px 16px;
+  border: 3px solid #3bb7e6;
+  border-radius: 20px;
+  background: #10262e;
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.45;
+  box-shadow: 0 6px 24px #0006;
+  cursor: pointer;
+}
+
+#bub::after {
+  content: "";
+  position: absolute;
+  right: -13px;
+  top: 30px;
+  border: 10px solid transparent;
+  border-left: 12px solid #3bb7e6;
+  border-right: 0;
+}
+
+/* Penyesuaian posisi balon saat robot digeser ke sisi lain */
+#bot.left #bub {
+  right: auto;
+  left: 122px;
+}
+
+#bot.left #bub::after {
+  right: auto;
+  left: -13px;
+  border: 10px solid transparent;
+  border-right: 12px solid #3bb7e6;
+  border-left: 0;
+}
+
+#bot.left #panel {
+  right: auto;
+  left: 0;
+}
+
+#bot.top #panel {
+  bottom: auto;
+  top: 198px;
+  max-height: calc(100vh - 260px);
+}
+
+/* =============================================================
+   RESPONSIF (TABLET & MOBILE)
+   ============================================================= */
+@media (max-width: 800px) {
+  body {
+    flex-direction: column;
+  }
+
+  aside {
+    width: 100%;
+    height: auto;
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .brand {
+    padding: 12px 16px;
+  }
+
+  .brand-logo-img {
+    width: 36px;
+  }
+
+  nav {
+    display: flex;
+  }
+
+  .me {
+    width: auto;
+    margin-left: auto;
+    padding: 8px 16px;
+  }
+
+  main {
+    padding: 16px;
+  }
+
+  .card {
+    padding: 18px;
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .filters .btn {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  #fab {
+    width: 98px;
+    height: 143px;
+  }
+
+  #bub {
+    right: 92px;
+    bottom: 40px;
+    font-size: 12.5px;
+  }
+
+  #panel {
+    bottom: 152px;
+    max-height: calc(100vh - 210px);
+  }
+
+  #bot.left #bub {
+    left: 92px;
+  }
+
+  #bot.top #panel {
+    top: 152px;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ================= SIDEBAR ================= -->
+<aside>
+  <div class="brand">
+    <img src="img/pln-logo.png" alt="Logo PT PLN (Persero)" class="brand-logo-img">
+    <div style="line-height:1.25;">
+      <div style="font-weight:700;font-size:14px;letter-spacing:0.3px;color:#fff;">PLN PUSHARLIS</div>
+      <div style="font-size:11.5px;opacity:0.85;color:#e0f2fe;">Visitor Management System</div>
+    </div>
+  </div>
+
+  <nav>
+    <a href="#registrasi" id="nav-registrasi" class="on">☺ Registrasi Tamu</a>
+    <a href="#dashboard" id="nav-dashboard" class="hide">⌂ Dashboard Admin</a>
+  </nav>
+
+  <div class="sidebar-footer" style="margin-top:auto;padding:14px;border-top:1px solid rgba(255,255,255,0.12);">
+    <!-- Tombol saat mode Tamu (User) -->
+    <button id="btn-open-login" style="width:100%;padding:11px 14px;border:1px solid rgba(255,255,255,0.25);border-radius:8px;background:rgba(255,255,255,0.08);color:#fff;font:inherit;font-size:13px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background 0.2s;" title="Khusus petugas PLN">
+      <span style="font-size:15px;">🔐</span>
+      <span style="font-weight:500;">Login Admin</span>
+    </button>
+
+    <!-- Info akun saat login sebagai Admin -->
+    <div id="admin-session-box" class="hide" style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="av" style="width:34px;height:34px;border-radius:8px;background:#ffe600;color:#17435a;font-weight:700;display:grid;place-items:center;flex-shrink:0;">A</span>
+        <div style="line-height:1.25;min-width:0;">
+          <div style="font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Petugas Admin</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.7);">PLN PUSHARLIS</div>
+        </div>
+      </div>
+      <button id="btn-logout" style="width:100%;padding:8px 12px;border:0;border-radius:6px;background:rgba(226,35,26,0.85);color:#fff;font:inherit;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background 0.2s;">
+        <span>🚪</span>
+        <span>Keluar (Logout)</span>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<main>
+  <!-- ========== DASHBOARD ========== -->
+  <section class="card hide" id="v-dashboard">
+    <h1 style="font-size:21px; margin-bottom:12px;">Daftar Tamu</h1>
+
+    <div class="stats">
+      <div class="stat"><b id="s1">0</b>Tamu Hari Ini</div>
+      <div class="stat"><b id="s2">0</b>Check In Hari Ini</div>
+      <div class="stat"><b id="s3">0</b>Check Out Hari Ini</div>
+    </div>
+
+    <h2>Data Tamu</h2>
+    <div class="filters">
+      <div>
+        <label for="d1">Tanggal Awal Data:</label>
+        <input type="date" id="d1">
+      </div>
+      <div>
+        <label for="d2">Tanggal Akhir Data:</label>
+        <input type="date" id="d2">
+      </div>
+      <div>
+        <label for="q">Cari Nama Tamu:</label>
+        <input type="text" id="q" placeholder="Ketik nama tamu...">
+      </div>
+      <button class="btn sm" id="xl">Export to Excel</button>
+    </div>
+
+    <div class="tw">
+      <table>
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Tanggal Kunjungan</th>
+            <th>Nama Tamu</th>
+            <th>Nama Pegawai Tujuan</th>
+            <th>Keperluan</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tb"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ========== REGISTRASI ========== -->
+  <section class="card hide" id="v-registrasi">
+    <h1>Formulir Tamu PLN PUSHARLIS UP2WVI</h1>
+    <form id="f">
+      <div class="photo">
+        <img class="ph" id="pv" alt="Foto tamu" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 168 233'%3E%3Crect width='168' height='233' fill='%23bdbdbd'/%3E%3Ccircle cx='84' cy='70' r='34' fill='%238a8a8a'/%3E%3Cpath d='M20 170c0-45 30-60 64-60s64 15 64 60z' fill='%238a8a8a'/%3E%3Ctext x='84' y='195' font-size='22' fill='%23f2f2f2' text-anchor='middle' font-family='sans-serif'%3ENo Image%3C/text%3E%3Ctext x='84' y='220' font-size='22' fill='%23f2f2f2' text-anchor='middle' font-family='sans-serif'%3EAvailable%3C/text%3E%3C/svg%3E">
+        <button type="button" class="btn" id="pb" style="padding:16px 30px">Ambil Foto</button>
+        <input type="file" id="pf" accept="image/*" class="hide">
+      </div>
+
+      <label for="nama">Nama Tamu*</label>
+      <input type="text" id="nama" required placeholder="Masukkan nama lengkap">
+
+      <label for="usaha">Nama Perusahaan*</label>
+      <input type="text" id="usaha" required placeholder="Instansi / perusahaan asal">
+
+      <label for="alamat">Alamat Perusahaan Tamu*</label>
+      <input type="text" id="alamat" required placeholder="Alamat lengkap perusahaan">
+
+      <label for="pegawai">Nama Pegawai Yang Dituju*</label>
+      <input type="text" id="pegawai" required placeholder="Nama pegawai PLN tujuan">
+
+      <label id="apdl">Pemakaian APD*</label>
+      <div class="apd" id="apd">
+        <label class="chk">
+          <input type="checkbox" value="Safety Helmet">
+          <span>Safety Helmet</span>
+        </label>
+        <label class="chk">
+          <input type="checkbox" value="Safety Shoes">
+          <span>Safety Shoes</span>
+        </label>
+        <label class="chk">
+          <input type="checkbox" value="Seragam Kerja">
+          <span>Seragam Kerja</span>
+        </label>
+        <label class="chk">
+          <input type="checkbox" id="apdall">
+          <span>Pilih semua</span>
+        </label>
+        <label class="chk none">
+          <input type="checkbox" id="apdnone">
+          <span>Tidak memakai APD</span>
+        </label>
+      </div>
+
+      <label for="perlu">Keperluan Kunjungan*</label>
+      <input type="text" id="perlu" required placeholder="Tujuan berkunjung">
+
+      <label for="ktp">No. KTP atau Identitas Lainnya*</label>
+      <input type="text" id="ktp" required autocomplete="off" maxlength="20" placeholder="16 digit NIK KTP atau identitas lain">
+      <div class="err" id="ktp-e"></div>
+
+      <label for="kend">Kendaraan (Jenis / No.Pol)*</label>
+      <input type="text" id="kend" required placeholder="Contoh: Avanza B 1234 CD">
+
+      <label for="tag">No Name Tag Tamu*</label>
+      <input type="text" id="tag" required placeholder="Nomor pada kartu tamu">
+
+      <label for="jml">Jumlah Tamu*</label>
+      <select id="jml" required></select>
+
+      <!-- ========== SAFETY AND SECURITY INDUCTION (PLN PUSHARLIS) ========== -->
+      <div class="induction-container" id="induction-container">
+        <div class="induction-header-text">
+          Selama Anda Berada di Area PT PLN (Persero) Pusharlis : Peraturan dan Tata Tertib Selama Anda Berada di Area PT PLN (Persero) Pusharlis :
+        </div>
+
+        <div class="induction-poster-wrapper" id="induction-poster-wrapper">
+          <img src="img/safety-induction.jpg" alt="Safety and Security Induction PT PLN (Persero) Pusharlis" class="induction-poster-img" id="img-induction" title="Klik untuk memperbesar poster">
+          <div class="induction-zoom-hint">🔍 Klik gambar untuk memperbesar</div>
+        </div>
+
+        <div class="induction-agree-box">
+          <label class="induction-agree-label" for="agree-induction">
+            <input type="checkbox" id="agree-induction" required>
+            <span>Saya telah membaca dan memahami Safety and Security Induction di atas<span style="color:#e5483b">*</span></span>
+          </label>
+          <div class="err" id="agree-e" style="display:none;margin-top:8px;font-size:13px;color:#e5483b;font-weight:600;">
+            ⚠️ Harap baca dan centang persetujuan Safety and Security Induction sebelum mengirim formulir.
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:28px;text-align:center;">
+        <button class="btn btn-submit" id="sub" type="button">Kirim Registrasi</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ========== TERIMA KASIH ========== -->
+  <section class="card thanks hide" id="v-terima">
+    <div class="tick">✓</div>
+    <h1 id="thanks-title">Terima Kasih</h1>
+    <p id="thanks-text"></p>
+    <p>Silakan menuju petugas keamanan untuk mengambil name tag.</p>
+    <button class="btn" id="again">Isi Formulir Lagi</button>
+  </section>
+</main>
+
+<!-- Dialog konfirmasi / modal -->
+<div id="ov" class="hide">
+  <div class="dlg">
+    <h2 id="ovt"></h2>
+    <div id="ovb"></div>
+    <div class="acts" id="ova"></div>
+  </div>
+</div>
+
+<!-- Modal Login Admin -->
+<div id="modal-login" class="hide" style="position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);">
+  <div class="card" style="width:100%;max-width:390px;padding:28px 24px;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,0.4);animation:pop 0.3s ease-out;">
+    <div style="text-align:center;margin-bottom:18px;">
+      <img src="img/pln-logo.png" alt="Logo PT PLN (Persero)" style="width:48px;height:auto;margin:0 auto 12px;display:block;filter:drop-shadow(0 3px 8px rgba(0,0,0,0.18));">
+      <h2 style="margin:0 0 4px;font-size:19px;font-weight:700;">Login Petugas Admin</h2>
+      <p style="margin:0;font-size:12px;color:var(--muted);">Hanya untuk petugas berwenang PLN PUSHARLIS</p>
+    </div>
+
+    <form id="form-login">
+      <label for="admin-user" style="margin:0 0 6px;font-size:13px;font-weight:600;">Username:</label>
+      <input type="text" id="admin-user" required placeholder="Masukkan username" autocomplete="username" style="padding:10px 12px;font-size:13px;margin-bottom:12px;border-radius:8px;">
+
+      <label for="admin-pass" style="margin:0 0 6px;font-size:13px;font-weight:600;">Password:</label>
+      <div style="position:relative;margin-bottom:12px;">
+        <input type="password" id="admin-pass" required placeholder="Masukkan password" autocomplete="current-password" style="padding:10px 38px 10px 12px;font-size:13px;border-radius:8px;">
+        <button type="button" id="btn-toggle-pass" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:0;cursor:pointer;font-size:14px;color:var(--muted);" title="Lihat/Sembunyikan password">👁️</button>
+      </div>
+
+      <div id="login-err" class="err" style="margin-bottom:12px;display:none;font-size:12px;">Username atau password salah!</div>
+
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button type="button" class="btn ghost" id="btn-cancel-login" style="flex:1;padding:10px;font-size:13px;">Batal</button>
+        <button type="submit" class="btn" style="flex:1;padding:10px;font-size:13px;">Masuk</button>
+      </div>
+
+      <div style="margin-top:16px;padding-top:10px;border-top:1px solid var(--line);text-align:center;font-size:11.5px;color:var(--muted);">
+        🔒 Sistem dilindungi. Akses terbatas untuk petugas PLN.
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Asisten robot -->
+<div id="bot">
+  <div id="bub" class="hide"></div>
+  <div id="panel" class="hide">
+    <div id="stage">
+      <span>Asisten PLN</span>
+      <button id="spk" title="Nyalakan / Matikan Suara">🔊 Aktif</button>
+      <button id="vcfg" title="Pengaturan Suara">⚙️</button>
+    </div>
+
+    <!-- Panel Pengaturan Suara -->
+    <div id="voice-settings" class="hide" style="padding:12px;background:var(--input);border-bottom:1px solid var(--line);font-size:12px;max-height:360px;overflow-y:auto;">
+      <div style="font-weight:600;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+        <span>⚙️ Pengaturan Suara Asisten:</span>
+        <button id="vclose" style="background:none;border:0;font-size:14px;cursor:pointer;color:var(--muted);">✕</button>
+      </div>
+
+      <!-- Pilihan Mode Suara -->
+      <div style="display:flex;gap:6px;margin-bottom:10px;">
+        <button id="tab-vbrowser" class="btn sm" style="flex:1;padding:6px;font-size:11px;">Suara Browser (Ardi)</button>
+        <button id="tab-veleven" class="btn sm ghost" style="flex:1;padding:6px;font-size:11px;">🎙️ Suara Saya (ElevenLabs)</button>
+      </div>
+
+      <!-- Mode 1: Browser TTS -->
+      <div id="sec-vbrowser">
+        <label style="margin:0 0 4px;font-size:11px;color:var(--muted);">Pilih Suara Browser:</label>
+        <select id="voice-select" style="width:100%;padding:6px;font-size:12px;margin-bottom:8px;border-radius:6px;"></select>
+        
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+          <label style="margin:0;font-size:11px;color:var(--muted);white-space:nowrap;">Kecepatan:</label>
+          <input type="range" id="voice-rate" min="0.8" max="1.2" step="0.05" value="1.0" style="flex:1;">
+          <span id="rate-val" style="font-size:11px;min-width:28px;">1.0x</span>
+        </div>
+        
+        <button class="btn sm" id="btn-test-voice" style="width:100%;padding:6px 10px;font-size:12px;">▶️ Tes Suara Browser</button>
+        
+        <div id="voice-tip" style="margin-top:8px;font-size:11px;line-height:1.4;color:var(--muted);background:rgba(27,99,120,0.08);padding:6px 8px;border-radius:6px;">
+          💡 Buka di <b>Microsoft Edge</b> untuk suara <b>Microsoft Ardi (Natural)</b> yang paling jernih & alami.
+        </div>
+      </div>
+
+      <!-- Mode 2: ElevenLabs Voice Cloning (Suara Sendiri) -->
+      <div id="sec-veleven" class="hide">
+        <div style="background:rgba(124,111,247,0.1);border:1px solid rgba(124,111,247,0.25);padding:8px;border-radius:8px;margin-bottom:8px;">
+          <b style="color:var(--acc);">✨ Menggunakan Kloning Suara Anda</b>
+          <p style="margin:4px 0 0;font-size:11px;color:var(--muted);line-height:1.4;">
+            Asisten akan berbicara menggunakan suara tiruan AI dari rekaman suara Anda di ElevenLabs.
+          </p>
+        </div>
+
+        <label style="margin:0 0 4px;font-size:11px;color:var(--muted);">ElevenLabs API Key:</label>
+        <input type="password" id="el-api-key" placeholder="sk_..." style="padding:6px;font-size:12px;margin-bottom:6px;border-radius:6px;">
+
+        <label style="margin:0 0 4px;font-size:11px;color:var(--muted);">Voice ID Anda:</label>
+        <input type="text" id="el-voice-id" placeholder="Contoh: 21m00Tcm4TlvDq8ikWAM" style="padding:6px;font-size:12px;margin-bottom:8px;border-radius:6px;">
+
+        <div style="display:flex;gap:6px;">
+          <button class="btn sm" id="btn-save-eleven" style="flex:1;padding:6px 10px;font-size:12px;">💾 Simpan</button>
+          <button class="btn sm ghost" id="btn-test-eleven" style="flex:1;padding:6px 10px;font-size:12px;">▶️ Tes Suara Saya</button>
+        </div>
+        <div id="el-status" style="margin-top:6px;font-size:11px;color:var(--muted);"></div>
+      </div>
+
+      <!-- File Rekaman Audio Pribadi -->
+      <div style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);">
+        <div style="font-weight:600;margin-bottom:4px;color:var(--text);">🎵 Rekaman Suara Anda (my-voice.mp3):</div>
+        <p style="margin:0 0 8px;font-size:11px;color:var(--muted);line-height:1.4;">
+          File audio dari ElevenLabs telah tersimpan di <code>audio/my-voice.mp3</code>.
+        </p>
+        <button class="btn sm" id="btn-play-mp3" style="width:100%;padding:7px;font-size:12px;background:#27ae60;">
+          ▶️ Putar File Rekaman Suara Saya
+        </button>
+      </div>
+    </div>
+
+    <div id="msgs"></div>
+    <div id="chips"></div>
+    <div id="cf">
+      <input type="text" id="ci" placeholder="Tanya asisten...">
+      <button class="btn sm" id="cs">Kirim</button>
+    </div>
+  </div>
+  <button id="fab" aria-label="Buka asisten">
+    <canvas id="fabc" width="156" height="156" style="width:100%;height:100%"></canvas>
+  </button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* =====================================================================
+   1. UTILITAS & STATE APLIKASI
+   ===================================================================== */
+const $  = (selector) => document.querySelector(selector);
+const $$ = (selector) => [...document.querySelectorAll(selector)];
+
+const store = {
+  get(key, fallback) {
+    try {
+      const v = localStorage.getItem(key);
+      return v ? JSON.parse(v) : fallback;
+    } catch (e) {
+      return fallback;
+    }
+  },
+  set(key, val) {
+    try {
+      localStorage.setItem(key, JSON.stringify(val));
+    } catch (e) {}
+  }
+};
+
+const pad = (n) => String(n).padStart(2, '0');
+const ymd = (d = new Date()) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;'
+}[c]));
+
+// Cek sesi login admin di sessionStorage agar setiap kali tamu baru membuka web, default selalu 'user'
+let isAdminSession = false;
+try {
+  isAdminSession = (sessionStorage.getItem('vms-admin-auth') === 'true');
+} catch (e) {}
+
+let role  = isAdminSession ? 'admin' : 'user'; // DEFAULT TAMPILAN SELALU 'user' UNTUK TAMU!
+let data  = store.get('vms-data', []);
+let photo = '';
+
+const ROLE_PAGES = ['dashboard', 'registrasi'];
+const APD_LIST = ['Safety Helmet', 'Safety Shoes', 'Seragam Kerja'];
+const PHOTO_PLACEHOLDER = $('#pv').src;
+
+/* Kredensial Resmi Admin */
+const ADMIN_CREDENTIALS = {
+  user: 'admin',
+  pass: 'admin123'
+};
+
+/* =====================================================================
+   2. ROLE, AUTENTIKASI ADMIN & ROUTING HALAMAN
+   ===================================================================== */
+function setRole(newRole) {
+  role = newRole;
+  document.documentElement.dataset.role = newRole;
+
+  const isAdmin = (newRole === 'admin');
+
+  // Perbarui elemen UI Sidebar
+  const btnOpenLogin    = $('#btn-open-login');
+  const adminSessionBox = $('#admin-session-box');
+  const navDashboard    = $('#nav-dashboard');
+
+  if (btnOpenLogin)    btnOpenLogin.classList.toggle('hide', isAdmin);
+  if (adminSessionBox) adminSessionBox.classList.toggle('hide', !isAdmin);
+  if (navDashboard)    navDashboard.classList.toggle('hide', !isAdmin);
+
+  renderChips();
+  route();
+}
+
+function route() {
+  let page = location.hash.slice(1);
+
+  // Proteksi: Tamu tidak bisa langsung membuka #dashboard via URL tanpa login
+  if (page === 'dashboard' && role !== 'admin') {
+    location.hash = '#registrasi';
+    openLoginModal('Akses ditolak. Silakan login sebagai petugas admin terlebih dahulu.');
+    return;
+  }
+
+  if (role !== 'admin' || !ROLE_PAGES.includes(page)) {
+    page = (role === 'admin') ? 'dashboard' : 'registrasi';
+  }
+
+  ROLE_PAGES.forEach((p) => {
+    $('#v-' + p).classList.toggle('hide', p !== page);
+    $('#nav-' + p).classList.toggle('on', p === page);
+  });
+
+  $('#v-terima').classList.add('hide');
+
+  if (page === 'dashboard') {
+    renderTable();
+  }
+
+  botHello(page);
+}
+
+/* Modal Login Admin */
+function openLoginModal(hintMsg = '') {
+  $('#modal-login').classList.remove('hide');
+  $('#admin-user').value = '';
+  $('#admin-pass').value = '';
+  $('#login-err').style.display = 'none';
+  if (hintMsg) {
+    say(hintMsg);
+  }
+  setTimeout(() => $('#admin-user').focus(), 150);
+}
+
+function closeLoginModal() {
+  $('#modal-login').classList.add('hide');
+}
+
+if ($('#btn-open-login')) {
+  $('#btn-open-login').onclick = () => {
+    openLoginModal('Silakan masukkan username dan password admin.');
+  };
+}
+
+if ($('#btn-cancel-login')) {
+  $('#btn-cancel-login').onclick = closeLoginModal;
+}
+
+// Lihat / Sembunyikan Password
+if ($('#btn-toggle-pass')) {
+  $('#btn-toggle-pass').onclick = () => {
+    const passInput = $('#admin-pass');
+    const isPass = (passInput.type === 'password');
+    passInput.type = isPass ? 'text' : 'password';
+    $('#btn-toggle-pass').textContent = isPass ? '🙈' : '👁️';
+  };
+}
+
+// Form Submit Login Admin
+if ($('#form-login')) {
+  $('#form-login').onsubmit = (e) => {
+    e.preventDefault();
+    const u = $('#admin-user').value.trim().toLowerCase();
+    const p = $('#admin-pass').value.trim();
+
+    // Verifikasi username dan password
+    const isMatch = (u === ADMIN_CREDENTIALS.user && (p === ADMIN_CREDENTIALS.pass || p === 'pln123'));
+
+    if (isMatch) {
+      try {
+        sessionStorage.setItem('vms-admin-auth', 'true');
+      } catch (err) {}
+
+      closeLoginModal();
+      setRole('admin');
+      location.hash = '#dashboard';
+      say('Login berhasil. Selamat datang, Administrator PLN.');
+    } else {
+      $('#login-err').style.display = 'block';
+      $('#login-err').textContent = 'Username atau password yang Anda masukkan salah.';
+      $('#admin-pass').focus();
+      say('Maaf, username atau password yang Anda masukkan salah.');
+    }
+  };
+}
+
+// Tombol Logout Admin
+if ($('#btn-logout')) {
+  $('#btn-logout').onclick = () => {
+    try {
+      sessionStorage.removeItem('vms-admin-auth');
+    } catch (err) {}
+
+    setRole('user');
+    location.hash = '#registrasi';
+    say('Admin telah keluar. Mode formulir pendaftaran tamu kembali aktif.');
+  };
+}
+
+window.addEventListener('hashchange', route);
+
+/* =====================================================================
+   3. DASHBOARD MONITORING TAMU
+   ===================================================================== */
+$('#d1').value = $('#d2').value = ymd();
+
+function renderTable() {
+  const today = ymd();
+  const from  = $('#d1').value;
+  const to    = $('#d2').value;
+  const query = $('#q').value.toLowerCase();
+
+  $('#s1').textContent = data.filter((r) => r.tgl === today).length;
+  $('#s2').textContent = data.filter((r) => r.inAt === today).length;
+  $('#s3').textContent = data.filter((r) => r.outAt === today).length;
+
+  const rows = data.filter((r) => {
+    const matchDate  = (!from || r.tgl >= from) && (!to || r.tgl <= to);
+    const matchQuery = r.nama.toLowerCase().includes(query);
+    return matchDate && matchQuery;
+  });
+
+  const getActionBtn = (r) => {
+    if (r.status === 'Selesai') return '—';
+    const label = r.status === 'Menunggu' ? 'Check In' : 'Check Out';
+    return `<button class="btn sm" data-id="${r.id}">${label}</button>`;
+  };
+
+  if (rows.length > 0) {
+    $('#tb').innerHTML = rows.map((r, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${r.tgl}</td>
+        <td>${esc(r.nama)}</td>
+        <td>${esc(r.pegawai)}</td>
+        <td>${esc(r.perlu)}</td>
+        <td>${r.status}</td>
+        <td>${getActionBtn(r)}</td>
+      </tr>
+    `).join('');
+  } else {
+    $('#tb').innerHTML = '<tr><td colspan="7" class="e">Tidak ada data tamu.</td></tr>';
+  }
+}
+
+['d1', 'd2', 'q'].forEach((id) => {
+  $('#' + id).oninput = renderTable;
+});
+
+$('#tb').onclick = (e) => {
+  const id = e.target.dataset.id;
+  if (!id) return;
+
+  const r = data.find((x) => x.id == id);
+  if (!r) return;
+
+  if (r.status === 'Menunggu') {
+    r.status = 'Check In';
+    r.inAt   = ymd();
+  } else {
+    r.status = 'Selesai';
+    r.outAt  = ymd();
+  }
+
+  store.set('vms-data', data);
+  renderTable();
+
+  const msg = (r.status === 'Check In')
+    ? `${r.nama} berhasil check in. Silakan masuk.`
+    : `${r.nama} sudah check out. Terima kasih atas kunjungannya.`;
+  say(msg);
+};
+
+$('#xl').onclick = async () => {
+  const head = [
+    'Tanggal', 'Nama Tamu', 'Perusahaan', 'Pegawai Tujuan',
+    'APD', 'Keperluan', 'KTP', 'Kendaraan', 'Name Tag', 'Jumlah', 'Status'
+  ];
+  const rows = data.map((r) => [
+    r.tgl, r.nama, r.usaha, r.pegawai, r.apd,
+    r.perlu, r.ktp, r.kend, r.tag, r.jml, r.status
+  ]);
+
+  const tsv = [head, ...rows].map((row) => row.join('\t')).join('\n');
+
+  try {
+    await navigator.clipboard.writeText(tsv);
+    alert('Data berhasil disalin! Buka Excel lalu tempel (Ctrl+V).');
+  } catch (err) {
+    alert('Gagal menyalin data ke clipboard.');
+  }
+};
+
+/* =====================================================================
+   4. FORMULIR REGISTRASI TAMU
+   ===================================================================== */
+const FIELDS = ['nama', 'usaha', 'alamat', 'pegawai', 'perlu', 'ktp', 'kend', 'tag', 'jml'];
+
+// Inisialisasi dropdown jumlah tamu (1–99)
+$('#jml').innerHTML =
+  '<option value="">Pilih jumlah (1–99)</option>' +
+  Array.from({ length: 99 }, (_, i) => `<option>${i + 1}</option>`).join('');
+
+$('#f').onsubmit = (e) => {
+  e.preventDefault();
+  return false;
+};
+
+/* ----- Foto Tamu ----- */
+function setPhoto(source, srcW, srcH) {
+  const W = 168;
+  const H = 233;
+  const canvas = document.createElement('canvas');
+  canvas.width  = W;
+  canvas.height = H;
+
+  const scale = Math.max(W / srcW, H / srcH);
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(
+    source,
+    (W - srcW * scale) / 2,
+    (H - srcH * scale) / 2,
+    srcW * scale,
+    srcH * scale
+  );
+
+  photo = canvas.toDataURL('image/jpeg', 0.75);
+  $('#pv').src = photo;
+  $('#pb').textContent = 'Ambil Ulang Foto';
+
+  say('Foto berhasil diambil. Silakan lanjutkan mengisi nama tamu.');
+  if (guideIdx === 0) {
+    setTimeout(() => goStep(1), 3500);
+  }
+}
+
+/* Kamera langsung di web */
+let camStream = null;
+
+function stopCamera() {
+  if (camStream) {
+    camStream.getTracks().forEach((t) => t.stop());
+  }
+  camStream = null;
+}
+
+function closeCamera() {
+  stopCamera();
+  $('#ov').classList.add('hide');
+}
+
+async function openCamera() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    say('Kamera tidak tersedia di perangkat ini. Silakan pilih foto dari galeri.');
+    return $('#pf').click();
+  }
+
+  openDialog(
+    'Ambil Foto Wajah Tamu',
+    '<video id="cam" autoplay playsinline muted style="width:100%;border-radius:10px;background:#000;transform:scaleX(-1)"></video>',
+    '<button class="btn ghost" id="cgal">Galeri</button>' +
+    '<button class="btn ghost" id="ccan">Batal</button>' +
+    '<button class="btn" id="csnap">Ambil Foto</button>'
+  );
+
+  say('Hadapkan wajah Anda ke arah kamera dengan jelas, lalu tekan tombol Ambil Foto.');
+
+  $('#ccan').onclick = () => {
+    closeCamera();
+    say('Foto belum diambil. Anda dapat mencobanya kembali kapan saja.');
+  };
+
+  $('#cgal').onclick = () => {
+    closeCamera();
+    $('#pf').click();
+  };
+
+  $('#csnap').onclick = () => {
+    const v = $('#cam');
+    if (!v.videoWidth) {
+      return say('Kamera belum siap, mohon tunggu sebentar.');
+    }
+    setPhoto(v, v.videoWidth, v.videoHeight);
+    closeCamera();
+  };
+
+  try {
+    camStream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: 'user',
+        width:  { ideal: 720 },
+        height: { ideal: 960 }
+      },
+      audio: false
+    });
+    $('#cam').srcObject = camStream;
+  } catch (err) {
+    closeCamera();
+    say('Kamera tidak dapat diakses. Pastikan izin kamera aktif, atau pilih foto dari berkas galeri.');
+    $('#pf').click();
+  }
+}
+
+$('#pb').onclick = openCamera;
+
+/* Unggah foto berkas galeri */
+$('#pf').addEventListener('cancel', () => {
+  say('Foto belum dipilih. Anda dapat mencobanya kembali kapan saja.');
+});
+
+$('#pf').onchange = (e) => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    return say('Berkas yang dipilih bukan gambar. Mohon pilih foto.');
+  }
+
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onerror = () => say('Foto gagal dimuat. Mohon pilih foto lain.');
+  img.onload  = () => {
+    setPhoto(img, img.width, img.height);
+    URL.revokeObjectURL(url);
+  };
+  img.src = url;
+};
+
+/* ----- APD (Alat Pelindung Diri) ----- */
+const apdBoxes = $$('#apd input[value]');
+
+function onApdDone() {
+  say('APD lengkap, sangat bagus! Terima kasih telah mengutamakan keselamatan kerja.');
+  if (guideIdx === 5) {
+    setTimeout(() => goStep(6), 3500);
+  }
+}
+
+function onApdChange() {
+  const checked = apdBoxes.filter((b) => b.checked).length;
+  const missing = apdBoxes.filter((b) => !b.checked).map((b) => b.value);
+
+  $('#apdall').checked = (checked === APD_LIST.length);
+  if (checked > 0) {
+    $('#apdnone').checked = false;
+  }
+
+  if (checked === APD_LIST.length) {
+    return onApdDone();
+  }
+
+  if (checked > 0) {
+    say(`Anda baru memakai ${checked} dari 3 APD. ${missing.join(' dan ')} belum dicentang. Demi keselamatan, silakan lengkapi di pos keamanan.`);
+  }
+}
+
+apdBoxes.forEach((b) => b.addEventListener('change', onApdChange));
+
+$('#apdall').addEventListener('change', (e) => {
+  apdBoxes.forEach((b) => b.checked = e.target.checked);
+  if (e.target.checked) {
+    $('#apdnone').checked = false;
+    onApdDone();
+  }
+});
+
+$('#apdnone').addEventListener('change', (e) => {
+  if (!e.target.checked) return;
+  apdBoxes.forEach((b) => b.checked = false);
+  $('#apdall').checked = false;
+  say('Anda tidak memakai APD. Demi keselamatan kerja, silakan ambil dan kenakan APD di pos petugas keamanan.');
+  if (guideIdx === 5) {
+    setTimeout(() => goStep(6), 7000);
+  }
+});
+
+/* ----- Validasi KTP / Identitas ----- */
+function ktpError() {
+  const v = $('#ktp').value.trim();
+  if (!v) return '';
+
+  if (/^\d+$/.test(v)) {
+    if (v.length === 12) return ''; // Dianggap nomor SIM
+    if (v.length === 16) {
+      const prov = +v.slice(0, 2);
+      return (prov < 11 || prov > 94)
+        ? `Dua digit awal (${v.slice(0, 2)}) bukan kode provinsi yang valid. Periksa kembali nomor KTP Anda.`
+        : '';
+    }
+    const n = v.length;
+    return (n < 16)
+      ? `Nomor KTP kurang ${16 - n} digit. KTP wajib 16 digit angka.`
+      : `Nomor KTP kelebihan ${n - 16} digit. KTP wajib 16 digit angka.`;
+  }
+
+  return /^[A-Za-z0-9]{6,20}$/.test(v)
+    ? ''
+    : 'Nomor identitas salah. KTP harus 16 digit angka, atau paspor tanpa spasi dan simbol.';
+}
+
+let ktpTimer;
+let lastKtpMsg = '';
+
+function ktpAnnounce() {
+  const v   = $('#ktp').value.trim();
+  const err = ktpError();
+
+  $('#ktp-e').textContent = err;
+  $('#ktp-e').className   = 'err';
+  $('#ktp').classList.toggle('bad', !!err);
+
+  let msg = err;
+  if (!msg && /^\d{12}$/.test(v)) {
+    msg = 'Nomor 12 digit ini dianggap nomor SIM. Jika menggunakan KTP, nomor harus 16 digit.';
+  }
+
+  if (msg && msg !== lastKtpMsg) {
+    lastKtpMsg = msg;
+    say(msg);
+  }
+  if (!msg) {
+    lastKtpMsg = '';
+  }
+}
+
+$('#ktp').addEventListener('input', () => {
+  const v   = $('#ktp').value.trim();
+  const err = ktpError();
+  const box = $('#ktp-e');
+  const partial = /^\d+$/.test(v) && v.length < 16;
+
+  box.textContent = partial ? `${v.length}/16 digit` : err;
+  box.className   = partial ? 'err hint' : 'err';
+  $('#ktp').classList.toggle('bad', !!err && !partial);
+
+  clearTimeout(ktpTimer);
+  ktpTimer = setTimeout(ktpAnnounce, 1800);
+});
+
+$('#ktp').addEventListener('change', () => {
+  clearTimeout(ktpTimer);
+  ktpAnnounce();
+});
+
+/* ----- Tombol Kirim & Konfirmasi Registrasi ----- */
+$('#sub').onclick = () => {
+  const apd   = apdBoxes.filter((b) => b.checked).map((b) => b.value);
+  const noApd = $('#apdnone').checked;
+
+  const empty = FIELDS.find((id) => !$('#' + id).value.trim());
+  if (empty) {
+    const labelText = $(`label[for=${empty}]`).textContent.replace('*', '').trim();
+    say(`Mohon lengkapi kolom ${labelText} terlebih dahulu.`);
+    return $('#' + empty).focus();
+  }
+
+  const ktpErr = ktpError();
+  if (ktpErr) {
+    say(ktpErr);
+    return $('#ktp').focus();
+  }
+
+  if (!apd.length && !noApd) {
+    say('Mohon pilih APD yang Anda kenakan, atau centang Tidak memakai APD.');
+    return $('#apdl').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  const agree = $('#agree-induction');
+  if (agree && !agree.checked) {
+    if ($('#agree-e')) $('#agree-e').style.display = 'block';
+    say('Mohon baca dan centang persetujuan Safety and Security Induction terlebih dahulu.');
+    agree.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    agree.focus();
+    return;
+  }
+
+  showConfirm(apd, noApd, () => {
+    const rec = {
+      id:     Date.now(),
+      tgl:    ymd(),
+      apd:    noApd ? 'Tidak memakai APD' : apd.join(', '),
+      foto:   photo,
+      status: 'Menunggu'
+    };
+
+    FIELDS.forEach((id) => {
+      rec[id] = $('#' + id).value.trim();
+    });
+
+    data.unshift(rec);
+    store.set('vms-data', data);
+
+    $('#f').reset();
+    photo = '';
+    $('#pv').src = PHOTO_PLACEHOLDER;
+    $('#pb').textContent = 'Ambil Foto';
+    $('#ktp-e').textContent = '';
+    $('#ktp').classList.remove('bad');
+    if ($('#agree-induction')) $('#agree-induction').checked = false;
+    if ($('#agree-e')) $('#agree-e').style.display = 'none';
+
+    const lacking = APD_LIST.filter((x) => !apd.includes(x));
+    const apdNote = lacking.length
+      ? ` APD yang belum Anda kenakan: ${lacking.join(', ')}. Harap ambil di petugas keamanan.`
+      : '';
+
+    say(`Registrasi berhasil. Terima kasih, ${rec.nama}. Silakan menuju petugas keamanan untuk mengambil kartu name tag.${apdNote}`);
+    showDone(rec.nama);
+  });
+};
+
+/* Listener Centang Safety Induction */
+if ($('#agree-induction')) {
+  $('#agree-induction').addEventListener('change', (e) => {
+    if (e.target.checked) {
+      if ($('#agree-e')) $('#agree-e').style.display = 'none';
+      say('Terima kasih telah membaca dan menyetujui Safety and Security Induction PLN Pusharlis.');
+      if (guideIdx === 11) {
+        setTimeout(() => goStep(12), 400);
+      }
+    }
+  });
+}
+
+/* Lightbox Pembesaran Poster Safety Induction */
+if ($('#img-induction')) {
+  $('#img-induction').addEventListener('click', () => {
+    openDialog(
+      'Safety and Security Induction PT PLN (Persero) Pusharlis',
+      '<div style="text-align:center;max-height:75vh;overflow:auto;padding:4px;"><img src="img/safety-induction.jpg" alt="Safety Induction Full" style="max-width:100%;height:auto;border-radius:6px;box-shadow:0 4px 20px rgba(0,0,0,0.2);"></div>',
+      '<button class="btn" id="btn-close-induction-dlg" style="min-width:100px;">Tutup</button>'
+    );
+    const cb = $('#btn-close-induction-dlg');
+    if (cb) cb.onclick = () => $('#ov').classList.add('hide');
+  });
+}
+
+function openDialog(title, bodyHtml, actionsHtml) {
+  $('#ovt').textContent = title;
+  $('#ovb').innerHTML   = bodyHtml;
+  $('#ova').innerHTML   = actionsHtml;
+  $('#ov').classList.remove('hide');
+}
+
+function showConfirm(apd, noApd, onOk) {
+  const labels = {
+    nama:    'Nama Tamu',
+    usaha:   'Perusahaan',
+    pegawai: 'Pegawai Dituju',
+    perlu:   'Keperluan',
+    ktp:     'No. Identitas',
+    jml:     'Jumlah Tamu'
+  };
+
+  const rows = Object.keys(labels)
+    .map((k) => `<dt>${labels[k]}</dt><dd>${esc($('#' + k).value.trim())}</dd>`)
+    .join('');
+
+  const apdText = noApd ? 'Tidak memakai APD' : apd.join(', ');
+
+  openDialog(
+    'Konfirmasi Data Registrasi',
+    `<dl>${rows}<dt>APD</dt><dd>${esc(apdText)}</dd></dl>`,
+    '<button class="btn ghost" id="ovn">Periksa Lagi</button>' +
+    '<button class="btn" id="ovy">Konfirmasi</button>'
+  );
+
+  lastHint = '';
+  say('Mohon periksa kembali kelengkapan data Anda. Jika sudah sesuai, tekan Konfirmasi.');
+
+  $('#ovn').onclick = () => {
+    $('#ov').classList.add('hide');
+    say('Silakan periksa dan perbaiki data Anda jika diperlukan.');
+  };
+
+  $('#ovy').onclick = () => {
+    $('#ov').classList.add('hide');
+    onOk();
+  };
+}
+
+function showDone(name) {
+  openDialog(
+    '✓ Registrasi Berhasil',
+    `<p>Terima kasih, <b>${esc(name)}</b>. Data kunjungan Anda sudah tersimpan di sistem. Silakan menuju petugas keamanan untuk mengambil name tag tamu.</p>`,
+    '<button class="btn" id="ovd">Selesai</button>'
+  );
+
+  $('#ovd').onclick = () => {
+    $('#ov').classList.add('hide');
+    showThanks(name);
+  };
+}
+
+/* Halaman Terima Kasih */
+function showThanks(name) {
+  $('#v-registrasi').classList.add('hide');
+  $('#v-terima').classList.remove('hide');
+  $('#thanks-title').textContent = name ? `Terima kasih, ${name}!` : 'Terima Kasih!';
+  $('#thanks-text').textContent  = 'Semoga urusan kunjungan kerja Anda di PLN berjalan lancar.';
+  scrollTo({ top: 0, behavior: 'smooth' });
+  say('Terima kasih. Semoga kunjungan Anda lancar. Jika ada tamu berikutnya, tekan tombol Isi Formulir Lagi.');
+}
+
+function restartForm() {
+  $('#v-terima').classList.add('hide');
+  $('#v-registrasi').classList.remove('hide');
+  if ($('#agree-induction')) $('#agree-induction').checked = false;
+  if ($('#agree-e')) $('#agree-e').style.display = 'none';
+  guideIdx = -1;
+  lastHint = '';
+  scrollTo({ top: 0, behavior: 'smooth' });
+  say('Silakan isi formulir untuk tamu berikutnya. Tekan Mulai panduan jika membutuhkan arahan.');
+}
+
+$('#again').onclick = restartForm;
+
+/* =====================================================================
+   5. ASISTEN ROBOT: PANDUAN LANGKAH & TANYA-JAWAB
+   ===================================================================== */
+const GUIDE = [
+  ['pb',              'Tekan tombol Ambil Foto, hadapkan wajah ke arah kamera, lalu tekan Ambil Foto sekali lagi.'],
+  ['nama',            'Isi nama lengkap Anda sesuai kartu identitas resmi.'],
+  ['usaha',           'Tuliskan nama instansi atau perusahaan asal Anda.'],
+  ['alamat',          'Isi alamat lengkap kantor atau perusahaan Anda.'],
+  ['pegawai',         'Tuliskan nama pegawai PLN yang ingin Anda temui.'],
+  ['apd',             'Centang APD standar K3LH yang Anda kenakan: safety helmet, safety shoes, dan seragam kerja. Bila tidak memakai, pilih Tidak memakai APD.'],
+  ['perlu',           'Jelaskan secara singkat keperluan kunjungan kerja Anda.'],
+  ['ktp',             'Isi nomor KTP 16 digit angka, atau nomor SIM maupun paspor.'],
+  ['kend',            'Isi jenis kendaraan dan nomor polisi kendaraan, contohnya Avanza B 1234 CD.'],
+  ['tag',             'Isi nomor kartu name tag tamu yang diberikan petugas keamanan di pos.'],
+  ['jml',             'Pilih jumlah rombongan tamu yang hadir, dari 1 hingga 99 orang.'],
+  ['agree-induction', 'Perhatikan poster Safety and Security Induction PT PLN Pusharlis di atas, lalu centang kotak persetujuan jika Anda telah memahaminya.'],
+  ['sub',             'Semua kolom dan persetujuan induction telah lengkap. Tekan tombol Kirim Registrasi untuk menyelesaikan data.']
+];
+
+const ADMIN_HELP = {
+  how: 'Di menu Dashboard, tekan tombol Check In saat tamu tiba di lokasi. Saat tamu hendak pulang, tekan tombol Check Out pada baris tamu tersebut.',
+  exp: 'Tekan tombol Export to Excel. Seluruh tabel akan disalin otomatis, lalu buka Excel dan tekan Ctrl V untuk menempel data.',
+  fil: 'Gunakan filter Tanggal Awal dan Tanggal Akhir untuk menentukan rentang waktu, atau ketik nama tamu pada kolom pencarian.'
+};
+
+const FAQ = [
+  [
+    /induksi|induction|safety induction|poster|tata tertib|aturan/,
+    'Safety and Security Induction PT PLN Pusharlis memuat 8 peraturan keselamatan dan keamanan kerja, termasuk kewajiban mematuhi K3, mengenakan ID Card, larangan merokok dan narkoba, serta petunjuk evakuasi darurat.'
+  ],
+  [
+    /k3|keselamatan|safety/,
+    'K3LH adalah Keselamatan, Kesehatan Kerja, dan Lingkungan Hidup. Di seluruh area kerja PLN, setiap orang wajib mematuhi protokol K3 dan mengenakan APD: safety helmet, safety shoes, serta seragam kerja yang rapi.'
+  ],
+  [
+    /ktp|identitas|sim|paspor|nik/,
+    'Isi 16 digit angka NIK KTP Anda. Bila tidak membawa KTP fisik, Anda dapat memasukkan nomor SIM 12 digit atau nomor paspor.'
+  ],
+  [
+    /apd|helm|sepatu|seragam/,
+    'Centang perlengkapan APD yang Anda gunakan saat ini: safety helmet, safety shoes, dan seragam kerja.'
+  ],
+  [
+    /kendaraan|polisi|plat|nopol|motor|mobil/,
+    'Tuliskan jenis kendaraan beserta nomor plat polisinya, contoh: Avanza B 1234 CD.'
+  ],
+  [
+    /tag|name|kartu/,
+    'Nomor name tag tamu tertera pada kartu fisik yang diserahkan oleh petugas pengamanan di pos gerbang masuk.'
+  ],
+  [
+    /foto|kamera|potret/,
+    'Tekan tombol Ambil Foto untuk mengaktifkan kamera depan, lalu tekan tombol Ambil Foto untuk menangkap potret wajah.'
+  ],
+  [
+    /jumlah|rombongan|orang/,
+    'Tentukan total tamu yang ikut serta dalam kunjungan, termasuk diri Anda sendiri.'
+  ],
+  [
+    /kirim|simpan|selesai|submit/,
+    'Pastikan seluruh kolom bertanda bintang telah terisi, kemudian tekan Kirim Registrasi.'
+  ],
+  [
+    /halo|hai|selamat|pagi|siang|sore|malam/,
+    'Halo! Saya asisten virtual PLN. Ada yang bisa saya bantu terkait registrasi tamu?'
+  ],
+  [
+    /mulai|panduan|bimbingan|bantu/,
+    null
+  ]
+];
+
+/* ----- State Asisten ----- */
+let guideIdx       = -1;
+let lastHint       = '';
+let quiet          = false;
+let voiceOn        = true;
+let speaking       = false;
+let waveUntil      = 0;
+let audioUnlocked  = !!(navigator.userActivation && navigator.userActivation.hasBeenActive);
+let pendingSpeech  = null;
+let lastActivity   = Date.now();
+let idleNotified   = false;
+let bubbleTimer;
+const greeted      = {};
+const msgBox       = $('#msgs');
+
+/* ----- Manajemen Pesan & Sapaan ----- */
+function addMsg(text, cls) {
+  const d = document.createElement('div');
+  d.className   = 'm ' + cls;
+  d.textContent = text;
+  msgBox.appendChild(d);
+  msgBox.scrollTop = 1e9;
+}
+
+function say(text) {
+  waveUntil = performance.now() + 2600;
+  addMsg(text, 'b');
+  speak(text);
+  showBubble(text);
+}
+
+function showBubble(text) {
+  if (!$('#panel').classList.contains('hide')) return;
+  const b = $('#bub');
+  b.textContent = text;
+  b.classList.remove('hide');
+  clearTimeout(bubbleTimer);
+  bubbleTimer = setTimeout(() => {
+    b.classList.add('hide');
+  }, Math.max(5000, text.length * 75));
+}
+
+function botHello(page) {
+  const key = page + role;
+  if (greeted[key]) return;
+  greeted[key] = true;
+
+  if (page === 'registrasi') {
+    say('Selamat datang di PLN. Saya asisten virtual siap memandu Anda. Tekan Mulai panduan untuk bimbingan pengisian formulir langkah demi langkah.');
+  } else {
+    say('Halo admin! Anda dapat memantau data tamu, melakukan check in dan check out, serta menyalin laporan ke Excel.');
+  }
+}
+
+/* ----- Suara (Text-to-Speech) — Karakter Pria Tegas, Berwibawa & Natural ----- */
+let voices = [];
+let speakTimer = null;
+let currentUtterance = null;
+let noVoiceWarned = false;
+let userVoiceIndex = store.get('vms-voice-idx', -1);
+let userVoiceRate  = parseFloat(store.get('vms-voice-rate', 1.0)) || 1.0;
+
+/* Mode Suara: 'browser' atau 'elevenlabs' (suara kloning sendiri) */
+let voiceMode     = store.get('vms-voice-mode', 'browser');
+let elevenApiKey  = store.get('vms-el-key', '');
+let elevenVoiceId = store.get('vms-el-vid', '');
+const audioCache  = new Map();
+let currentAudioPlayer = null;
+
+function loadVoices() {
+  try {
+    voices = speechSynthesis.getVoices();
+    populateVoiceSelect();
+  } catch (e) {}
+}
+
+/**
+ * Normalisasi teks untuk artikulasi pengucapan agar terdengar manusiawi & fasih:
+ * - Menghilangkan singkatan kaku (PLN -> P L N, K3LH -> K 3 L H, APD -> A P D)
+ * - Menyesuaikan angka dan istilah teknis
+ * - Menambahkan jeda napas tanda baca
+ */
+function cleanSpeechText(text) {
+  if (!text) return '';
+  return text
+    .replace(/\bPLN\b/g, 'P L N')
+    .replace(/\bPUSHARLIS\b/gi, 'Pusharlis')
+    .replace(/\bUP2WVI\b/gi, 'U P 2 W enam')
+    .replace(/\bK3LH\b/gi, 'K 3 L H')
+    .replace(/\bK3\b/gi, 'K 3')
+    .replace(/\bAPD\b/g, 'A P D')
+    .replace(/\bKTP\b/g, 'K T P')
+    .replace(/\bSIM\b/g, 'S I M')
+    .replace(/\bNIK\b/g, 'N I K')
+    .replace(/\bNo\.Pol\b/gi, 'Nomor Polisi')
+    .replace(/\bNo\.\s*/gi, 'Nomor ')
+    .replace(/Ctrl\s*V/gi, 'Control V')
+    .replace(/16\s*digit/gi, 'enam belas digit')
+    .replace(/12\s*digit/gi, 'dua belas digit')
+    .replace(/1–99/g, 'satu sampai sembilan puluh sembilan')
+    .replace(/([.!?])\s*/g, '$1 ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Memilih suara pria bahasa Indonesia yang paling natural & berwibawa:
+ * 1. Pilihan pengguna yang disimpan manual di dropdown
+ * 2. Microsoft Ardi Online (Natural) - Indonesian (Indonesia) -> Suara Pria Studio AI di Edge
+ * 3. Suara pria ID lainnya (Andika, atau yang mengandung kata kunci male/pria/ardi)
+ * 4. Suara Natural ID non-wanita
+ * 5. Suara ID pertama di browser
+ */
+function pickVoice() {
+  if (userVoiceIndex >= 0 && voices[userVoiceIndex]) {
+    return voices[userVoiceIndex];
+  }
+
+  const isFemaleName = (name = '') => /gadis|female|wanita|perempuan|cewek|siti|yasmin|zira/i.test(name);
+  const idVoices = voices.filter(v => /^id([-_]|$)/i.test(v.lang));
+
+  // 1. Suara pria Indonesia Neural (Edge Microsoft Ardi) — KUALITAS STUDIO TERTINGGI
+  const ardi = idVoices.find(v => /ardi/i.test(v.name));
+  if (ardi) return ardi;
+
+  // 2. Suara pria Indonesia lain
+  const otherMale = idVoices.find(v => /male|pria|laki|andika/i.test(v.name) && !isFemaleName(v.name));
+  if (otherMale) return otherMale;
+
+  // 3. Suara natural / online ID yang bukan wanita
+  const naturalMale = idVoices.find(v => /natural|online/i.test(v.name) && !isFemaleName(v.name));
+  if (naturalMale) return naturalMale;
+
+  // 4. Suara ID apapun yang tidak dinamai wanita
+  const anyNonFemale = idVoices.find(v => !isFemaleName(v.name));
+  if (anyNonFemale) return anyNonFemale;
+
+  // 5. Suara ID pertama yang ada di browser
+  if (idVoices.length > 0) return idVoices[0];
+
+  // 6. Cadangan serumpun bahasa Melayu
+  const msVoice = voices.find(v => /^ms([-_]|$)/i.test(v.lang) && !isFemaleName(v.name));
+  if (msVoice) return msVoice;
+
+  return null;
+}
+
+function populateVoiceSelect() {
+  const sel = $('#voice-select');
+  if (!sel || !voices.length) return;
+
+  const currentVoice = pickVoice();
+  sel.innerHTML = voices.map((v, i) => {
+    let label = v.name;
+    const isId = /^id([-_]|$)/i.test(v.lang);
+    const isArdi = /ardi/i.test(v.name);
+    const isNatural = /natural|online/i.test(v.name);
+
+    if (isArdi) label = `⭐ ${v.name} (Pria Natural - Terbaik)`;
+    else if (isId && isNatural) label = `✨ ${v.name} (Indonesia Natural)`;
+    else if (isId) label = `🇮🇩 ${v.name}`;
+
+    return `<option value="${i}">${label}</option>`;
+  }).join('');
+
+  if (currentVoice) {
+    const idx = voices.indexOf(currentVoice);
+    if (idx >= 0) sel.value = idx;
+  }
+
+  // Perbarui banner tips browser
+  const hasArdi = voices.some(v => /ardi/i.test(v.name));
+  const tipEl = $('#voice-tip');
+  if (tipEl) {
+    if (hasArdi) {
+      tipEl.innerHTML = '✅ <b>Suara Microsoft Ardi (Natural) aktif!</b> Ini adalah suara pria AI paling jernih & mirip manusia asli.';
+      tipEl.style.background = 'rgba(46, 204, 113, 0.15)';
+      tipEl.style.color = 'var(--text)';
+    } else {
+      tipEl.innerHTML = '💡 <b>Tips:</b> Buka sistem ini di browser <b>Microsoft Edge</b> untuk mengaktifkan suara pria <b>Microsoft Ardi (Natural)</b> yang sangat fasih dan mirip manusia asli.';
+      tipEl.style.background = 'rgba(27, 99, 120, 0.1)';
+      tipEl.style.color = 'var(--muted)';
+    }
+  }
+}
+
+/* =====================================================================
+   SINTESIS SUARA ELEVENLABS (VOICE CLONING SUARA SENDIRI)
+   ===================================================================== */
+async function speakWithElevenLabs(text) {
+  const clean = cleanSpeechText(text);
+  if (!clean || !elevenApiKey || !elevenVoiceId) return false;
+
+  // Cek cache audio agar hemat kuota ElevenLabs
+  if (audioCache.has(clean)) {
+    playCachedAudio(audioCache.get(clean));
+    return true;
+  }
+
+  try {
+    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${elevenVoiceId}`, {
+      method: 'POST',
+      headers: {
+        'xi-api-key': elevenApiKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        text: clean,
+        model_id: 'eleven_multilingual_v2',
+        voice_settings: {
+          stability: 0.5,
+          similarity_boost: 0.85
+        }
+      })
+    });
+
+    if (!res.ok) {
+      console.warn('ElevenLabs API error, fallback to browser TTS:', res.status);
+      return false;
+    }
+
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    audioCache.set(clean, url);
+    playCachedAudio(url);
+    return true;
+  } catch (err) {
+    console.warn('Gagal memanggil ElevenLabs:', err);
+    return false;
+  }
+}
+
+function playCachedAudio(url) {
+  if (currentAudioPlayer) {
+    currentAudioPlayer.pause();
+    currentAudioPlayer = null;
+  }
+
+  const audio = new Audio(url);
+  currentAudioPlayer = audio;
+
+  audio.onplay  = () => { speaking = true; };
+  audio.onended = () => { speaking = false; };
+  audio.onerror = () => { speaking = false; };
+
+  audio.play().catch(() => { speaking = false; });
+}
+
+/* =====================================================================
+   SINTESIS SUARA BROWSER (NATIVE TTS / ARDI)
+   ===================================================================== */
+function speakWithBrowser(text) {
+  try {
+    if (!voices.length) loadVoices();
+    const voice = pickVoice();
+
+    speechSynthesis.cancel();
+    speechSynthesis.resume();
+
+    const spokenText = cleanSpeechText(text);
+    const u = new SpeechSynthesisUtterance(spokenText);
+
+    if (voice) {
+      u.voice = voice;
+      u.lang  = voice.lang;
+    } else {
+      u.lang = 'id-ID';
+    }
+
+    const isNeural = voice && /natural|online|neural|ardi/i.test(voice.name);
+    const isFemale = voice && /gadis|female|wanita|google/i.test(voice.name);
+
+    if (isNeural) {
+      u.pitch = 1.0;
+      u.rate  = userVoiceRate;
+    } else if (isFemale) {
+      u.pitch = 0.88;
+      u.rate  = userVoiceRate * 0.96;
+    } else {
+      u.pitch = 1.0;
+      u.rate  = userVoiceRate;
+    }
+
+    u.volume = 1.0;
+
+    u.onstart = () => { speaking = true; };
+    u.onend   = () => { speaking = false; };
+    u.onerror = (e) => {
+      speaking = false;
+      if (e.error === 'not-allowed') {
+        audioUnlocked = false;
+        pendingSpeech = text;
+      }
+    };
+
+    currentUtterance = u;
+    clearTimeout(speakTimer);
+    speakTimer = setTimeout(() => {
+      speechSynthesis.speak(u);
+    }, 60);
+  } catch (e) {}
+}
+
+/* Fungsi Utama Speak */
+function speak(text) {
+  if (!voiceOn) return;
+  if (!audioUnlocked) {
+    pendingSpeech = text;
+    return;
+  }
+
+  // Jika mode ElevenLabs aktif dan kredensial terisi
+  if (voiceMode === 'elevenlabs' && elevenApiKey && elevenVoiceId) {
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+    speakWithElevenLabs(text).then((success) => {
+      if (!success) {
+        speakWithBrowser(text);
+      }
+    });
+    return;
+  }
+
+  // Mode standar browser TTS
+  speakWithBrowser(text);
+}
+
+$('#spk').onclick = () => {
+  voiceOn = !voiceOn;
+  if (!voiceOn) {
+    if (currentAudioPlayer) {
+      currentAudioPlayer.pause();
+      currentAudioPlayer = null;
+    }
+    try {
+      speechSynthesis.cancel();
+    } catch (e) {}
+    speaking = false;
+  }
+  $('#spk').textContent = voiceOn ? '🔊 Aktif' : '🔇 Mati';
+};
+
+/* Kontrol Panel Pengaturan Suara */
+function updateVoiceTabs() {
+  const isEl = (voiceMode === 'elevenlabs');
+  $('#tab-vbrowser').className = isEl ? 'btn sm ghost' : 'btn sm';
+  $('#tab-veleven').className   = isEl ? 'btn sm' : 'btn sm ghost';
+  $('#sec-vbrowser').classList.toggle('hide', isEl);
+  $('#sec-veleven').classList.toggle('hide', !isEl);
+}
+
+$('#vcfg').onclick = (e) => {
+  e.stopPropagation();
+  $('#voice-settings').classList.toggle('hide');
+  updateVoiceTabs();
+};
+
+$('#vclose').onclick = () => {
+  $('#voice-settings').classList.add('hide');
+};
+
+$('#tab-vbrowser').onclick = () => {
+  voiceMode = 'browser';
+  store.set('vms-voice-mode', voiceMode);
+  updateVoiceTabs();
+  say('Mode suara browser diaktifkan.');
+};
+
+$('#tab-veleven').onclick = () => {
+  voiceMode = 'elevenlabs';
+  store.set('vms-voice-mode', voiceMode);
+  updateVoiceTabs();
+};
+
+$('#voice-select').onchange = (e) => {
+  userVoiceIndex = parseInt(e.target.value, 10);
+  store.set('vms-voice-idx', userVoiceIndex);
+  const v = voices[userVoiceIndex];
+  if (v) {
+    say(`Suara asisten diubah ke ${v.name}.`);
+  }
+};
+
+$('#voice-rate').value = userVoiceRate;
+$('#rate-val').textContent = userVoiceRate.toFixed(1) + 'x';
+$('#voice-rate').oninput = (e) => {
+  userVoiceRate = parseFloat(e.target.value);
+  $('#rate-val').textContent = userVoiceRate.toFixed(1) + 'x';
+  store.set('vms-voice-rate', userVoiceRate);
+};
+
+$('#btn-test-voice').onclick = () => {
+  say('Halo! Selamat datang di PLN. Ini adalah contoh pengucapan suara pria yang tegas, jelas, dan natural.');
+};
+
+/* Form ElevenLabs */
+if ($('#el-api-key'))  $('#el-api-key').value  = elevenApiKey;
+if ($('#el-voice-id')) $('#el-voice-id').value = elevenVoiceId;
+
+$('#btn-save-eleven').onclick = () => {
+  elevenApiKey  = $('#el-api-key').value.trim();
+  elevenVoiceId = $('#el-voice-id').value.trim();
+  store.set('vms-el-key', elevenApiKey);
+  store.set('vms-el-vid', elevenVoiceId);
+
+  const statusEl = $('#el-status');
+  if (!elevenApiKey || !elevenVoiceId) {
+    statusEl.textContent = '⚠️ Mohon isi API Key dan Voice ID Anda.';
+    statusEl.style.color = '#e74c3c';
+    return;
+  }
+
+  statusEl.textContent = '⏳ Menghubungkan ke ElevenLabs...';
+  statusEl.style.color = 'var(--acc)';
+
+  speakWithElevenLabs('Halo! Ini adalah suara kloning saya sendiri untuk asisten PLN. Pengaturan berhasil tersimpan.').then((ok) => {
+    if (ok) {
+      statusEl.textContent = '✅ Berhasil terhubung! Suara Anda aktif digunakan.';
+      statusEl.style.color = '#2ecc71';
+    } else {
+      statusEl.textContent = '❌ Gagal. Periksa kembali API Key dan Voice ID Anda.';
+      statusEl.style.color = '#e74c3c';
+    }
+  });
+};
+
+$('#btn-test-eleven').onclick = () => {
+  $('#btn-save-eleven').click();
+};
+
+/* Putar File Rekaman Pribadi (my-voice.mp3) */
+if ($('#btn-play-mp3')) {
+  $('#btn-play-mp3').onclick = () => {
+    if (currentAudioPlayer) {
+      currentAudioPlayer.pause();
+      currentAudioPlayer = null;
+    }
+    if ('speechSynthesis' in window) {
+      try {
+        speechSynthesis.cancel();
+      } catch (e) {}
+    }
+
+    const audio = new Audio('audio/my-voice.mp3');
+    currentAudioPlayer = audio;
+
+    audio.onplay = () => {
+      speaking = true;
+      showBubble('Halo, Bu. Ini aku. Ibu lagi sibuk enggak? Aku telepon sebentar aja...');
+    };
+    audio.onended = () => {
+      speaking = false;
+    };
+    audio.onerror = () => {
+      speaking = false;
+      alert('File audio/my-voice.mp3 tidak dapat diputar. Pastikan file berada di folder audio.');
+    };
+
+    audio.play().catch(() => {
+      speaking = false;
+    });
+
+    addMsg(
+      'Halo, Bu. Ini aku. Ibu lagi sibuk enggak? Aku telepon sebentar aja. Soalnya tadi Ibu bilang meteran listrik di rumah bunyi terus, kan?',
+      'b'
+    );
+  };
+}
+
+updateVoiceTabs();
+
+/* Izin audio browser setelah interaksi pertama pengguna */
+['pointerdown', 'keydown', 'touchstart'].forEach((ev) => {
+  window.addEventListener(ev, () => {
+    lastActivity = Date.now();
+    idleNotified = false;
+
+    if (audioUnlocked) return;
+    audioUnlocked = true;
+
+    if (pendingSpeech) {
+      const p = pendingSpeech;
+      pendingSpeech = null;
+      speak(p);
+    }
+  }, { passive: true });
+});
+
+/* ----- Panduan Langkah Demi Langkah Formulir ----- */
+function goStep(i) {
+  if (i < 0 || i >= GUIDE.length) return;
+  guideIdx = i;
+
+  const [id, text] = GUIDE[i];
+  const targetEl = (id === 'apd')
+    ? $('#apdl')
+    : (id === 'agree-induction')
+      ? $('#induction-container')
+      : $('#' + id);
+
+  if (targetEl) {
+    targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  quiet = true;
+  if (id !== 'apd' && id !== 'agree-induction' && $('#' + id)) {
+    $('#' + id).focus({ preventScroll: true });
+  }
+  quiet = false;
+
+  lastHint = id;
+  say(`Langkah ${i + 1} dari ${GUIDE.length}. ${text}`);
+}
+
+function openForm() {
+  if ($('#v-registrasi').classList.contains('hide')) {
+    location.hash = '#registrasi';
+  }
+}
+
+/* Maju otomatis saat kolom selesai diisi dengan benar */
+GUIDE.forEach(([id], i) => {
+  if (id === 'apd' || id === 'sub' || id === 'agree-induction') return;
+
+  const el = $('#' + id);
+  if (!el) return;
+
+  el.addEventListener('change', () => {
+    const isCurrentStep = (guideIdx === i);
+    const hasValue      = el.value ? el.value.trim() : '';
+    const hasKtpError   = (id === 'ktp' && ktpError());
+
+    if (isCurrentStep && hasValue && !hasKtpError) {
+      setTimeout(() => goStep(i + 1), 400);
+    }
+  });
+});
+
+/* Panduan audio otomatis saat elemen difokuskan */
+document.addEventListener('focusin', (e) => {
+  if (quiet || e.target.id === 'pb') return;
+
+  const i = GUIDE.findIndex((g) => g[0] === e.target.id);
+  if (i < 0 || e.target.id === lastHint) return;
+
+  lastHint = e.target.id;
+  guideIdx = i;
+  say(GUIDE[i][1]);
+});
+
+/* Menawarkan bantuan bila pengguna terdiam lama di formulir */
+setInterval(() => {
+  const isIdle = (Date.now() - lastActivity > 25000);
+  const isFormActive = !$('#v-registrasi').classList.contains('hide');
+
+  if (isIdle && !idleNotified && isFormActive) {
+    idleNotified = true;
+    say('Apakah Anda membutuhkan bantuan untuk mengisi formulir? Ketuk saya, lalu tekan Mulai panduan.');
+  }
+}, 5000);
+
+/* ----- Tanya Jawab Asisten & Dialog Chat ----- */
+function todaySummary() {
+  const t       = ymd();
+  const today   = data.filter((r) => r.tgl === t);
+  const waiting = today.filter((r) => r.status === 'Menunggu').length;
+  const inside  = today.filter((r) => r.status === 'Check In').length;
+  const out     = data.filter((r) => r.outAt === t).length;
+
+  return `Hari ini tercatat ${today.length} tamu: ${waiting} sedang menunggu, ${inside} sedang berada di lokasi, dan ${out} telah check out.`;
+}
+
+function answer(q) {
+  if (/terima\s*kasih|makasih|thanks?|thank you/i.test(q)) {
+    const onForm = !$('#v-registrasi').classList.contains('hide');
+    return onForm ? showThanks('') : say('Sama-sama! Siap membantu Anda kapan saja.');
+  }
+
+  if (role === 'admin') {
+    if (/ringkas|rekap|hari ini|berapa/i.test(q)) return say(todaySummary());
+    if (/check|masuk|keluar/i.test(q))            return say(ADMIN_HELP.how);
+    if (/export|excel|unduh|salin/i.test(q))      return say(ADMIN_HELP.exp);
+    if (/cari|filter|tanggal/i.test(q))          return say(ADMIN_HELP.fil);
+  }
+
+  const hit = FAQ.find(([re]) => re.test(q));
+  if (hit && hit[1] === null) {
+    openForm();
+    return goStep(0);
+  }
+
+  say(hit ? hit[1] : 'Maaf, saya belum memahami pertanyaan tersebut. Anda dapat bertanya seputar KTP, APD, kendaraan, name tag, atau tekan tombol Mulai panduan.');
+}
+
+function ask() {
+  const text = $('#ci').value.trim();
+  if (!text) return;
+
+  $('#ci').value = '';
+  addMsg(text, 'u');
+  answer(text.toLowerCase());
+}
+
+$('#cs').onclick = ask;
+$('#ci').onkeydown = (e) => {
+  if (e.key === 'Enter') ask();
+};
+
+/* ----- Tombol Cepat (Quick Chips) ----- */
+function renderChips() {
+  $('#chips').innerHTML = (role === 'admin')
+    ? '<button data-c="sum">Ringkasan hari ini</button>' +
+      '<button data-c="how">Cara check in/out</button>' +
+      '<button data-c="exp">Export data</button>' +
+      '<button data-c="start">Panduan formulir</button>'
+    : '<button data-c="start">Mulai panduan</button>' +
+      '<button data-c="next">Lanjut</button>' +
+      '<button data-c="again">Ulangi</button>';
+}
+
+$('#chips').onclick = (e) => {
+  const c = e.target.dataset.c;
+  if (!c) return;
+
+  if (c === 'sum')  return say(todaySummary());
+  if (c === 'how')  return say(ADMIN_HELP.how);
+  if (c === 'exp')  return say(ADMIN_HELP.exp);
+
+  openForm();
+  if (c === 'start') goStep(0);
+  if (c === 'next')  goStep(guideIdx + 1);
+  if (c === 'again') goStep(Math.max(guideIdx, 0));
+};
+
+/* ----- Buka / Tutup Panel Chat Asisten ----- */
+let wasDragged = false;
+
+$('#fab').onclick = () => {
+  if (wasDragged) {
+    wasDragged = false;
+    return;
+  }
+
+  $('#bub').classList.add('hide');
+  $('#panel').classList.toggle('hide');
+
+  if (!$('#panel').classList.contains('hide')) {
+    const isReg = (location.hash === '#registrasi' || role !== 'admin');
+    botHello(isReg ? 'registrasi' : 'dashboard');
+  } else {
+    try {
+      speechSynthesis.cancel();
+    } catch (e) {}
+  }
+};
+
+$('#bub').onclick = () => $('#fab').click();
+
+/* ----- Fitur Drag-and-Drop Robot (Sentuhan & Mouse) ----- */
+(function enableDrag() {
+  const bot = $('#bot');
+  const fab = $('#fab');
+
+  let startX  = 0;
+  let startY  = 0;
+  let originX = 0;
+  let originY = 0;
+  let moved   = false;
+  let down    = false;
+
+  fab.title = 'Geser untuk memindahkan posisi asisten';
+
+  function place(x, y) {
+    const w = bot.offsetWidth;
+    const h = bot.offsetHeight;
+    x = Math.max(0, Math.min(innerWidth - w, x));
+    y = Math.max(0, Math.min(innerHeight - h, y));
+
+    Object.assign(bot.style, {
+      left:   x + 'px',
+      top:    y + 'px',
+      right:  'auto',
+      bottom: 'auto'
+    });
+
+    bot.classList.toggle('left', x + w / 2 < innerWidth / 2);
+    bot.classList.toggle('top',  y < 290);
+  }
+
+  function end() {
+    if (!down) return;
+    down = false;
+    bot.classList.remove('drag');
+
+    if (moved) {
+      wasDragged = true;
+      setTimeout(() => { wasDragged = false; }, 60);
+      store.set('vms-pos', {
+        x: parseFloat(bot.style.left),
+        y: parseFloat(bot.style.top)
+      });
+    }
+  }
+
+  fab.addEventListener('pointerdown', (e) => {
+    down    = true;
+    moved   = false;
+    startX  = e.clientX;
+    startY  = e.clientY;
+
+    const r = bot.getBoundingClientRect();
+    originX = r.left;
+    originY = r.top;
+
+    try {
+      fab.setPointerCapture(e.pointerId);
+    } catch (x) {}
+  });
+
+  fab.addEventListener('pointermove', (e) => {
+    if (!down) return;
+
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+
+    if (!moved && Math.hypot(dx, dy) < 6) return;
+    moved = true;
+    bot.classList.add('drag');
+
+    place(originX + dx, originY + dy);
+  });
+
+  fab.addEventListener('pointerup', end);
+  fab.addEventListener('pointercancel', end);
+
+  // Mengembalikan posisi tersimpan dari local storage
+  const saved = store.get('vms-pos', null);
+  if (saved && isFinite(saved.x) && isFinite(saved.y)) {
+    place(saved.x, saved.y);
+  }
+
+  window.addEventListener('resize', () => {
+    if (bot.style.left) {
+      place(parseFloat(bot.style.left), parseFloat(bot.style.top));
+    }
+  });
+})();
+
+/* =====================================================================
+   6. MODEL 3D THREE.JS — "VOLTI", PETUGAS K3LH PLN
+   APD Standar K3LH:
+     - Safety helmet kuning dengan lampu sorot & logo petir PLN
+     - Kacamata safety transparan
+     - Earmuff pelindung telinga
+     - Pakaian kerja wearpack biru khas PLN
+     - Rompi reflektif oranye bergaris perak & emblem PLN
+     - Sarung tangan safety (tangan kanan melambai menyapa)
+     - Sepatu safety dengan toe-cap baja
+   ===================================================================== */
+let renderer, scene, camera, rig, robot;
+
+function createRobot(T) {
+  const mat = (color, opt = {}) => new T.MeshStandardMaterial({
+    color,
+    roughness: 0.35,
+    metalness: 0.1,
+    ...opt
+  });
+
+  const C = {
+    white:  mat(0xf4f7f9),
+    blue:   mat(0x0a8fd8, { roughness: 0.5 }),
+    yellow: mat(0xffe600),
+    ridge:  mat(0xd9be00),
+    orange: mat(0xff7a00, { roughness: 0.6, side: T.DoubleSide }),
+    red:    mat(0xe2231a),
+    glove:  mat(0xffb300, { roughness: 0.7 }),
+    boot:   mat(0x1a1a1a, { roughness: 0.6 }),
+    visor:  mat(0x0b1b33, { roughness: 0.12, metalness: 0.4 }),
+    metal:  mat(0xb8c2c8, { metalness: 0.5 }),
+    strip:  mat(0xe8eef2, { metalness: 0.7, roughness: 0.2 }),
+    glass:  mat(0x9fe8ff, { transparent: true, opacity: 0.25, roughness: 0.05, metalness: 0.2 }),
+    glow:   mat(0x22e6ff, { emissive: 0x22e6ff, emissiveIntensity: 1 }),
+    lamp:   mat(0xfff3b0, { emissive: 0xffd400, emissiveIntensity: 1 })
+  };
+
+  const ball = (r, m, [sx, sy, sz], [x, y, z], parent) => {
+    const o = new T.Mesh(new T.SphereGeometry(r, 32, 20), m);
+    o.scale.set(sx, sy, sz);
+    o.position.set(x, y, z);
+    parent.add(o);
+    return o;
+  };
+
+  const cyl = (rt, rb, h, m, [x, y, z], parent, open = false) => {
+    const o = new T.Mesh(new T.CylinderGeometry(rt, rb, h, 40, 1, open), m);
+    o.position.set(x, y, z);
+    parent.add(o);
+    return o;
+  };
+
+  // Simbol petir khas PLN
+  const bolt = (m, k = 1) => {
+    const shape = new T.Shape();
+    [
+      [0.05, 0.2], [-0.12, -0.03], [-0.01, -0.03],
+      [-0.06, -0.22], [0.12, 0.04], [0.01, 0.04]
+    ].forEach(([x, y], i) => {
+      if (i === 0) shape.moveTo(x * k, y * k);
+      else shape.lineTo(x * k, y * k);
+    });
+    return new T.Mesh(new T.ShapeGeometry(shape), m);
+  };
+
+  const g = new T.Group();
+
+  /* --- Kepala & Wajah --- */
+  const head = new T.Group();
+  head.position.y = 0.9;
+  g.add(head);
+
+  ball(1, C.white, [1.2, 0.95, 1], [0, 0, 0], head);
+  ball(0.8, C.visor, [1.2, 0.78, 0.4], [0, 0, 0.8], head);
+  ball(0.8, C.glass, [1.26, 0.5, 0.43], [0, 0.06, 0.8], head); // Kacamata safety
+
+  // Earmuff pelindung telinga
+  [-1, 1].forEach((k) => {
+    const ear = cyl(0.3, 0.3, 0.22, C.orange, [k * 1.28, 0, 0], head);
+    ear.rotation.z = Math.PI / 2;
+  });
+
+  // Mata LED
+  const eyes = new T.Group();
+  eyes.position.y = 0.12;
+  head.add(eyes);
+  [-0.3, 0.3].forEach((x) => {
+    ball(0.1, C.glow, [1, 1.5, 0.4], [x, 0, 1.12], eyes);
+  });
+
+  // Senyum LED & Mulut berbicara
+  const smile = new T.Mesh(new T.TorusGeometry(0.17, 0.03, 8, 24, Math.PI), C.glow);
+  smile.rotation.z = Math.PI;
+  smile.position.set(0, -0.02, 1.12);
+  head.add(smile);
+
+  const mouth = ball(0.12, C.glow, [1.6, 0.2, 0.3], [0, -0.22, 1.12], head);
+  mouth.visible = false;
+
+  /* --- Safety Helmet Kuning K3 --- */
+  const dome = new T.Mesh(
+    new T.SphereGeometry(1, 40, 20, 0, Math.PI * 2, 0, Math.PI / 2),
+    C.yellow
+  );
+  dome.scale.set(1.25, 0.85, 1.12);
+  dome.position.y = 0.38;
+  head.add(dome);
+
+  const brim = new T.Mesh(
+    new T.CylinderGeometry(1.3, 1.3, 0.07, 40, 1, false, -Math.PI * 0.55, Math.PI * 1.1),
+    C.yellow
+  );
+  brim.scale.z = 1.15;
+  brim.position.y = 0.4;
+  head.add(brim);
+
+  const ridge = new T.Mesh(new T.TorusGeometry(1, 0.05, 8, 40, Math.PI), C.ridge);
+  ridge.rotation.y = Math.PI / 2;
+  ridge.scale.set(1.13, 0.87, 1);
+  ridge.position.y = 0.38;
+  head.add(ridge);
+
+  // Logo PLN di helm
+  const badgeTex = new T.TextureLoader().load('img/pln-logo.png');
+  const badgeMat = new T.MeshStandardMaterial({
+    map: badgeTex,
+    transparent: true,
+    roughness: 0.3,
+    metalness: 0.1
+  });
+  const badge = new T.Mesh(new T.PlaneGeometry(0.32, 0.44), badgeMat);
+  badge.position.set(0, 0.78, 1.01);
+  badge.rotation.x = -0.5;
+  head.add(badge);
+
+  const tip = ball(0.09, C.lamp, [1, 1, 1], [0, 1.02, 0.74], head); // Lampu senter helm
+
+  /* --- Badan: Wearpack Biru & Rompi Reflektif Oranye --- */
+  ball(1, C.blue, [0.75, 0.8, 0.62], [0, -0.75, 0], g);
+
+  const vest = new T.Mesh(
+    new T.SphereGeometry(1, 32, 16, 0, Math.PI * 2, Math.PI * 0.28, Math.PI * 0.46),
+    C.orange
+  );
+  vest.scale.set(0.77, 0.82, 0.64);
+  vest.position.y = -0.75;
+  g.add(vest);
+
+  // Strip reflektif perak pada rompi
+  [[-0.72, 0.775, 0.645], [-0.98, 0.745, 0.62]].forEach(([y, sx, sz]) => {
+    const s = cyl(1, 1, 0.07, C.strip, [0, y, 0], g, true);
+    s.scale.set(sx, 1, sz);
+  });
+
+  // Emblem PLN di dada rompi
+  const emblem = new T.Group();
+  emblem.position.set(0, -0.45, 0.6);
+  emblem.rotation.x = -0.1;
+  g.add(emblem);
+
+  const disc = cyl(0.24, 0.24, 0.05, C.yellow, [0, 0, 0], emblem);
+  disc.rotation.x = Math.PI / 2;
+
+  const emblemBolt = bolt(C.red, 0.95);
+  emblemBolt.position.z = 0.03;
+  emblem.add(emblemBolt);
+
+  /* --- Lengan & Sarung Tangan K3 (Tangan Kanan Melambai) --- */
+  const makeArm = (side) => {
+    const a = new T.Group();
+    a.position.set(side * 0.8, -0.55, 0);
+
+    ball(0.15, C.blue,  [1, 1, 1],   [0, 0, 0], a);
+    ball(0.13, C.blue,  [1, 2.6, 1], [0, -0.3, 0], a);
+    ball(0.17, C.glove, [1, 1, 0.9], [0, -0.68, 0], a);
+    ball(0.065, C.glove, [1, 1, 1],  [side * 0.13, -0.62, 0.05], a);
+
+    g.add(a);
+    return a;
+  };
+
+  makeArm(-1).rotation.z = -0.3;
+  const arm = makeArm(1);
+  arm.rotation.z = 0.3;
+
+  /* --- Kaki: Celana Wearpack & Sepatu Safety --- */
+  [-0.28, 0.28].forEach((x) => {
+    cyl(0.15, 0.14, 0.5, C.blue, [x, -1.65, 0], g);
+    cyl(0.16, 0.16, 0.06, C.strip, [x, -1.88, 0], g);
+    ball(0.24, C.boot, [1, 0.7, 1.55], [x, -2.0, 0.12], g);
+    ball(0.18, C.metal, [1, 0.65, 1],  [x, -1.99, 0.42], g); // Ujung pelindung baja
+  });
+
+  // Bayangan di lantai
+  const shadow = new T.Mesh(
+    new T.CircleGeometry(0.9, 40),
+    new T.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.18 })
+  );
+  shadow.rotation.x = -Math.PI / 2;
+  shadow.position.y = -2.17;
+  g.add(shadow);
+
+  return { g, head, eyes, mouth, smile, arm, tip };
+}
+
+function initRobot() {
+  try {
+    renderer = new THREE.WebGLRenderer({
+      canvas: $('#fabc'),
+      alpha: true,
+      antialias: true
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(260, 380, false);
+
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(35, 260 / 380, 0.1, 50);
+    camera.position.set(0, 0, 8);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+
+    const sun = new THREE.DirectionalLight(0xffffff, 0.8);
+    sun.position.set(2, 3, 4);
+    scene.add(sun);
+
+    rig = new THREE.Group();
+    scene.add(rig);
+
+    robot = createRobot(THREE);
+    rig.add(robot.g);
+
+    requestAnimationFrame(animate);
+  } catch (err) {
+    $('#fab').insertAdjacentHTML('afterbegin', '<div style="font-size:70px">🤖</div>');
+  }
+}
+
+function animate(ms) {
+  requestAnimationFrame(animate);
+  const t = ms / 1000;
+  const R = robot;
+  if (!R) return;
+
+  // Gerakan menoleh halus & bernapas
+  R.head.rotation.y = Math.sin(t * 0.8) * 0.25;
+  R.head.rotation.x = Math.sin(t * 0.6) * 0.05;
+  R.head.position.y = 0.9 + Math.sin(t * 1.6) * 0.03;
+
+  // Gerakan artikulasi mulut saat berbicara
+  const talk = speaking ? 0.25 + Math.abs(Math.sin(t * 14)) * 0.85 : 0.2;
+  R.mouth.scale.y += (talk - R.mouth.scale.y) * 0.4;
+  R.mouth.visible = speaking;
+  R.smile.visible = !speaking;
+
+  // Gerakan melambaikan tangan kanan
+  const wave = speaking || ms < waveUntil;
+  const targetArmZ = wave ? (2.5 + Math.sin(t * 8) * 0.3) : 0.3;
+  R.arm.rotation.z += (targetArmZ - R.arm.rotation.z) * 0.15;
+
+  // Kedipan mata periodik
+  const isBlinking = (Math.sin(t * 1.3) > 0.985 || (t % 4) > 3.9);
+  R.eyes.scale.y = isBlinking ? 0.1 : 1;
+
+  // Efek kedip lampu senter di atas helm
+  R.tip.material.emissiveIntensity = 0.6 + Math.sin(t * 4) * 0.4;
+
+  renderer.render(scene, camera);
+}
+
+/* =====================================================================
+   7. INISIALISASI APLIKASI
+   ===================================================================== */
+if ('speechSynthesis' in window) {
+  speechSynthesis.onvoiceschanged = loadVoices;
+  loadVoices();
+}
+
+initRobot();
+setRole(role);
+</script>
+</body>
+</html>

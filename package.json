@@ -1,0 +1,23 @@
+{
+  "name": "pln-pusharlis-visitor-management",
+  "version": "1.0.0",
+  "description": "Visitor Management System PT PLN (Persero) Pusharlis UP2WVI dengan Asisten 3D & Voice K3",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "keywords": [
+    "pln",
+    "pusharlis",
+    "visitor-management",
+    "safety-induction",
+    "threejs",
+    "elevenlabs"
+  ],
+  "author": "PLN PUSHARLIS",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "msedge-tts": "^2.1.1"
+  }
+}

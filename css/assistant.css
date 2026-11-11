@@ -1,0 +1,376 @@
+/* =============================================================
+   VISITOR MANAGEMENT SYSTEM - PT PLN (PERSERO) PUSHARLIS
+   Assistant Stylesheet: 3D Robot Widget, Bubbles, Chat & Voice Drawer
+   ============================================================= */
+
+/* =============================================================
+   1. ASISTEN ROBOT (WIDGET, KANVAS & BALON SUARA)
+   ============================================================= */
+#bot {
+  position: fixed;
+  z-index: 40;
+  right: max(18px, env(safe-area-inset-right, 0px));
+  bottom: max(18px, env(safe-area-inset-bottom, 0px));
+  font-size: 14px;
+}
+
+#fab {
+  position: relative;
+  display: block;
+  width: 130px;
+  height: 190px;
+  margin-left: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  filter: drop-shadow(0 8px 10px #0006);
+}
+
+.fab-badge {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  background: rgba(16, 38, 46, 0.94);
+  backdrop-filter: blur(6px);
+  border: 1.5px solid #3bb7e6;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  pointer-events: none;
+  transition: transform 0.2s, background 0.2s, border-color 0.2s;
+}
+
+#fab:hover .fab-badge {
+  background: rgba(23, 67, 90, 0.98);
+  border-color: #ffe600;
+}
+
+#bot.drag #fab {
+  cursor: grabbing;
+}
+
+#bot.drag #bub {
+  opacity: 0.4;
+}
+
+/* =============================================================
+   2. BALON BICARA (SPEECH BUBBLE)
+   ============================================================= */
+#bub {
+  position: absolute;
+  right: 122px;
+  bottom: 62px;
+  width: max-content;
+  max-width: min(280px, calc(100vw - 180px));
+  padding: 12px 16px;
+  border: 2.5px solid #3bb7e6;
+  border-radius: 18px;
+  background: #10262e;
+  color: #fff;
+  font-size: 13.5px;
+  line-height: 1.45;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#bub:hover {
+  transform: scale(1.02);
+  border-color: #ffe600;
+}
+
+.bub-brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffe600;
+  letter-spacing: 0.4px;
+}
+
+.bub-logo {
+  width: 15px;
+  height: 15px;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 3px;
+  padding: 1px;
+}
+
+.bub-text {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.42;
+  color: #f8fafc;
+}
+
+#bub::after {
+  content: "";
+  position: absolute;
+  right: -13px;
+  top: 30px;
+  border: 10px solid transparent;
+  border-left: 12px solid #3bb7e6;
+  border-right: 0;
+}
+
+/* Penyesuaian posisi balon saat robot digeser ke sisi kiri / atas */
+#bot.left #bub {
+  right: auto;
+  left: 122px;
+}
+
+#bot.left #bub::after {
+  right: auto;
+  left: -13px;
+  border: 10px solid transparent;
+  border-right: 12px solid #3bb7e6;
+  border-left: 0;
+}
+
+#bot.left #panel {
+  right: auto;
+  left: 0;
+}
+
+#bot.top #panel {
+  bottom: auto;
+  top: 198px;
+  max-height: calc(100vh - 260px);
+}
+
+/* =============================================================
+   3. PANEL INTERAKSI CHAT
+   ============================================================= */
+#panel {
+  position: absolute;
+  right: 0;
+  bottom: 198px;
+  width: 270px;
+  max-width: calc(100vw - 36px);
+  max-height: calc(100vh - 250px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: 0 10px 40px #0007;
+}
+
+#stage {
+  position: relative;
+  flex: none;
+  height: 46px;
+  background: linear-gradient(135deg, var(--side), var(--acc));
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+}
+
+.stage-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stage-logo {
+  width: 25px;
+  height: 25px;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 5px;
+  padding: 2px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+  flex-shrink: 0;
+}
+
+.stage-title {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  line-height: 1.15;
+}
+
+.stage-subtitle {
+  color: #e0f2fe;
+  font-size: 10px;
+  opacity: 0.85;
+  line-height: 1.1;
+}
+
+#spk {
+  position: absolute;
+  right: 42px;
+  top: 10px;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 20px;
+  background: #fff3;
+  color: #fff;
+  font: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#spk:hover {
+  background: #fff5;
+}
+
+#vcfg {
+  position: absolute;
+  right: 8px;
+  top: 10px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 20px;
+  background: #fff3;
+  color: #fff;
+  font: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#vcfg:hover {
+  background: #fff5;
+}
+
+#msgs {
+  flex: 1;
+  height: 110px;
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: auto;
+  padding: 10px;
+  font-size: 12.5px;
+}
+
+.m {
+  max-width: 90%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  line-height: 1.4;
+}
+
+.m.b {
+  align-self: flex-start;
+  background: var(--input);
+  border: 1px solid var(--line);
+}
+
+.msg-sender {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 5px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.msg-bot-logo {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 3px;
+  padding: 1px;
+  flex-shrink: 0;
+}
+
+.msg-bot-name {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #ffe600;
+  letter-spacing: 0.3px;
+}
+
+.msg-content {
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+.m.u {
+  align-self: flex-end;
+  background: var(--acc);
+  color: #fff;
+}
+
+#chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 0 12px 8px;
+}
+
+#chips button {
+  padding: 4px 12px;
+  border: 1px solid var(--acc);
+  border-radius: 16px;
+  background: none;
+  color: var(--acc);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+#cf {
+  display: flex;
+  gap: 6px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--line);
+}
+
+#cf input {
+  padding: 9px;
+  font-size: 13px;
+}
+
+/* =============================================================
+   4. RESPONSIF ROBOT & BALON PADA LAYAR KECIL
+   ============================================================= */
+@media (max-width: 600px) {
+  #fab {
+    width: 98px;
+    height: 143px;
+  }
+
+  #bub {
+    right: 92px;
+    bottom: 40px;
+    font-size: 12.5px;
+  }
+
+  #panel {
+    bottom: 152px;
+    max-height: calc(100vh - 210px);
+  }
+
+  #bot.left #bub {
+    left: 92px;
+  }
+
+  #bot.top #panel {
+    top: 152px;
+  }
+}

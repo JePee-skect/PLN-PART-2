@@ -588,114 +588,114 @@ function createRobot(T) {
   beltBuckle.rotation.x = Math.PI / 2;
 
   /* ================= 3. LENGAN & TANGAN NATURAL ANATOMIS & SISTEM GERAK PENGARAH ================= */
-  // Fungsi pembuat telapak tangan robotik android yang lentik, anggun & detail
+  // Fungsi pembuat telapak tangan robotik android yang lentik, proporsional & jelas terlihat
   function createAndroidHand(side) {
     const handGroup = new T.Group();
 
-    // 1. Telapak Tangan Halus Porselen & Silikon
-    ball(0.058, C.skin, [1.0, 0.82, 0.50], [0, -0.045, 0.012], handGroup, 24);
-    ball(0.052, C.porcelain, [0.95, 0.78, 0.38], [0, -0.042, -0.010], handGroup, 20);
-    ball(0.014, C.glow, [1, 0.6, 0.4], [0, -0.038, -0.022], handGroup, 12); // Indikator LED telapak punggung
+    // 1. Telapak Tangan Halus Porselen & Silikon (Proporsi Solid & Jelas)
+    ball(0.095, C.skin, [1.0, 0.85, 0.50], [0, -0.070, 0.018], handGroup, 24);
+    ball(0.088, C.porcelain, [0.95, 0.80, 0.38], [0, -0.065, -0.014], handGroup, 20);
+    ball(0.024, C.glow, [1, 0.6, 0.4], [0, -0.060, -0.030], handGroup, 14); // Indikator LED telapak punggung
 
     // 2. Empat Jari Lentik Berartikulasi (Index, Middle, Ring, Pinky)
     // Sisi dalam (dekat ibu jari) adalah +X untuk tangan kiri (side === -1), dan -X untuk tangan kanan (side === 1)
     const fingerOffsets = (side === -1)
-      ? [0.022, 0.007, -0.008, -0.022]
-      : [-0.022, -0.007, 0.008, 0.022];
-    const fingerLengths = [0.082, 0.092, 0.080, 0.066];
+      ? [0.036, 0.012, -0.012, -0.036]
+      : [-0.036, -0.012, 0.012, 0.036];
+    const fingerLengths = [0.135, 0.150, 0.132, 0.108];
 
     fingerOffsets.forEach((fx, idx) => {
       const fLen = fingerLengths[idx];
       const fGroup = new T.Group();
-      fGroup.position.set(fx, -0.078, 0.014);
+      fGroup.position.set(fx, -0.122, 0.020);
       handGroup.add(fGroup);
 
       // Buku jari emas
-      ball(0.0095, C.gold, [1, 1, 1], [0, 0, 0], fGroup, 12);
+      ball(0.016, C.gold, [1, 1, 1], [0, 0, 0], fGroup, 14);
 
       // Ruas pertama (proximal)
-      cyl(0.0090, 0.0080, fLen * 0.50, C.skin, [0, -fLen * 0.25, 0.004], fGroup, false, 12);
+      cyl(0.015, 0.013, fLen * 0.50, C.skin, [0, -fLen * 0.25, 0.006], fGroup, false, 14);
 
       // Sendi tengah perak
-      ball(0.0078, C.silver, [1, 1, 1], [0, -fLen * 0.50, 0.008], fGroup, 12);
+      ball(0.013, C.silver, [1, 1, 1], [0, -fLen * 0.50, 0.012], fGroup, 12);
 
       // Ruas kedua (distal)
-      cyl(0.0075, 0.0065, fLen * 0.45, C.skin, [0, -fLen * 0.725, 0.013], fGroup, false, 12);
+      cyl(0.0125, 0.0105, fLen * 0.45, C.skin, [0, -fLen * 0.725, 0.018], fGroup, false, 14);
 
       // Ujung jari halus
-      ball(0.0062, C.skin, [1, 1, 1], [0, -fLen * 0.95, 0.018], fGroup, 12);
+      ball(0.0105, C.skin, [1, 1, 1], [0, -fLen * 0.95, 0.025], fGroup, 12);
     });
 
     // 3. Ibu Jari (Thumb) di Sisi Dalam Menghadap Tubuh
-    const thumbX = (side === -1) ? 0.040 : -0.040;
+    const thumbX = (side === -1) ? 0.065 : -0.065;
     const thumbGroup = new T.Group();
-    thumbGroup.position.set(thumbX, -0.038, 0.018);
+    thumbGroup.position.set(thumbX, -0.055, 0.026);
     thumbGroup.rotation.set(-0.25, side * 0.35, side * 0.45);
     handGroup.add(thumbGroup);
 
-    ball(0.011, C.gold, [1, 1, 1], [0, 0, 0], thumbGroup, 12);
-    cyl(0.0095, 0.0080, 0.042, C.skin, [side * -0.012, -0.021, 0.004], thumbGroup, false, 12);
-    ball(0.0080, C.silver, [1, 1, 1], [side * -0.020, -0.042, 0.008], thumbGroup, 12);
-    cyl(0.0078, 0.0065, 0.032, C.skin, [side * -0.026, -0.058, 0.013], thumbGroup, false, 12);
-    ball(0.0065, C.skin, [1, 1, 1], [side * -0.030, -0.074, 0.018], thumbGroup, 12);
+    ball(0.018, C.gold, [1, 1, 1], [0, 0, 0], thumbGroup, 14);
+    cyl(0.0155, 0.0135, 0.068, C.skin, [side * -0.018, -0.034, 0.006], thumbGroup, false, 14);
+    ball(0.013, C.silver, [1, 1, 1], [side * -0.030, -0.068, 0.012], thumbGroup, 12);
+    cyl(0.0125, 0.0105, 0.052, C.skin, [side * -0.040, -0.094, 0.018], thumbGroup, false, 14);
+    ball(0.0105, C.skin, [1, 1, 1], [side * -0.048, -0.120, 0.025], thumbGroup, 12);
 
     return handGroup;
   }
 
   // --- A. LENGAN KIRI (PANDANGAN PENGGUNA: SISI KIRI / MENGARAH KE FORMULIR) ---
   const leftShoulder = new T.Group();
-  leftShoulder.position.set(-0.56, 0.22, 0.04);
+  leftShoulder.position.set(-0.58, 0.22, 0.04);
   torso.add(leftShoulder);
 
-  ball(0.14, C.porcelain, [1, 1, 1], [0, 0, 0], leftShoulder, 32);
-  cyl(0.092, 0.092, 0.030, C.gold, [0, -0.05, 0], leftShoulder, false, 24);
+  ball(0.17, C.porcelain, [1, 1, 1], [0, 0, 0], leftShoulder, 32);
+  cyl(0.115, 0.115, 0.036, C.gold, [0, -0.06, 0], leftShoulder, false, 24);
 
   const leftUpperArm = new T.Group();
-  leftUpperArm.position.set(0, -0.05, 0);
+  leftUpperArm.position.set(0, -0.06, 0);
   leftShoulder.add(leftUpperArm);
 
-  cyl(0.082, 0.072, 0.26, C.porcelain, [0, -0.13, 0], leftUpperArm, false, 28);
-  ball(0.070, C.gold, [1, 1, 1], [0, -0.26, 0.012], leftUpperArm, 24);
-  cyl(0.065, 0.065, 0.020, C.silver, [0, -0.26, 0.012], leftUpperArm, false, 20);
+  cyl(0.115, 0.098, 0.32, C.porcelain, [0, -0.16, 0], leftUpperArm, false, 28);
+  ball(0.095, C.gold, [1, 1, 1], [0, -0.32, 0.015], leftUpperArm, 24);
+  cyl(0.088, 0.088, 0.024, C.silver, [0, -0.32, 0.015], leftUpperArm, false, 20);
 
   const leftForearm = new T.Group();
-  leftForearm.position.set(0, -0.26, 0.012);
+  leftForearm.position.set(0, -0.32, 0.015);
   leftUpperArm.add(leftForearm);
 
-  cyl(0.070, 0.060, 0.25, C.porcelain, [0, -0.125, 0.008], leftForearm, false, 28);
-  cyl(0.064, 0.064, 0.028, C.gold, [0, -0.24, 0.008], leftForearm, false, 24);
-  ball(0.054, C.silver, [1, 1, 1], [0, -0.25, 0.008], leftForearm, 20);
+  cyl(0.096, 0.085, 0.30, C.porcelain, [0, -0.15, 0.010], leftForearm, false, 28);
+  cyl(0.088, 0.088, 0.034, C.gold, [0, -0.29, 0.010], leftForearm, false, 24);
+  ball(0.075, C.silver, [1, 1, 1], [0, -0.30, 0.010], leftForearm, 20);
 
   const leftHand = createAndroidHand(-1);
-  leftHand.position.set(0, -0.25, 0.008);
+  leftHand.position.set(0, -0.30, 0.010);
   leftForearm.add(leftHand);
 
   // --- B. LENGAN KANAN (PANDANGAN PENGGUNA: SISI KANAN / POISE SANTUN CONCIERGE) ---
   const rightShoulder = new T.Group();
-  rightShoulder.position.set(0.56, 0.22, 0.04);
+  rightShoulder.position.set(0.58, 0.22, 0.04);
   torso.add(rightShoulder);
 
-  ball(0.14, C.porcelain, [1, 1, 1], [0, 0, 0], rightShoulder, 32);
-  cyl(0.092, 0.092, 0.030, C.gold, [0, -0.05, 0], rightShoulder, false, 24);
+  ball(0.17, C.porcelain, [1, 1, 1], [0, 0, 0], rightShoulder, 32);
+  cyl(0.115, 0.115, 0.036, C.gold, [0, -0.06, 0], rightShoulder, false, 24);
 
   const rightUpperArm = new T.Group();
-  rightUpperArm.position.set(0, -0.05, 0);
+  rightUpperArm.position.set(0, -0.06, 0);
   rightShoulder.add(rightUpperArm);
 
-  cyl(0.082, 0.072, 0.26, C.porcelain, [0, -0.13, 0], rightUpperArm, false, 28);
-  ball(0.070, C.gold, [1, 1, 1], [0, -0.26, 0.012], rightUpperArm, 24);
-  cyl(0.065, 0.065, 0.020, C.silver, [0, -0.26, 0.012], rightUpperArm, false, 20);
+  cyl(0.115, 0.098, 0.32, C.porcelain, [0, -0.16, 0], rightUpperArm, false, 28);
+  ball(0.095, C.gold, [1, 1, 1], [0, -0.32, 0.015], rightUpperArm, 24);
+  cyl(0.088, 0.088, 0.024, C.silver, [0, -0.32, 0.015], rightUpperArm, false, 20);
 
   const rightForearm = new T.Group();
-  rightForearm.position.set(0, -0.26, 0.012);
+  rightForearm.position.set(0, -0.32, 0.015);
   rightUpperArm.add(rightForearm);
 
-  cyl(0.070, 0.060, 0.25, C.porcelain, [0, -0.125, 0.008], rightForearm, false, 28);
-  cyl(0.064, 0.064, 0.028, C.gold, [0, -0.24, 0.008], rightForearm, false, 24);
-  ball(0.054, C.silver, [1, 1, 1], [0, -0.25, 0.008], rightForearm, 20);
+  cyl(0.096, 0.085, 0.30, C.porcelain, [0, -0.15, 0.010], rightForearm, false, 28);
+  cyl(0.088, 0.088, 0.034, C.gold, [0, -0.29, 0.010], rightForearm, false, 24);
+  ball(0.075, C.silver, [1, 1, 1], [0, -0.30, 0.010], rightForearm, 20);
 
   const rightHand = createAndroidHand(1);
-  rightHand.position.set(0, -0.25, 0.008);
+  rightHand.position.set(0, -0.30, 0.010);
   rightForearm.add(rightHand);
 
   /* ================= 4. ROK HOVER & CHASSIS LEVITASI ELEGAN ================= */

@@ -590,94 +590,94 @@ function createRobot(T) {
   /* ================= 3. LENGAN & TANGAN NATURAL, PROPORSIONAL & ANGGUN ================= */
   // --- A. LENGAN KANAN: GESTUR "SALAM SANTUN PLN ners" (MENYAMBUT HANGAT) ---
   const rightShoulder = new T.Group();
-  rightShoulder.position.set(0.48, 0.22, 0.02);
+  rightShoulder.position.set(0.66, 0.25, 0.0);
   torso.add(rightShoulder);
 
-  // Pundak porselen mulus menyatu rapi ke torso (bukan bola terpisah)
-  ball(0.15, C.porcelain, [1.0, 0.95, 1.0], [0, 0, 0], rightShoulder, 32);
-  cyl(0.105, 0.105, 0.03, C.gold, [0, -0.07, 0], rightShoulder, false, 24);
+  // Pundak porselen mulus menyatu ke torso
+  ball(0.16, C.porcelain, [1.05, 0.95, 1.0], [0, 0, 0], rightShoulder, 32);
+  cyl(0.108, 0.108, 0.035, C.gold, [0, -0.08, 0], rightShoulder, false, 24);
 
   // Lengan Atas Kanan
   const rightUpperArmGroup = new T.Group();
-  rightUpperArmGroup.position.set(0, -0.06, 0);
-  rightUpperArmGroup.rotation.set(0.15, -0.10, -0.22);
+  rightUpperArmGroup.position.set(0, -0.07, 0);
+  rightUpperArmGroup.rotation.set(0.12, -0.05, -0.16);
   rightShoulder.add(rightUpperArmGroup);
 
-  cyl(0.098, 0.088, 0.30, C.porcelain, [0, -0.15, 0], rightUpperArmGroup, false, 24);
+  cyl(0.10, 0.088, 0.32, C.porcelain, [0, -0.16, 0], rightUpperArmGroup, false, 28);
 
   // Siku Emas Kanan
-  ball(0.082, C.gold, [1, 1, 1], [0, -0.30, 0.02], rightUpperArmGroup, 24);
+  ball(0.082, C.gold, [1, 1, 1], [0, -0.32, 0.02], rightUpperArmGroup, 24);
 
   // Grup Lengan Bawah Kanan (Aktif melambai saat berbicara)
   const rightForearmGroup = new T.Group();
-  rightForearmGroup.position.set(0, -0.30, 0.02);
-  rightForearmGroup.rotation.set(0.85, -0.25, -0.28);
+  rightForearmGroup.position.set(0, -0.32, 0.02);
+  rightForearmGroup.rotation.set(0.80, -0.15, -0.22);
   rightUpperArmGroup.add(rightForearmGroup);
 
-  cyl(0.085, 0.072, 0.28, C.porcelain, [0, -0.14, 0], rightForearmGroup, false, 24);
-  cyl(0.074, 0.074, 0.03, C.gold, [0, -0.28, 0], rightForearmGroup, false, 24); // Manset emas
+  cyl(0.085, 0.072, 0.28, C.porcelain, [0, -0.14, 0], rightForearmGroup, false, 28);
+  cyl(0.074, 0.074, 0.035, C.gold, [0, -0.28, 0], rightForearmGroup, false, 24); // Manset emas
 
   // Telapak Tangan Kanan Terbuka Menyambut Santun
   const rightHandGroup = new T.Group();
-  rightHandGroup.position.set(0, -0.31, 0);
+  rightHandGroup.position.set(0, -0.30, 0);
   rightForearmGroup.add(rightHandGroup);
 
-  ball(0.072, C.skin, [1.0, 0.42, 1.15], [0, -0.04, 0.01], rightHandGroup, 24).rotation.set(0.15, -0.10, 0);
+  ball(0.075, C.skin, [1.0, 0.42, 1.15], [0, -0.04, 0.02], rightHandGroup, 24).rotation.set(0.20, -0.15, 0);
 
   // Jari-jari feminin lentik menyambut hangat
   const fingerOffsets = [-0.030, -0.010, 0.010, 0.030];
   const fingerLengths = [0.090, 0.110, 0.100, 0.080];
   fingerOffsets.forEach((fx, i) => {
     const fLen = fingerLengths[i];
-    const finger = cyl(0.011, 0.009, fLen, C.skin, [fx, -0.06 - fLen / 2, 0.01], rightHandGroup, false, 12);
+    const finger = cyl(0.011, 0.009, fLen, C.skin, [fx, -0.06 - fLen / 2, 0.02], rightHandGroup, false, 12);
     finger.rotation.x = 0.18;
-    ball(0.009, C.skin, [1, 1, 1], [fx, -0.06 - fLen, 0.01 + Math.sin(0.18) * fLen], rightHandGroup, 12);
+    ball(0.009, C.skin, [1, 1, 1], [fx, -0.06 - fLen, 0.02 + Math.sin(0.18) * fLen], rightHandGroup, 12);
   });
-  const rightThumb = cyl(0.012, 0.010, 0.070, C.skin, [-0.046, -0.035, 0.025], rightHandGroup, false, 12);
+  const rightThumb = cyl(0.012, 0.010, 0.070, C.skin, [-0.046, -0.035, 0.035], rightHandGroup, false, 12);
   rightThumb.rotation.set(0.30, 0, 0.60);
 
   // --- B. LENGAN KIRI: POISE ANGGUN DI SAMPING PINGGUL (SEIMBANG & RAPI) ---
   const leftShoulder = new T.Group();
-  leftShoulder.position.set(-0.48, 0.22, 0.02);
+  leftShoulder.position.set(-0.66, 0.25, 0.0);
   torso.add(leftShoulder);
 
-  ball(0.15, C.porcelain, [1.0, 0.95, 1.0], [0, 0, 0], leftShoulder, 32);
-  cyl(0.105, 0.105, 0.03, C.gold, [0, -0.07, 0], leftShoulder, false, 24);
+  ball(0.16, C.porcelain, [1.05, 0.95, 1.0], [0, 0, 0], leftShoulder, 32);
+  cyl(0.108, 0.108, 0.035, C.gold, [0, -0.08, 0], leftShoulder, false, 24);
 
   // Lengan Atas Kiri
   const leftUpperArmGroup = new T.Group();
-  leftUpperArmGroup.position.set(0, -0.06, 0);
-  leftUpperArmGroup.rotation.set(0.12, 0.08, 0.20);
+  leftUpperArmGroup.position.set(0, -0.07, 0);
+  leftUpperArmGroup.rotation.set(0.10, 0.05, 0.16);
   leftShoulder.add(leftUpperArmGroup);
 
-  cyl(0.098, 0.088, 0.30, C.porcelain, [0, -0.15, 0], leftUpperArmGroup, false, 24);
+  cyl(0.10, 0.088, 0.32, C.porcelain, [0, -0.16, 0], leftUpperArmGroup, false, 28);
 
   // Siku Emas Kiri
-  ball(0.082, C.gold, [1, 1, 1], [0, -0.30, 0.02], leftUpperArmGroup, 24);
+  ball(0.082, C.gold, [1, 1, 1], [0, -0.32, 0.02], leftUpperArmGroup, 24);
 
   // Grup Lengan Bawah Kiri (Santun di samping pinggul)
   const leftForearmGroup = new T.Group();
-  leftForearmGroup.position.set(0, -0.30, 0.02);
-  leftForearmGroup.rotation.set(0.35, 0.20, 0.22);
+  leftForearmGroup.position.set(0, -0.32, 0.02);
+  leftForearmGroup.rotation.set(0.40, 0.15, 0.18);
   leftUpperArmGroup.add(leftForearmGroup);
 
-  cyl(0.085, 0.072, 0.28, C.porcelain, [0, -0.14, 0], leftForearmGroup, false, 24);
-  cyl(0.074, 0.074, 0.03, C.gold, [0, -0.28, 0], leftForearmGroup, false, 24);
+  cyl(0.085, 0.072, 0.28, C.porcelain, [0, -0.14, 0], leftForearmGroup, false, 28);
+  cyl(0.074, 0.074, 0.035, C.gold, [0, -0.28, 0], leftForearmGroup, false, 24);
 
   // Telapak Tangan Kiri di Pinggang
   const leftHandGroup = new T.Group();
-  leftHandGroup.position.set(0, -0.31, 0);
+  leftHandGroup.position.set(0, -0.30, 0);
   leftForearmGroup.add(leftHandGroup);
 
-  ball(0.072, C.skin, [1.0, 0.42, 1.15], [0, -0.04, 0.01], leftHandGroup, 24).rotation.set(0.20, 0.15, 0);
+  ball(0.075, C.skin, [1.0, 0.42, 1.15], [0, -0.04, 0.02], leftHandGroup, 24).rotation.set(0.20, 0.15, 0);
 
   fingerOffsets.forEach((fx, i) => {
     const fLen = fingerLengths[i] * 0.88;
-    const finger = cyl(0.011, 0.009, fLen, C.skin, [fx, -0.05 - fLen / 2, 0.01], leftHandGroup, false, 12);
+    const finger = cyl(0.011, 0.009, fLen, C.skin, [fx, -0.05 - fLen / 2, 0.02], leftHandGroup, false, 12);
     finger.rotation.x = 0.22;
-    ball(0.009, C.skin, [1, 1, 1], [fx, -0.05 - fLen, 0.01 + Math.sin(0.22) * fLen], leftHandGroup, 12);
+    ball(0.009, C.skin, [1, 1, 1], [fx, -0.05 - fLen, 0.02 + Math.sin(0.22) * fLen], leftHandGroup, 12);
   });
-  const leftThumb = cyl(0.012, 0.010, 0.065, C.skin, [0.044, -0.030, 0.025], leftHandGroup, false, 12);
+  const leftThumb = cyl(0.012, 0.010, 0.065, C.skin, [0.044, -0.030, 0.035], leftHandGroup, false, 12);
   leftThumb.rotation.set(0.30, 0, -0.60);
 
   /* ================= 4. ROK HOVER & CHASSIS LEVITASI ELEGAN ================= */
@@ -795,15 +795,15 @@ function animate(ms) {
   // 8. Gerakan Tangan Menyambut Ramah ("Salam Santun PLN ners")
   const isWaving = (typeof waveUntil !== 'undefined') ? (isSpeaking || ms < waveUntil) : isSpeaking;
   if (R.rightForearmGroup) {
-    const targetWaveZ = isWaving ? (-0.28 + Math.sin(t * 5.0) * 0.18) : -0.28;
-    const targetWaveX = isWaving ? (0.85 + Math.sin(t * 3.5) * 0.08) : 0.85;
+    const targetWaveZ = isWaving ? (-0.22 + Math.sin(t * 5.0) * 0.16) : -0.22;
+    const targetWaveX = isWaving ? (0.80 + Math.sin(t * 3.5) * 0.08) : 0.80;
     R.rightForearmGroup.rotation.z += (targetWaveZ - R.rightForearmGroup.rotation.z) * 0.12;
     R.rightForearmGroup.rotation.x += (targetWaveX - R.rightForearmGroup.rotation.x) * 0.12;
   }
 
   // Ayunan halus lengan kiri (breathing motion)
   if (R.leftForearmGroup) {
-    R.leftForearmGroup.rotation.z = 0.22 + Math.sin(t * 1.8) * 0.02;
+    R.leftForearmGroup.rotation.z = 0.18 + Math.sin(t * 1.8) * 0.02;
   }
 
   // 9. Kedipan Mata Cerdas & Lembut (Natural Blink)

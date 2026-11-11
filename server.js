@@ -295,7 +295,10 @@ const server = http.createServer((req, res) => {
   let reqPath = decodeURIComponent(pathname);
   if (reqPath === '/' || reqPath === '') reqPath = '/index.html';
 
-  const filePath = path.join(ROOT, reqPath);
+  let filePath = path.join(ROOT, 'public', reqPath);
+  if (!fs.existsSync(filePath)) {
+    filePath = path.join(ROOT, reqPath);
+  }
 
   // Security check
   if (!filePath.startsWith(ROOT)) {

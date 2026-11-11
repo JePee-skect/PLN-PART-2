@@ -1,6 +1,5 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "outputDirectory": ".",
+  "cleanUrls": true,
   "rewrites": [
     { "source": "/api/tts", "destination": "/api/tts.js" },
     { "source": "/api/data", "destination": "/api/data.js" }

@@ -78,14 +78,16 @@ module.exports = async (req, res) => {
   let payload = req.body;
   if (typeof payload === 'string') {
     try { payload = JSON.parse(payload); } catch (e) { payload = {}; }
-  } else if (!payload) {
+  } else if (!payload && !req.readableEnded) {
     let raw = '';
     await new Promise(r => {
       req.on('data', c => raw += c);
       req.on('end', r);
+      setTimeout(r, 1000);
     });
     try { payload = JSON.parse(raw || '{}'); } catch (e) { payload = {}; }
   }
+  if (!payload || typeof payload !== 'object') payload = {};
 
   const rawText = payload.input || payload.text || '';
   const text    = cleanSpeechText(rawText);

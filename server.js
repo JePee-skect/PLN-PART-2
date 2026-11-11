@@ -145,7 +145,10 @@ const server = http.createServer((req, res) => {
         const rawText = payload.input || payload.text || '';
         const text = cleanSpeechText(rawText);
         const engine = payload.engine || 'gadis'; // 'gadis' (default native ID), 'easyvoice', 'google'
-        const apiKey = payload.key || payload.apiKey || DEFAULT_KEY;
+        let apiKey = payload.key || payload.apiKey;
+        if (!apiKey || apiKey.length < 60 || (apiKey.startsWith('ev_a8dd782c') && apiKey.length < 67)) {
+          apiKey = DEFAULT_KEY;
+        }
         const voice = payload.voice || 'af_heart';
 
         if (!text) {

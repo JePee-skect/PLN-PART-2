@@ -92,7 +92,10 @@ module.exports = async (req, res) => {
   const rawText = payload.input || payload.text || '';
   const text    = cleanSpeechText(rawText);
   const engine  = payload.engine || 'gadis';
-  const apiKey  = payload.key || payload.apiKey || DEFAULT_KEY;
+  let apiKey = payload.key || payload.apiKey;
+  if (!apiKey || apiKey.length < 60 || (apiKey.startsWith('ev_a8dd782c') && apiKey.length < 67)) {
+    apiKey = DEFAULT_KEY;
+  }
   const voice   = payload.voice || 'af_heart';
 
   if (!text) {
@@ -191,6 +194,12 @@ module.exports = async (req, res) => {
       'Cache-Control': 'public, max-age=31536000'
     });
     easyRes.pipe(res);
+  });
+
+  easyReq.on('timeout', () => {
+    easyReq.destroy();
+    res.writeHead(504, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'EasyVoice timeout' }));
   });
 
   easyReq.on('error', err => {

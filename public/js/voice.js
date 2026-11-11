@@ -65,8 +65,14 @@ function playBuddyChime() {
 }
 
 /* Mode Suara: 'online' (default wanita ID), 'browser', 'easyvoice', atau 'elevenlabs' */
+const OFFICIAL_EASYVOICE_KEY = 'ev_a8dd782ce24e59571a03d3cbda4039cd73c68d9a0013647a9d295a6e7cc87e16';
 let voiceMode      = store.get('vms-voice-mode', 'online');
-let easyVoiceKey   = store.get('vms-ev-key', (typeof DEFAULT_EASYVOICE_KEY !== 'undefined' ? DEFAULT_EASYVOICE_KEY : 'ev_a8dd782ce24e59571a03d3cbda4039cd73c68d9a0013647a9d295a6e7cc87e16'));
+let easyVoiceKey   = store.get('vms-ev-key', OFFICIAL_EASYVOICE_KEY);
+// Auto-heal jika key di localStorage pernah terpotong atau rusak
+if (!easyVoiceKey || easyVoiceKey.length < 60 || (easyVoiceKey.startsWith('ev_a8dd782c') && easyVoiceKey.length < 67)) {
+  easyVoiceKey = OFFICIAL_EASYVOICE_KEY;
+  store.set('vms-ev-key', easyVoiceKey);
+}
 let easyVoiceVoice = store.get('vms-ev-voice', (typeof DEFAULT_EASYVOICE_VOICE !== 'undefined' ? DEFAULT_EASYVOICE_VOICE : 'af_heart'));
 
 let elevenApiKey   = store.get('vms-el-key', '');
@@ -208,6 +214,10 @@ function initVoice() {
   }
 
   // Pengaturan Form EasyVoice AI
+  if (!easyVoiceKey || easyVoiceKey.length < 60 || (easyVoiceKey.startsWith('ev_a8dd782c') && easyVoiceKey.length < 67)) {
+    easyVoiceKey = (typeof OFFICIAL_EASYVOICE_KEY !== 'undefined') ? OFFICIAL_EASYVOICE_KEY : 'ev_a8dd782ce24e59571a03d3cbda4039cd73c68d9a0013647a9d295a6e7cc87e16';
+    store.set('vms-ev-key', easyVoiceKey);
+  }
   if ($('#ev-api-key')) $('#ev-api-key').value = easyVoiceKey;
   if ($('#ev-voice-select')) $('#ev-voice-select').value = easyVoiceVoice;
 
@@ -218,19 +228,19 @@ function initVoice() {
       const selectVoice = $('#ev-voice-select');
       const statusEl = $('#ev-status');
 
-      if (inputKey) easyVoiceKey = inputKey.value.trim();
+      if (inputKey) {
+        let val = inputKey.value.trim();
+        // Otomatis pulihkan jika key terpotong
+        if (!val || val.length < 60 || (val.startsWith('ev_a8dd782c') && val.length < 67)) {
+          val = (typeof OFFICIAL_EASYVOICE_KEY !== 'undefined') ? OFFICIAL_EASYVOICE_KEY : 'ev_a8dd782ce24e59571a03d3cbda4039cd73c68d9a0013647a9d295a6e7cc87e16';
+          inputKey.value = val;
+        }
+        easyVoiceKey = val;
+      }
       if (selectVoice) easyVoiceVoice = selectVoice.value;
 
       store.set('vms-ev-key', easyVoiceKey);
       store.set('vms-ev-voice', easyVoiceVoice);
-
-      if (!easyVoiceKey) {
-        if (statusEl) {
-          statusEl.textContent = '⚠️ Mohon isi API Key EasyVoice Anda.';
-          statusEl.style.color = '#e74c3c';
-        }
-        return;
-      }
 
       if (statusEl) {
         statusEl.textContent = '⏳ Menguji koneksi ke EasyVoice...';
@@ -240,7 +250,7 @@ function initVoice() {
       speakWithEasyVoice('Halo! API Key EasyVoice berhasil disimpan. PLN ners siap menyambut tamu dengan suara AI yang ramah.').then((ok) => {
         if (statusEl) {
           if (ok) {
-            statusEl.textContent = '✅ Berhasil terhubung! Suara AI EasyVoice aktif.';
+            statusEl.textContent = '✅ Berhasil terhubung! Suara AI EasyVoice (Kokoro-82m) aktif.';
             statusEl.style.color = '#2ecc71';
           } else {
             statusEl.textContent = '⚠️ Gagal terhubung ke API EasyVoice. Sistem beralih ke suara browser.';
@@ -254,8 +264,23 @@ function initVoice() {
   const btnTestEasy = $('#btn-test-easyvoice');
   if (btnTestEasy) {
     btnTestEasy.onclick = () => {
+      const statusEl = $('#ev-status');
+      if (statusEl) {
+        statusEl.textContent = '⏳ Menguji pemutaran audio EasyVoice...';
+        statusEl.style.color = 'var(--acc)';
+      }
       stopAllAudio();
-      speakWithEasyVoice('Selamat datang di PT PLN (Persero) Pusharlis. Saya PLN ners, asisten virtual Anda.');
+      speakWithEasyVoice('Selamat datang di PT PLN (Persero) Pusharlis. Saya PLN ners, asisten virtual Anda.').then((ok) => {
+        if (statusEl) {
+          if (ok) {
+            statusEl.textContent = '✅ Suara EasyVoice AI berhasil diputar.';
+            statusEl.style.color = '#2ecc71';
+          } else {
+            statusEl.textContent = '⚠️ Gagal memutar EasyVoice. Menggunakan suara cadangan.';
+            statusEl.style.color = '#f39c12';
+          }
+        }
+      });
     };
   }
 
@@ -682,7 +707,12 @@ async function speakWithGadisTTS(text) {
 /* SINTESIS SUARA EASYVOICE AI (KOKORO-82M) */
 async function speakWithEasyVoice(text) {
   const clean = cleanSpeechText(text);
-  if (!clean || !easyVoiceKey) return false;
+  if (!clean) return false;
+
+  if (!easyVoiceKey || easyVoiceKey.length < 60 || (easyVoiceKey.startsWith('ev_a8dd782c') && easyVoiceKey.length < 67)) {
+    easyVoiceKey = (typeof OFFICIAL_EASYVOICE_KEY !== 'undefined') ? OFFICIAL_EASYVOICE_KEY : 'ev_a8dd782ce24e59571a03d3cbda4039cd73c68d9a0013647a9d295a6e7cc87e16';
+    store.set('vms-ev-key', easyVoiceKey);
+  }
 
   stopAllAudio();
   const mySeq = ++speechSequence;
@@ -696,14 +726,9 @@ async function speakWithEasyVoice(text) {
     return true;
   }
 
-  // Jika web diakses via HTTP/HTTPS (Local Server), gunakan proxy /api/tts (100% Bebas Hambatan CORS!)
-  const isLocalHttp = location.protocol.startsWith('http');
-  const targetUrl   = isLocalHttp ? '/api/tts' : 'https://easyvoice.ae/api/v1/audio/speech';
-
+  // Gunakan proxy backend /api/tts (aman dari batasan CORS dan terlindungi enkripsi)
+  const targetUrl = '/api/tts';
   const reqHeaders = { 'Content-Type': 'application/json' };
-  if (!isLocalHttp) {
-    reqHeaders['Authorization'] = 'Bearer ' + easyVoiceKey;
-  }
 
   const payload = {
     engine: 'easyvoice',

@@ -15,7 +15,7 @@ let audioUnlocked  = false;
 let pendingSpeech  = null;
 const activeUtterances = [];
 
-/* Web Audio API Chime untuk Safety Buddy */
+/* Web Audio API Chime untuk PLN ners */
 let buddyAudioCtx = null;
 function getBuddyAudioContext() {
   try {
@@ -167,7 +167,7 @@ function initVoice() {
   if (btnTestOnline) {
     btnTestOnline.onclick = () => {
       stopAllAudio();
-      speakWithGadisTTS('Selamat datang di PT PLN (Persero) Pusharlis. Saya Safety Buddy, asisten virtual Anda.');
+      speakWithGadisTTS('Selamat datang di PT PLN (Persero) Pusharlis. Saya PLN ners, asisten virtual Anda.');
     };
   }
 
@@ -237,7 +237,7 @@ function initVoice() {
         statusEl.style.color = 'var(--acc)';
       }
 
-      speakWithEasyVoice('Halo! API Key EasyVoice berhasil disimpan. Safety Buddy siap menyambut tamu dengan suara AI yang ramah.').then((ok) => {
+      speakWithEasyVoice('Halo! API Key EasyVoice berhasil disimpan. PLN ners siap menyambut tamu dengan suara AI yang ramah.').then((ok) => {
         if (statusEl) {
           if (ok) {
             statusEl.textContent = '✅ Berhasil terhubung! Suara AI EasyVoice aktif.';
@@ -255,7 +255,7 @@ function initVoice() {
   if (btnTestEasy) {
     btnTestEasy.onclick = () => {
       stopAllAudio();
-      speakWithEasyVoice('Selamat datang di PT PLN (Persero) Pusharlis. Saya Safety Buddy, asisten virtual Anda.');
+      speakWithEasyVoice('Selamat datang di PT PLN (Persero) Pusharlis. Saya PLN ners, asisten virtual Anda.');
     };
   }
 
@@ -490,7 +490,7 @@ function populateVoiceSelect() {
   const tipEl = $('#voice-tip');
   if (tipEl) {
     if (hasFemaleId) {
-      tipEl.innerHTML = '✅ <b>Suara Wanita Indonesia Natural aktif!</b> Safety Buddy siap menyambut tamu dengan ramah.';
+      tipEl.innerHTML = '✅ <b>Suara Wanita Indonesia Natural aktif!</b> PLN ners siap menyambut tamu dengan ramah.';
       tipEl.style.background = 'rgba(46, 204, 113, 0.15)';
       tipEl.style.color = 'var(--text)';
     } else {

@@ -80,7 +80,7 @@ const FAQ = [
   ],
   [
     /halo|hai|selamat|pagi|siang|sore|malam/,
-    'Selamat datang di PT PLN (Persero) Pusharlis. Saya Safety Buddy, asisten virtual Anda. Apakah ada yang dapat saya bantu terkait pendaftaran kunjungan Bapak dan Ibu?'
+    'Selamat datang di PT PLN (Persero) Pusharlis. Saya PLN ners, asisten virtual Anda. Apakah ada yang dapat saya bantu terkait pendaftaran kunjungan Bapak dan Ibu?'
   ],
   [
     /mulai|panduan|bimbingan|bantu/,
@@ -212,7 +212,7 @@ function addMsg(text, cls) {
   if (cls === 'b') {
     d.innerHTML = `
       <div class="msg-sender">
-        <span class="msg-bot-name">Safety Buddy</span>
+        <span class="msg-bot-name">PLN ners</span>
       </div>
       <div class="msg-content">${esc(text)}</div>
     `;
@@ -240,7 +240,7 @@ function showBubble(text) {
   if (!b) return;
   b.innerHTML = `
     <div class="bub-brand">
-      <span>Safety Buddy • PLN Pusharlis</span>
+      <span>PLN ners • PLN Pusharlis</span>
     </div>
     <div class="bub-text">${esc(text)}</div>
   `;
@@ -257,9 +257,9 @@ function botHello(page, force = false) {
   greeted[key] = true;
 
   if (page === 'registrasi') {
-    say('Selamat datang di PT PLN (Persero) Pusharlis. Saya Safety Buddy, asisten virtual Anda. Dengan senang hati, saya siap memandu Bapak dan Ibu dalam proses pengisian formulir registrasi kunjungan. Silakan tekan tombol Mulai Panduan untuk bimbingan langkah demi langkah.');
+    say('Selamat datang di PT PLN (Persero) Pusharlis. Saya PLN ners, asisten virtual Anda. Dengan senang hati, saya siap memandu Bapak dan Ibu dalam proses pengisian formulir registrasi kunjungan. Silakan tekan tombol Mulai Panduan untuk bimbingan langkah demi langkah.');
   } else {
-    say('Selamat datang, Bapak dan Ibu Petugas. Saya Safety Buddy. Anda dapat memantau data tamu, melakukan check in dan check out, serta mengunduh laporan ke Excel.');
+    say('Selamat datang, Bapak dan Ibu Petugas. Saya PLN ners. Anda dapat memantau data tamu, melakukan check in dan check out, serta mengunduh laporan ke Excel.');
   }
 }
 

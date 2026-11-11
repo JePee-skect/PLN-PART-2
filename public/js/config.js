@@ -58,26 +58,66 @@ const ADMIN_CREDENTIALS = {
 const DEFAULT_EASYVOICE_KEY = 'ev_a8dd782ce24e59571a03d3cbda4039cd73c68d9a0013647a9d295a6e7cc87e16';
 const DEFAULT_EASYVOICE_VOICE = 'af_heart';
 
-// Sinkronisasi Data Pengunjung Realtime dari Local Server
-if (location.protocol.startsWith('http')) {
-  fetch('/api/data')
-    .then(r => r.json())
-    .then(res => {
-      if (res && Array.isArray(res.data) && res.data.length > 0) {
-        data = res.data;
-        store.set('vms-data', data);
-        if (typeof renderTable === 'function') renderTable();
-      }
-    })
-    .catch(() => {});
+// Sinkronisasi Data Pengunjung Real-time Lintas Perangkat (Cloud Database)
+async function fetchVisitorsFromServer() {
+  if (!location.protocol.startsWith('http')) return;
+  try {
+    const res = await fetch('/api/data');
+    if (!res.ok) return;
+    const json = await res.json();
+    if (json && Array.isArray(json.data)) {
+      const map = new Map();
+      (data || []).forEach(r => {
+        if (r && (r.id || r.nama)) {
+          const k = String(r.id || `${r.tgl}_${r.ktp}_${r.nama}`);
+          map.set(k, r);
+        }
+      });
+      json.data.forEach(r => {
+        if (r && (r.id || r.nama)) {
+          const k = String(r.id || `${r.tgl}_${r.ktp}_${r.nama}`);
+          if (map.has(k)) {
+            map.set(k, { ...map.get(k), ...r });
+          } else {
+            map.set(k, r);
+          }
+        }
+      });
+      data = Array.from(map.values()).sort((a, b) => {
+        const tA = Number(String(a.id || '').split('-')[0]) || (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+        const tB = Number(String(b.id || '').split('-')[0]) || (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+        return tB - tA;
+      });
+      store.set('vms-data', data);
+      if (typeof renderTable === 'function') renderTable();
+    }
+  } catch (e) {
+    // Abaikan error koneksi
+  }
 }
 
-function syncDataToServer() {
-  if (location.protocol.startsWith('http')) {
-    fetch('/api/data', {
+async function syncDataToServer(payload = data) {
+  if (!location.protocol.startsWith('http')) return;
+  try {
+    const res = await fetch('/api/data', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    }).catch(() => {});
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) return;
+    const json = await res.json();
+    if (json && Array.isArray(json.data)) {
+      data = json.data;
+      store.set('vms-data', data);
+      if (typeof renderTable === 'function') renderTable();
+    }
+    return json;
+  } catch (e) {
+    // Abaikan jika offline
   }
+}
+
+// Inisialisasi pengambilan data server pertama kali saat halaman dimuat
+if (location.protocol.startsWith('http')) {
+  fetchVisitorsFromServer();
 }

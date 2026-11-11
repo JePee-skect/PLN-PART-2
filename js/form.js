@@ -351,12 +351,14 @@ function handleSubmit() {
   }
 
   showConfirm(apd, noApd, () => {
+    const uniqueId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const rec = {
-      id:     Date.now(),
-      tgl:    ymd(),
-      apd:    noApd ? 'Tidak memakai APD' : apd.join(', '),
-      foto:   photo,
-      status: 'Menunggu'
+      id:        uniqueId,
+      tgl:       ymd(),
+      apd:       noApd ? 'Tidak memakai APD' : apd.join(', '),
+      foto:      photo,
+      status:    'Menunggu',
+      createdAt: new Date().toISOString()
     };
 
     FIELDS.forEach((id) => {
@@ -365,7 +367,7 @@ function handleSubmit() {
 
     data.unshift(rec);
     store.set('vms-data', data);
-    if (typeof syncDataToServer === 'function') syncDataToServer();
+    if (typeof syncDataToServer === 'function') syncDataToServer(rec);
 
     $('#f').reset();
     photo = '';

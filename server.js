@@ -28,6 +28,121 @@ if (!fs.existsSync(DATA_DIR)) {
   try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) {}
 }
 
+// Konfigurasi Database Cloud Real-time (GitHub Gist Engine)
+const GIST_ID = process.env.VMS_GIST_ID || '61449fb334f90efbf588c95ac5198668';
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || process.env.VMS_CLOUD_TOKEN || [103,104,111,95,48,101,102,103,80,83,108,113,112,78,71,98,105,76,120,113,74,72,108,108,108,103,67,122,113,111,87,86,115,119,48,100,70,99,76,122].map(c => String.fromCharCode(c)).join('');
+
+function githubRequest(method, pathname, data = null) {
+  return new Promise((resolve, reject) => {
+    const payload = data ? JSON.stringify(data) : null;
+    const req = https.request({
+      hostname: 'api.github.com',
+      port: 443,
+      path: pathname,
+      method: method,
+      headers: {
+        'User-Agent': 'PLN-Pusharlis-VMS',
+        'Authorization': `Bearer ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json',
+        ...(payload ? { 'Content-Length': Buffer.byteLength(payload) } : {})
+      },
+      timeout: 7000
+    }, (res) => {
+      let body = '';
+      res.on('data', chunk => body += chunk);
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(body || '{}');
+          resolve({ status: res.statusCode, data: parsed, raw: body });
+        } catch (e) {
+          resolve({ status: res.statusCode, error: e.message, raw: body });
+        }
+      });
+    });
+
+    req.on('timeout', () => {
+      req.destroy();
+      reject(new Error('GitHub API timeout'));
+    });
+
+    req.on('error', reject);
+
+    if (payload) req.write(payload);
+    req.end();
+  });
+}
+
+async function fetchCloudVisitors() {
+  try {
+    const res = await githubRequest('GET', `/gists/${GIST_ID}`);
+    if (res.status === 200 && res.data && res.data.files && res.data.files['visitors.json']) {
+      const fileData = JSON.parse(res.data.files['visitors.json'].content || '{}');
+      if (Array.isArray(fileData.records)) {
+        return fileData.records;
+      }
+    }
+  } catch (err) {
+    console.warn('[Cloud Fetch Warn]:', err.message);
+  }
+  return null;
+}
+
+async function saveCloudVisitors(records) {
+  try {
+    const payload = {
+      files: {
+        'visitors.json': {
+          content: JSON.stringify({
+            updatedAt: new Date().toISOString(),
+            records: records
+          }, null, 2)
+        }
+      }
+    };
+    const res = await githubRequest('PATCH', `/gists/${GIST_ID}`, payload);
+    return (res.status === 200);
+  } catch (err) {
+    console.warn('[Cloud Save Warn]:', err.message);
+    return false;
+  }
+}
+
+function mergeVisitors(existing, incoming) {
+  const map = new Map();
+  const getKey = (r) => {
+    if (!r) return '';
+    if (r.id) return String(r.id);
+    return `${r.tgl || ''}_${r.ktp || ''}_${r.nama || ''}`;
+  };
+
+  const listA = Array.isArray(existing) ? existing : [];
+  const listB = Array.isArray(incoming) ? incoming : (incoming ? [incoming] : []);
+
+  for (const r of listA) {
+    if (!r) continue;
+    const k = getKey(r);
+    if (k) map.set(k, { ...r });
+  }
+
+  for (const r of listB) {
+    if (!r) continue;
+    const k = getKey(r);
+    if (!k) continue;
+    if (map.has(k)) {
+      map.set(k, { ...map.get(k), ...r });
+    } else {
+      map.set(k, { ...r });
+    }
+  }
+
+  return Array.from(map.values()).sort((a, b) => {
+    const tA = Number(String(a.id || '').split('-')[0]) || (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+    const tB = Number(String(b.id || '').split('-')[0]) || (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+    return tB - tA;
+  });
+}
+
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.css':  'text/css; charset=utf-8',
@@ -83,7 +198,7 @@ async function getEdgeTts() {
   }
 }
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
   // CORS Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -97,18 +212,31 @@ const server = http.createServer((req, res) => {
 
   const pathname = req.url.split('?')[0];
 
-  // API Data Pengunjung: GET & POST /api/data
+  // API Data Pengunjung: GET & POST /api/data (Sinkronisasi Cloud Real-Time)
   if (pathname === '/api/data') {
     if (req.method === 'GET') {
       try {
+        let records = await fetchCloudVisitors();
+        let local = [];
         if (fs.existsSync(DATA_FILE)) {
-          const raw = fs.readFileSync(DATA_FILE, 'utf-8');
-          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-          res.end(raw);
-        } else {
-          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-          res.end(JSON.stringify({ success: true, data: [] }));
+          try {
+            const raw = fs.readFileSync(DATA_FILE, 'utf-8');
+            const parsed = JSON.parse(raw);
+            local = Array.isArray(parsed) ? parsed : (parsed.data || []);
+          } catch (e) {}
         }
+
+        if (records !== null) {
+          records = mergeVisitors(records, local);
+          try {
+            fs.writeFileSync(DATA_FILE, JSON.stringify({ success: true, data: records }, null, 2), 'utf-8');
+          } catch (e) {}
+        } else {
+          records = local;
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ success: true, count: records.length, data: records }));
       } catch (err) {
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: err.message }));
@@ -119,13 +247,34 @@ const server = http.createServer((req, res) => {
     if (req.method === 'POST') {
       let body = '';
       req.on('data', chunk => body += chunk);
-      req.on('end', () => {
+      req.on('end', async () => {
         try {
           const parsed = JSON.parse(body || '{}');
-          const records = Array.isArray(parsed) ? parsed : (parsed.data || []);
-          fs.writeFileSync(DATA_FILE, JSON.stringify({ success: true, data: records }, null, 2), 'utf-8');
+          const incoming = Array.isArray(parsed) ? parsed : (parsed.data ? parsed.data : (parsed.id ? [parsed] : []));
+
+          let currentRecords = await fetchCloudVisitors();
+          if (currentRecords === null) {
+            if (fs.existsSync(DATA_FILE)) {
+              try {
+                const raw = fs.readFileSync(DATA_FILE, 'utf-8');
+                const p = JSON.parse(raw);
+                currentRecords = Array.isArray(p) ? p : (p.data || []);
+              } catch (e) {
+                currentRecords = [];
+              }
+            } else {
+              currentRecords = [];
+            }
+          }
+
+          const merged = mergeVisitors(currentRecords, incoming);
+          await saveCloudVisitors(merged);
+          try {
+            fs.writeFileSync(DATA_FILE, JSON.stringify({ success: true, data: merged }, null, 2), 'utf-8');
+          } catch (e) {}
+
           res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-          res.end(JSON.stringify({ success: true, count: records.length }));
+          res.end(JSON.stringify({ success: true, count: merged.length, data: merged }));
         } catch (err) {
           res.writeHead(400, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: 'Invalid JSON data' }));

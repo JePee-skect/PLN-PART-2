@@ -8,6 +8,19 @@ function initDashboard() {
     $('#d1').value = $('#d2').value = ymd();
   }
 
+  // Sinkronisasi data awal & polling otomatis per 5 detik untuk admin dashboard
+  if (typeof fetchVisitorsFromServer === 'function') {
+    fetchVisitorsFromServer();
+    if (!window._vmsDashPoll) {
+      window._vmsDashPoll = setInterval(() => {
+        const dash = $('#dashboard');
+        if (dash && !dash.classList.contains('hide')) {
+          fetchVisitorsFromServer();
+        }
+      }, 5000);
+    }
+  }
+
   ['d1', 'd2', 'q'].forEach((id) => {
     const el = $('#' + id);
     if (el) el.oninput = renderTable;
@@ -19,7 +32,7 @@ function initDashboard() {
       const id = e.target.dataset.id;
       if (!id) return;
 
-      const r = data.find((x) => x.id == id);
+      const r = data.find((x) => String(x.id) === String(id));
       if (!r) return;
 
       if (r.status === 'Menunggu') {
@@ -31,7 +44,7 @@ function initDashboard() {
       }
 
       store.set('vms-data', data);
-      if (typeof syncDataToServer === 'function') syncDataToServer();
+      if (typeof syncDataToServer === 'function') syncDataToServer(r);
       renderTable();
 
       const msg = (r.status === 'Check In')

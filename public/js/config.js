@@ -45,7 +45,7 @@ let data  = store.get('vms-data', []);
 let photo = '';
 
 const ROLE_PAGES = ['dashboard', 'registrasi'];
-const APD_LIST = ['Safety Helmet', 'Safety Shoes', 'Seragam Kerja'];
+const APD_LIST = ['Safety Helmet', 'Safety Shoes', 'Rompi Reflektif', 'Seragam Kerja'];
 const PHOTO_PLACEHOLDER = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 168 233\'%3E%3Crect width=\'168\' height=\'233\' fill=\'%23bdbdbd\'/%3E%3Ccircle cx=\'84\' cy=\'70\' r=\'34\' fill=\'%238a8a8a\'/%3E%3Cpath d=\'M20 170c0-45 30-60 64-60s64 15 64 60z\' fill=\'%238a8a8a\'/%3E%3Ctext x=\'84\' y=\'195\' font-size=\'22\' fill=\'%23f2f2f2\' text-anchor=\'middle\' font-family=\'sans-serif\'%3ENo Image%3C/text%3E%3Ctext x=\'84\' y=\'220\' font-size=\'22\' fill=\'%23f2f2f2\' text-anchor=\'middle\' font-family=\'sans-serif\'%3EAvailable%3C/text%3E%3C/svg%3E';
 
 // Kredensial Resmi Admin (Tersimpan aman di logika internal)

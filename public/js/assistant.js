@@ -48,15 +48,15 @@ const FAQ = [
   ],
   [
     /k3|keselamatan|safety/,
-    'K3LH adalah Keselamatan, Kesehatan Kerja, dan Lingkungan Hidup. Di seluruh area kerja PLN, setiap orang wajib mematuhi protokol K3 dan mengenakan APD: safety helmet, safety shoes, serta seragam kerja yang rapi.'
+    'K3LH adalah Keselamatan, Kesehatan Kerja, dan Lingkungan Hidup. Di seluruh area kerja PLN Pusharlis, setiap orang wajib mematuhi protokol K3 dan mengenakan APD: safety helmet, rompi reflektif, safety shoes, serta kartu tanda pengenal.'
   ],
   [
     /ktp|identitas|sim|paspor|nik/,
     'Isi 16 digit angka NIK KTP Anda. Bila tidak membawa KTP fisik, Anda dapat memasukkan nomor SIM 12 digit atau nomor paspor.'
   ],
   [
-    /apd|helm|sepatu|seragam/,
-    'Centang perlengkapan APD yang Anda gunakan saat ini: safety helmet, safety shoes, dan seragam kerja.'
+    /apd|helm|rompi|sepatu|seragam/,
+    'Centang perlengkapan APD yang Anda gunakan: safety helmet, safety shoes, rompi reflektif, atau seragam kerja.'
   ],
   [
     /kendaraan|polisi|plat|nopol|motor|mobil/,

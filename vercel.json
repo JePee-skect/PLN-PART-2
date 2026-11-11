@@ -1,7 +1,6 @@
 {
-  "version": 2,
   "rewrites": [
-    { "source": "/api/tts", "destination": "/api/tts" },
-    { "source": "/api/data", "destination": "/api/data" }
+    { "source": "/api/tts", "destination": "/api/tts.js" },
+    { "source": "/api/data", "destination": "/api/data.js" }
   ]
 }

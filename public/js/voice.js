@@ -516,6 +516,23 @@ function updateVoiceTabs() {
   if ($('#sec-vbrowser'))   $('#sec-vbrowser').classList.toggle('hide', !isBrowser);
   if ($('#sec-veasyvoice')) $('#sec-veasyvoice').classList.toggle('hide', !isEasy);
   if ($('#sec-veleven'))    $('#sec-veleven').classList.toggle('hide', !isEleven);
+
+  const badge = $('#admin-voice-badge');
+  if (badge) {
+    if (isOnline) {
+      badge.textContent = 'Aktif: 🌟 Gadis Neural (Studio 96kbps)';
+      badge.style.background = '#27ae60';
+    } else if (isBrowser) {
+      badge.textContent = 'Aktif: 🔊 Browser WebSpeech';
+      badge.style.background = '#2980b9';
+    } else if (isEasy) {
+      badge.textContent = 'Aktif: ✨ EasyVoice AI';
+      badge.style.background = '#e67e22';
+    } else if (isEleven) {
+      badge.textContent = 'Aktif: 🎙️ ElevenLabs AI';
+      badge.style.background = '#8e44ad';
+    }
+  }
 }
 
 /* SINTESIS SUARA ONLINE WANITA INDONESIA (DIRECT STREAMING - BEBAS CORS) */
@@ -611,7 +628,7 @@ async function speakWithGadisTTS(text) {
   const mySeq = ++speechSequence;
   playBuddyChime();
 
-  const cacheKey = 'gadis_formal_v2_' + clean;
+  const cacheKey = 'gadis_v4_studio_' + clean;
   if (audioCache.has(cacheKey)) {
     if (mySeq === speechSequence) {
       playCachedAudio(audioCache.get(cacheKey));
@@ -867,15 +884,14 @@ function speakWithBrowser(text) {
     const isFemale = voice && /gadis|siti|reza|hana|yasmin|female|wanita|zira/i.test(voice.name);
 
     if (isFemale) {
-      u.pitch = 0.98; // Pitch lembut, teduh & dewasa (tidak cempreng)
-      u.rate  = userVoiceRate * 0.92; // Tempo lebih tenang, sopan & anggun
+      u.pitch = 1.0; // Artikulasi jernih & cerah
+      u.rate  = userVoiceRate * 0.98; // Tempo bicara natural & jelas
     } else if (isMale) {
-      // Jika terpaksa suara pria, naikkan pitch ke 1.24 agar terdengar lebih ramah
-      u.pitch = 1.24;
-      u.rate  = userVoiceRate * 0.94;
+      u.pitch = 1.15;
+      u.rate  = userVoiceRate * 0.96;
     } else {
       u.pitch = 1.0;
-      u.rate  = userVoiceRate * 0.92;
+      u.rate  = userVoiceRate * 0.98;
     }
 
     u.volume = 1.0;

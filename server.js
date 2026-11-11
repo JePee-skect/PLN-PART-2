@@ -73,7 +73,7 @@ async function getEdgeTts() {
   try {
     if (!edgeTtsClient) {
       edgeTtsClient = new MsEdgeTTS();
-      await edgeTtsClient.setMetadata('id-ID-GadisNeural', OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+      await edgeTtsClient.setMetadata('id-ID-GadisNeural', OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3);
     }
     return edgeTtsClient;
   } catch (err) {
@@ -155,7 +155,7 @@ const server = http.createServer((req, res) => {
         }
 
         // 1. Cek Disk Cache Lokal
-        const cachePrefix = (engine === 'easyvoice') ? `ev_${voice}` : 'gadis_formal_v2';
+        const cachePrefix = (engine === 'easyvoice') ? `ev_${voice}` : 'gadis_v4_studio';
         const hash = crypto.createHash('md5').update(cachePrefix + '_' + text).digest('hex');
         const cacheFile = path.join(CACHE_DIR, `${hash}.mp3`);
 
@@ -174,14 +174,13 @@ const server = http.createServer((req, res) => {
           }
         }
 
-        // 2A. OPSI DEFAULT & TERBAIK: Microsoft Gadis Neural (Format Formal, Lembut, & Santun)
+        // 2A. OPSI DEFAULT & TERBAIK: Microsoft Gadis Neural (Format Jernih, Studio 96kbps, Natural & Santun)
         if (engine !== 'easyvoice') {
           try {
-            console.log(`[TTS Gadis Formal] Menghasilkan suara wanita formal & lembut untuk: "${text.slice(0, 35)}..."`);
+            console.log(`[TTS Gadis Studio] Menghasilkan suara wanita formal, jernih & santun (96kbps): "${text.slice(0, 35)}..."`);
             const tts = await getEdgeTts();
             if (tts) {
-              // Rate -7% (lebih tenang & anggun), Pitch -2Hz (lebih hangat & lembut)
-              const { audioStream } = tts.toStream(text, { rate: '-7%', pitch: '-2Hz' });
+              const { audioStream } = tts.toStream(text, { rate: '+0%', pitch: '+0Hz' });
               const tempFile = `${cacheFile}.tmp`;
               const fileStream = fs.createWriteStream(tempFile);
               let totalBytes = 0;

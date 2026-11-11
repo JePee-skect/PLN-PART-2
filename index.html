@@ -68,6 +68,115 @@
       <div class="stat"><b id="s3">0</b>Check Out Hari Ini</div>
     </div>
 
+    <!-- KONTROL EKSKLUSIF ADMIN: PENGATURAN MESIN SUARA ASISTEN (AI VOICE ENGINE) -->
+    <div class="card" id="admin-voice-card" style="margin-bottom:20px;padding:20px;border-radius:12px;border:1.5px solid var(--acc);background:linear-gradient(135deg, rgba(0,162,185,0.06), rgba(15,39,53,0.04));">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;border-bottom:1px solid var(--line);padding-bottom:10px;">
+        <div>
+          <h2 style="margin:0;font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;">
+            <span>🎙️</span>
+            <span>Pengaturan Mesin Suara Asisten (AI Voice Engine)</span>
+          </h2>
+          <p style="margin:3px 0 0;font-size:12px;color:var(--muted);">Konfigurasi eksklusif Administrator untuk seluruh sistem VMS PLN Pusharlis</p>
+        </div>
+        <span class="badge" id="admin-voice-badge" style="background:#27ae60;color:#fff;font-size:11.5px;padding:5px 12px;border-radius:20px;font-weight:700;">
+          Aktif: 🌟 Gadis Neural (Studio 96kbps)
+        </span>
+      </div>
+
+      <!-- Tab Pilihan Engine Suara -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+        <button type="button" id="tab-vonline" class="btn sm" style="padding:8px 14px;font-size:12px;">🌟 Gadis Neural (Default Resmi PLN)</button>
+        <button type="button" id="tab-vbrowser" class="btn sm ghost" style="padding:8px 14px;font-size:12px;">🔊 Browser Edge / Chrome</button>
+        <button type="button" id="tab-veasyvoice" class="btn sm ghost" style="padding:8px 14px;font-size:12px;">✨ EasyVoice AI</button>
+        <button type="button" id="tab-veleven" class="btn sm ghost" style="padding:8px 14px;font-size:12px;">🎙️ ElevenLabs AI</button>
+      </div>
+
+      <!-- Mode 1: Gadis Neural -->
+      <div id="sec-vonline" style="background:rgba(46,204,113,0.10);border:1px solid rgba(46,204,113,0.3);padding:14px;border-radius:8px;">
+        <div style="font-size:12.5px;line-height:1.5;margin-bottom:12px;color:var(--text);">
+          <b style="color:#27ae60;">✅ Suara Standar Pelayanan Resmi PLN Pusharlis (Studio 96kbps):</b><br>
+          Artikulasi vokal wanita Indonesia asli yang santun, jernih, alami, dan bebas logat asing. Dikonfigurasi dengan pitch dan tempo natural agar setiap instruksi terdengar sangat jelas bagi tamu.
+        </div>
+        <button type="button" class="btn sm" id="btn-test-online" style="padding:9px 18px;font-size:12px;background:#27ae60;">
+          ▶️ Uji Coba Suara Gadis Neural
+        </button>
+      </div>
+
+      <!-- Mode 2: EasyVoice AI Studio -->
+      <div id="sec-veasyvoice" class="hide" style="background:rgba(230,126,34,0.08);border:1px solid rgba(230,126,34,0.25);border-radius:8px;padding:14px;">
+        <div style="background:rgba(230,126,34,0.12);padding:8px 10px;border-radius:6px;margin-bottom:12px;font-size:11.5px;line-height:1.45;">
+          ℹ️ <b>Catatan EasyVoice (Kokoro-82m):</b> Model AI EasyVoice dilatih untuk bahasa Inggris/Jepang sehingga pelafalan Bahasa Indonesia berlogat asing. Disarankan menggunakan <b>🌟 Gadis Neural</b> untuk pelafalan Indonesia resmi PLN.
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px;margin-bottom:12px;">
+          <div>
+            <label for="ev-api-key" style="margin:0 0 4px;font-size:11.5px;font-weight:600;display:block;">EasyVoice API Key:</label>
+            <input type="text" id="ev-api-key" placeholder="ev_..." value="ev_a8dd782ce24e59571a03d3cbda4039cd73c68d9a0013647a9d295a6e7cc87e16" style="padding:8px 10px;font-size:12px;border-radius:6px;font-family:monospace;width:100%;">
+          </div>
+          <div>
+            <label for="ev-voice-select" style="margin:0 0 4px;font-size:11.5px;font-weight:600;display:block;">Karakter Suara (Kokoro AI):</label>
+            <select id="ev-voice-select" style="width:100%;padding:8px 10px;font-size:12px;border-radius:6px;">
+              <option value="af_heart">💖 Heart (Ramah &amp; Hangat - Rekomendasi)</option>
+              <option value="af_bella">🌸 Bella (Lembut &amp; Ceria)</option>
+              <option value="af_sarah">✨ Sarah (Profesional &amp; Jelas)</option>
+              <option value="af_nicole">💫 Nicole (Natural &amp; Elegan)</option>
+              <option value="af_sky">🌟 Sky (Energik &amp; Terang)</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <button type="button" class="btn sm" id="btn-save-easyvoice" style="padding:8px 16px;font-size:12px;">💾 Simpan API Key</button>
+          <button type="button" class="btn sm ghost" id="btn-test-easyvoice" style="padding:8px 16px;font-size:12px;">▶️ Tes Suara</button>
+          <div id="ev-status" style="font-size:12px;font-weight:600;color:#2ecc71;">✅ API Key tersimpan.</div>
+        </div>
+      </div>
+
+      <!-- Mode 3: Browser TTS -->
+      <div id="sec-vbrowser" class="hide" style="background:rgba(27,99,120,0.08);border:1px solid rgba(27,99,120,0.25);border-radius:8px;padding:14px;">
+        <label for="voice-select" style="margin:0 0 4px;font-size:11.5px;font-weight:600;display:block;">Pilih Suara Browser:</label>
+        <select id="voice-select" style="width:100%;max-width:400px;padding:8px 10px;font-size:12px;margin-bottom:12px;border-radius:6px;"></select>
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px;max-width:320px;">
+          <label for="voice-rate" style="margin:0;font-size:11.5px;color:var(--muted);white-space:nowrap;">Kecepatan:</label>
+          <input type="range" id="voice-rate" min="0.8" max="1.2" step="0.05" value="1.0" style="flex:1;">
+          <span id="rate-val" style="font-size:12px;min-width:32px;font-weight:600;">1.0x</span>
+        </div>
+        <button type="button" class="btn sm" id="btn-test-voice" style="padding:8px 16px;font-size:12px;">▶️ Tes Suara Browser</button>
+        <div id="voice-tip" style="margin-top:10px;font-size:11.5px;line-height:1.45;color:var(--muted);background:rgba(27,99,120,0.08);padding:8px 12px;border-radius:6px;">
+          💡 Rekomendasi Browser: Buka di <b>Microsoft Edge</b> untuk suara wanita <b>Microsoft Gadis (Natural)</b>.
+        </div>
+      </div>
+
+      <!-- Mode 4: ElevenLabs Voice Cloning -->
+      <div id="sec-veleven" class="hide" style="background:rgba(155,89,182,0.08);border:1px solid rgba(155,89,182,0.25);border-radius:8px;padding:14px;">
+        <p style="margin:0 0 10px;font-size:11.5px;line-height:1.45;color:var(--muted);">
+          Gunakan API Key dan Voice ID dari akun ElevenLabs untuk integrasi model suara studio khusus.
+        </p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px;margin-bottom:12px;">
+          <div>
+            <label for="el-api-key" style="margin:0 0 4px;font-size:11.5px;font-weight:600;display:block;">ElevenLabs API Key:</label>
+            <input type="password" id="el-api-key" placeholder="sk_..." style="padding:8px 10px;font-size:12px;border-radius:6px;width:100%;">
+          </div>
+          <div>
+            <label for="el-voice-id" style="margin:0 0 4px;font-size:11.5px;font-weight:600;display:block;">Voice ID Kloning:</label>
+            <input type="text" id="el-voice-id" placeholder="Contoh: 21m00Tcm4TlvDq8ikWAM" style="padding:8px 10px;font-size:12px;border-radius:6px;width:100%;">
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <button type="button" class="btn sm" id="btn-save-eleven" style="padding:8px 16px;font-size:12px;">💾 Simpan &amp; Aktifkan</button>
+          <button type="button" class="btn sm ghost" id="btn-test-eleven" style="padding:8px 16px;font-size:12px;">▶️ Tes Bicara</button>
+          <div id="el-status" style="font-size:12px;font-weight:600;"></div>
+        </div>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line);">
+          <div style="font-weight:600;font-size:12px;margin-bottom:4px;">Atau putar rekaman lokal:</div>
+          <p style="margin:0 0 8px;font-size:11px;color:var(--muted);">
+            Memutar file <code>audio/my-voice.mp3</code> langsung tanpa kuota API.
+          </p>
+          <button type="button" class="btn sm" id="btn-play-mp3" style="padding:8px 16px;font-size:12px;background:#27ae60;">
+            ▶️ Putar File Rekaman Suara Saya
+          </button>
+        </div>
+      </div>
+    </div>
+
     <h2>Data Tamu</h2>
     <div class="filters">
       <div>
@@ -262,110 +371,6 @@
         </div>
       </div>
       <button id="spk" title="Nyalakan / Matikan Suara">🔊 Aktif</button>
-      <button id="vcfg" title="Pengaturan Suara">⚙️</button>
-    </div>
-
-    <!-- Drawer Pengaturan Suara -->
-    <div id="voice-settings" class="hide" style="padding:12px;background:var(--input);border-bottom:1px solid var(--line);font-size:12px;max-height:360px;overflow-y:auto;">
-      <div style="font-weight:600;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <img src="img/pln-logo.png" alt="PLN" style="width:18px;height:18px;object-fit:contain;background:#fff;border-radius:3px;padding:1px;box-shadow:0 1px 3px rgba(0,0,0,0.2);">
-          <span>Pengaturan Suara Asisten PLN</span>
-        </div>
-        <button id="vclose" style="background:none;border:0;font-size:14px;cursor:pointer;color:var(--muted);">✕</button>
-      </div>
-
-      <!-- Tab Mode Suara -->
-      <div style="display:flex;gap:4px;margin-bottom:10px;">
-        <button id="tab-vonline" class="btn sm" style="flex:1;padding:6px 2px;font-size:10.5px;">🌟 Gadis Neural (ID Asli)</button>
-        <button id="tab-vbrowser" class="btn sm ghost" style="flex:1;padding:6px 2px;font-size:10.5px;">🔊 Browser Edge</button>
-        <button id="tab-veasyvoice" class="btn sm ghost" style="flex:1;padding:6px 2px;font-size:10.5px;">✨ EasyVoice</button>
-        <button id="tab-veleven" class="btn sm ghost" style="flex:1;padding:6px 2px;font-size:10.5px;">🎙️ ElevenLabs</button>
-      </div>
-
-      <!-- Mode 1: Online TTS Wanita Indonesia (Microsoft Gadis Neural) -->
-      <div id="sec-vonline">
-        <div style="background:rgba(46,204,113,0.12);border:1px solid rgba(46,204,113,0.3);padding:8px;border-radius:6px;margin-bottom:8px;font-size:11px;line-height:1.45;">
-          ✅ <b>Suara Asli Wanita Indonesia (Microsoft Gadis Neural)</b><br>
-          Pelafalan 100% fasih, alami, sopan, dan ramah khas asisten resmi PLN Pusharlis (Bebas logat asing/bule).
-        </div>
-        <button class="btn sm" id="btn-test-online" style="width:100%;padding:7px 10px;font-size:12px;background:#27ae60;">
-          ▶️ Tes Suara Safety Buddy (Gadis Neural)
-        </button>
-      </div>
-
-      <!-- Mode 2: EasyVoice AI Studio -->
-      <div id="sec-veasyvoice" class="hide">
-        <div style="background:rgba(230,126,34,0.12);border:1px solid rgba(230,126,34,0.3);padding:8px;border-radius:6px;margin-bottom:8px;font-size:11px;line-height:1.4;color:var(--text);">
-          ℹ️ <b>Catatan EasyVoice (Kokoro-82m):</b> Model AI EasyVoice dilatih untuk bahasa Inggris/Jepang, sehingga pelafalan Bahasa Indonesia berlogat bule/asing. Untuk pelafalan bahasa Indonesia normal &amp; fasih, disarankan menggunakan tab <b>🌟 Gadis Neural</b>.
-        </div>
-
-        <label style="margin:0 0 4px;font-size:11px;color:var(--muted);">EasyVoice API Key:</label>
-        <input type="text" id="ev-api-key" placeholder="ev_..." value="ev_a8dd782ce24e59571a03d3cbda4039cd73c68d9a0013647a9d295a6e7cc87e16" style="padding:6px;font-size:11px;margin-bottom:6px;border-radius:6px;font-family:monospace;">
-
-        <label style="margin:0 0 4px;font-size:11px;color:var(--muted);">Karakter Suara (Kokoro AI):</label>
-        <select id="ev-voice-select" style="width:100%;padding:6px;font-size:12px;margin-bottom:8px;border-radius:6px;">
-          <option value="af_heart">💖 Heart (Ramah &amp; Hangat - Rekomendasi)</option>
-          <option value="af_bella">🌸 Bella (Lembut &amp; Ceria)</option>
-          <option value="af_sarah">✨ Sarah (Profesional &amp; Jelas)</option>
-          <option value="af_nicole">💫 Nicole (Natural &amp; Elegan)</option>
-          <option value="af_sky">🌟 Sky (Energik &amp; Terang)</option>
-        </select>
-
-        <div style="display:flex;gap:6px;margin-bottom:6px;">
-          <button class="btn sm" id="btn-save-easyvoice" style="flex:1;padding:6px;font-size:11px;">💾 Simpan API Key</button>
-          <button class="btn sm ghost" id="btn-test-easyvoice" style="flex:1;padding:6px;font-size:11px;">▶️ Tes Suara</button>
-        </div>
-        <div id="ev-status" style="font-size:11px;min-height:16px;color:#2ecc71;">✅ API Key tersimpan.</div>
-      </div>
-
-      <!-- Mode 2: Suara Browser TTS (Ardi Natural / Gadis) -->
-      <div id="sec-vbrowser" class="hide">
-        <label style="margin:0 0 4px;font-size:11px;color:var(--muted);">Pilih Suara Browser:</label>
-        <select id="voice-select" style="width:100%;padding:6px;font-size:12px;margin-bottom:8px;border-radius:6px;"></select>
-        
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-          <label style="margin:0;font-size:11px;color:var(--muted);white-space:nowrap;">Kecepatan:</label>
-          <input type="range" id="voice-rate" min="0.8" max="1.2" step="0.05" value="1.0" style="flex:1;">
-          <span id="rate-val" style="font-size:11px;min-width:28px;">1.0x</span>
-        </div>
-        
-        <button class="btn sm" id="btn-test-voice" style="width:100%;padding:6px 10px;font-size:12px;">▶️ Tes Suara Browser</button>
-        
-        <div id="voice-tip" style="margin-top:8px;font-size:11px;line-height:1.4;color:var(--muted);background:rgba(27,99,120,0.08);padding:6px 8px;border-radius:6px;">
-          💡 Buka di <b>Microsoft Edge</b> untuk suara wanita <b>Microsoft Gadis (Natural)</b> yang paling jernih &amp; ramah.
-        </div>
-      </div>
-
-      <!-- Mode 2: ElevenLabs Voice Cloning -->
-      <div id="sec-veleven" class="hide">
-        <p style="margin:0 0 8px;font-size:11px;line-height:1.4;color:var(--muted);">
-          Gunakan API Key dan Voice ID dari akun ElevenLabs tempat Anda mengkloning suara sendiri.
-        </p>
-
-        <label style="margin:0 0 4px;font-size:11px;color:var(--muted);">ElevenLabs API Key:</label>
-        <input type="password" id="el-api-key" placeholder="sk_..." style="padding:6px;font-size:12px;margin-bottom:6px;border-radius:6px;">
-
-        <label style="margin:0 0 4px;font-size:11px;color:var(--muted);">Voice ID Kloning:</label>
-        <input type="text" id="el-voice-id" placeholder="Contoh: 21m00Tcm4TlvDq8ikWAM" style="padding:6px;font-size:12px;margin-bottom:8px;border-radius:6px;">
-
-        <div style="display:flex;gap:6px;margin-bottom:8px;">
-          <button class="btn sm" id="btn-save-eleven" style="flex:1;padding:6px;font-size:11px;">💾 Simpan & Aktifkan</button>
-          <button class="btn sm ghost" id="btn-test-eleven" style="flex:1;padding:6px;font-size:11px;">▶️ Tes Bicara</button>
-        </div>
-
-        <div id="el-status" style="font-size:11px;min-height:16px;"></div>
-
-        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line);">
-          <div style="font-weight:600;font-size:11px;margin-bottom:4px;">Atau putar rekaman lokal:</div>
-          <p style="margin:0 0 6px;font-size:10.5px;color:var(--muted);">
-            Memutar file <code>audio/my-voice.mp3</code> yang Anda unggah tanpa perlu kuota API.
-          </p>
-          <button class="btn sm" id="btn-play-mp3" style="width:100%;padding:7px;font-size:12px;background:#27ae60;">
-            ▶️ Putar File Rekaman Suara Saya
-          </button>
-        </div>
-      </div>
     </div>
 
     <!-- Chat Messages, Quick Chips & Input -->

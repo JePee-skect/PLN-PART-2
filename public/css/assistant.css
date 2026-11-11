@@ -218,9 +218,9 @@
 
 #spk {
   position: absolute;
-  right: 42px;
+  right: 10px;
   top: 10px;
-  padding: 4px 10px;
+  padding: 4px 12px;
   border: 0;
   border-radius: 20px;
   background: #fff3;

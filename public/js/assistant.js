@@ -227,7 +227,8 @@ function say(text) {
   if (typeof stopAllAudio === 'function') {
     stopAllAudio();
   }
-  waveUntil = performance.now() + 2600;
+  // Aktifkan gestur tangan mengarahkan user selama pesan diucapkan
+  waveUntil = performance.now() + Math.max(3800, (text || '').length * 85);
   addMsg(text, 'b');
   if (typeof speak === 'function') speak(text);
   showBubble(text);

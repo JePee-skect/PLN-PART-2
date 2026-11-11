@@ -587,98 +587,116 @@ function createRobot(T) {
   const beltBuckle = cyl(0.07, 0.07, 0.05, C.glow, [0, -0.32, 0.45], torso);
   beltBuckle.rotation.x = Math.PI / 2;
 
-  /* ================= 3. LENGAN & TANGAN NATURAL, PROPORSIONAL & ANGGUN ================= */
-  // --- A. LENGAN KANAN: GESTUR "SALAM SANTUN PLN ners" (MENYAMBUT HANGAT) ---
-  const rightShoulder = new T.Group();
-  rightShoulder.position.set(0.66, 0.25, 0.0);
-  torso.add(rightShoulder);
+  /* ================= 3. LENGAN & TANGAN NATURAL ANATOMIS & SISTEM GERAK PENGARAH ================= */
+  // Fungsi pembuat telapak tangan robotik android yang lentik, anggun & detail
+  function createAndroidHand(side) {
+    const handGroup = new T.Group();
 
-  // Pundak porselen mulus menyatu ke torso
-  ball(0.16, C.porcelain, [1.05, 0.95, 1.0], [0, 0, 0], rightShoulder, 32);
-  cyl(0.108, 0.108, 0.035, C.gold, [0, -0.08, 0], rightShoulder, false, 24);
+    // 1. Telapak Tangan Halus Porselen & Silikon
+    ball(0.058, C.skin, [1.0, 0.82, 0.50], [0, -0.045, 0.012], handGroup, 24);
+    ball(0.052, C.porcelain, [0.95, 0.78, 0.38], [0, -0.042, -0.010], handGroup, 20);
+    ball(0.014, C.glow, [1, 0.6, 0.4], [0, -0.038, -0.022], handGroup, 12); // Indikator LED telapak punggung
 
-  // Lengan Atas Kanan
-  const rightUpperArmGroup = new T.Group();
-  rightUpperArmGroup.position.set(0, -0.07, 0);
-  rightUpperArmGroup.rotation.set(0.12, -0.05, -0.16);
-  rightShoulder.add(rightUpperArmGroup);
+    // 2. Empat Jari Lentik Berartikulasi (Index, Middle, Ring, Pinky)
+    // Sisi dalam (dekat ibu jari) adalah +X untuk tangan kiri (side === -1), dan -X untuk tangan kanan (side === 1)
+    const fingerOffsets = (side === -1)
+      ? [0.022, 0.007, -0.008, -0.022]
+      : [-0.022, -0.007, 0.008, 0.022];
+    const fingerLengths = [0.082, 0.092, 0.080, 0.066];
 
-  cyl(0.10, 0.088, 0.32, C.porcelain, [0, -0.16, 0], rightUpperArmGroup, false, 28);
+    fingerOffsets.forEach((fx, idx) => {
+      const fLen = fingerLengths[idx];
+      const fGroup = new T.Group();
+      fGroup.position.set(fx, -0.078, 0.014);
+      handGroup.add(fGroup);
 
-  // Siku Emas Kanan
-  ball(0.082, C.gold, [1, 1, 1], [0, -0.32, 0.02], rightUpperArmGroup, 24);
+      // Buku jari emas
+      ball(0.0095, C.gold, [1, 1, 1], [0, 0, 0], fGroup, 12);
 
-  // Grup Lengan Bawah Kanan (Aktif melambai saat berbicara)
-  const rightForearmGroup = new T.Group();
-  rightForearmGroup.position.set(0, -0.32, 0.02);
-  rightForearmGroup.rotation.set(0.80, -0.15, -0.22);
-  rightUpperArmGroup.add(rightForearmGroup);
+      // Ruas pertama (proximal)
+      cyl(0.0090, 0.0080, fLen * 0.50, C.skin, [0, -fLen * 0.25, 0.004], fGroup, false, 12);
 
-  cyl(0.085, 0.072, 0.28, C.porcelain, [0, -0.14, 0], rightForearmGroup, false, 28);
-  cyl(0.074, 0.074, 0.035, C.gold, [0, -0.28, 0], rightForearmGroup, false, 24); // Manset emas
+      // Sendi tengah perak
+      ball(0.0078, C.silver, [1, 1, 1], [0, -fLen * 0.50, 0.008], fGroup, 12);
 
-  // Telapak Tangan Kanan Terbuka Menyambut Santun
-  const rightHandGroup = new T.Group();
-  rightHandGroup.position.set(0, -0.30, 0);
-  rightForearmGroup.add(rightHandGroup);
+      // Ruas kedua (distal)
+      cyl(0.0075, 0.0065, fLen * 0.45, C.skin, [0, -fLen * 0.725, 0.013], fGroup, false, 12);
 
-  ball(0.075, C.skin, [1.0, 0.42, 1.15], [0, -0.04, 0.02], rightHandGroup, 24).rotation.set(0.20, -0.15, 0);
+      // Ujung jari halus
+      ball(0.0062, C.skin, [1, 1, 1], [0, -fLen * 0.95, 0.018], fGroup, 12);
+    });
 
-  // Jari-jari feminin lentik menyambut hangat
-  const fingerOffsets = [-0.030, -0.010, 0.010, 0.030];
-  const fingerLengths = [0.090, 0.110, 0.100, 0.080];
-  fingerOffsets.forEach((fx, i) => {
-    const fLen = fingerLengths[i];
-    const finger = cyl(0.011, 0.009, fLen, C.skin, [fx, -0.06 - fLen / 2, 0.02], rightHandGroup, false, 12);
-    finger.rotation.x = 0.18;
-    ball(0.009, C.skin, [1, 1, 1], [fx, -0.06 - fLen, 0.02 + Math.sin(0.18) * fLen], rightHandGroup, 12);
-  });
-  const rightThumb = cyl(0.012, 0.010, 0.070, C.skin, [-0.046, -0.035, 0.035], rightHandGroup, false, 12);
-  rightThumb.rotation.set(0.30, 0, 0.60);
+    // 3. Ibu Jari (Thumb) di Sisi Dalam Menghadap Tubuh
+    const thumbX = (side === -1) ? 0.040 : -0.040;
+    const thumbGroup = new T.Group();
+    thumbGroup.position.set(thumbX, -0.038, 0.018);
+    thumbGroup.rotation.set(-0.25, side * 0.35, side * 0.45);
+    handGroup.add(thumbGroup);
 
-  // --- B. LENGAN KIRI: POISE ANGGUN DI SAMPING PINGGUL (SEIMBANG & RAPI) ---
+    ball(0.011, C.gold, [1, 1, 1], [0, 0, 0], thumbGroup, 12);
+    cyl(0.0095, 0.0080, 0.042, C.skin, [side * -0.012, -0.021, 0.004], thumbGroup, false, 12);
+    ball(0.0080, C.silver, [1, 1, 1], [side * -0.020, -0.042, 0.008], thumbGroup, 12);
+    cyl(0.0078, 0.0065, 0.032, C.skin, [side * -0.026, -0.058, 0.013], thumbGroup, false, 12);
+    ball(0.0065, C.skin, [1, 1, 1], [side * -0.030, -0.074, 0.018], thumbGroup, 12);
+
+    return handGroup;
+  }
+
+  // --- A. LENGAN KIRI (PANDANGAN PENGGUNA: SISI KIRI / MENGARAH KE FORMULIR) ---
   const leftShoulder = new T.Group();
-  leftShoulder.position.set(-0.66, 0.25, 0.0);
+  leftShoulder.position.set(-0.56, 0.22, 0.04);
   torso.add(leftShoulder);
 
-  ball(0.16, C.porcelain, [1.05, 0.95, 1.0], [0, 0, 0], leftShoulder, 32);
-  cyl(0.108, 0.108, 0.035, C.gold, [0, -0.08, 0], leftShoulder, false, 24);
+  ball(0.14, C.porcelain, [1, 1, 1], [0, 0, 0], leftShoulder, 32);
+  cyl(0.092, 0.092, 0.030, C.gold, [0, -0.05, 0], leftShoulder, false, 24);
 
-  // Lengan Atas Kiri
-  const leftUpperArmGroup = new T.Group();
-  leftUpperArmGroup.position.set(0, -0.07, 0);
-  leftUpperArmGroup.rotation.set(0.10, 0.05, 0.16);
-  leftShoulder.add(leftUpperArmGroup);
+  const leftUpperArm = new T.Group();
+  leftUpperArm.position.set(0, -0.05, 0);
+  leftShoulder.add(leftUpperArm);
 
-  cyl(0.10, 0.088, 0.32, C.porcelain, [0, -0.16, 0], leftUpperArmGroup, false, 28);
+  cyl(0.082, 0.072, 0.26, C.porcelain, [0, -0.13, 0], leftUpperArm, false, 28);
+  ball(0.070, C.gold, [1, 1, 1], [0, -0.26, 0.012], leftUpperArm, 24);
+  cyl(0.065, 0.065, 0.020, C.silver, [0, -0.26, 0.012], leftUpperArm, false, 20);
 
-  // Siku Emas Kiri
-  ball(0.082, C.gold, [1, 1, 1], [0, -0.32, 0.02], leftUpperArmGroup, 24);
+  const leftForearm = new T.Group();
+  leftForearm.position.set(0, -0.26, 0.012);
+  leftUpperArm.add(leftForearm);
 
-  // Grup Lengan Bawah Kiri (Santun di samping pinggul)
-  const leftForearmGroup = new T.Group();
-  leftForearmGroup.position.set(0, -0.32, 0.02);
-  leftForearmGroup.rotation.set(0.40, 0.15, 0.18);
-  leftUpperArmGroup.add(leftForearmGroup);
+  cyl(0.070, 0.060, 0.25, C.porcelain, [0, -0.125, 0.008], leftForearm, false, 28);
+  cyl(0.064, 0.064, 0.028, C.gold, [0, -0.24, 0.008], leftForearm, false, 24);
+  ball(0.054, C.silver, [1, 1, 1], [0, -0.25, 0.008], leftForearm, 20);
 
-  cyl(0.085, 0.072, 0.28, C.porcelain, [0, -0.14, 0], leftForearmGroup, false, 28);
-  cyl(0.074, 0.074, 0.035, C.gold, [0, -0.28, 0], leftForearmGroup, false, 24);
+  const leftHand = createAndroidHand(-1);
+  leftHand.position.set(0, -0.25, 0.008);
+  leftForearm.add(leftHand);
 
-  // Telapak Tangan Kiri di Pinggang
-  const leftHandGroup = new T.Group();
-  leftHandGroup.position.set(0, -0.30, 0);
-  leftForearmGroup.add(leftHandGroup);
+  // --- B. LENGAN KANAN (PANDANGAN PENGGUNA: SISI KANAN / POISE SANTUN CONCIERGE) ---
+  const rightShoulder = new T.Group();
+  rightShoulder.position.set(0.56, 0.22, 0.04);
+  torso.add(rightShoulder);
 
-  ball(0.075, C.skin, [1.0, 0.42, 1.15], [0, -0.04, 0.02], leftHandGroup, 24).rotation.set(0.20, 0.15, 0);
+  ball(0.14, C.porcelain, [1, 1, 1], [0, 0, 0], rightShoulder, 32);
+  cyl(0.092, 0.092, 0.030, C.gold, [0, -0.05, 0], rightShoulder, false, 24);
 
-  fingerOffsets.forEach((fx, i) => {
-    const fLen = fingerLengths[i] * 0.88;
-    const finger = cyl(0.011, 0.009, fLen, C.skin, [fx, -0.05 - fLen / 2, 0.02], leftHandGroup, false, 12);
-    finger.rotation.x = 0.22;
-    ball(0.009, C.skin, [1, 1, 1], [fx, -0.05 - fLen, 0.02 + Math.sin(0.22) * fLen], leftHandGroup, 12);
-  });
-  const leftThumb = cyl(0.012, 0.010, 0.065, C.skin, [0.044, -0.030, 0.035], leftHandGroup, false, 12);
-  leftThumb.rotation.set(0.30, 0, -0.60);
+  const rightUpperArm = new T.Group();
+  rightUpperArm.position.set(0, -0.05, 0);
+  rightShoulder.add(rightUpperArm);
+
+  cyl(0.082, 0.072, 0.26, C.porcelain, [0, -0.13, 0], rightUpperArm, false, 28);
+  ball(0.070, C.gold, [1, 1, 1], [0, -0.26, 0.012], rightUpperArm, 24);
+  cyl(0.065, 0.065, 0.020, C.silver, [0, -0.26, 0.012], rightUpperArm, false, 20);
+
+  const rightForearm = new T.Group();
+  rightForearm.position.set(0, -0.26, 0.012);
+  rightUpperArm.add(rightForearm);
+
+  cyl(0.070, 0.060, 0.25, C.porcelain, [0, -0.125, 0.008], rightForearm, false, 28);
+  cyl(0.064, 0.064, 0.028, C.gold, [0, -0.24, 0.008], rightForearm, false, 24);
+  ball(0.054, C.silver, [1, 1, 1], [0, -0.25, 0.008], rightForearm, 20);
+
+  const rightHand = createAndroidHand(1);
+  rightHand.position.set(0, -0.25, 0.008);
+  rightForearm.add(rightHand);
 
   /* ================= 4. ROK HOVER & CHASSIS LEVITASI ELEGAN ================= */
   const hoverSkirt = cyl(0.48, 0.22, 0.54, C.porcelain, [0, -1.26, 0], g, false, 48);
@@ -715,8 +733,12 @@ function createRobot(T) {
     smile,
     blushGroup,
     arcCore,
-    rightForearmGroup,
-    leftForearmGroup,
+    leftUpperArm,
+    leftForearm,
+    leftHand,
+    rightUpperArm,
+    rightForearm,
+    rightHand,
     hairLocks,
     ring1,
     ring2,
@@ -792,18 +814,166 @@ function animate(ms) {
     R.blushGroup.scale.set(blushScale, blushScale, 1.0);
   }
 
-  // 8. Gerakan Tangan Menyambut Ramah ("Salam Santun PLN ners")
+  // 8. Gerakan Lengan & Tangan Realistis Mengarahkan Pengguna (Interactive Directing & Guiding)
   const isWaving = (typeof waveUntil !== 'undefined') ? (isSpeaking || ms < waveUntil) : isSpeaking;
-  if (R.rightForearmGroup) {
-    const targetWaveZ = isWaving ? (-0.22 + Math.sin(t * 5.0) * 0.16) : -0.22;
-    const targetWaveX = isWaving ? (0.80 + Math.sin(t * 3.5) * 0.08) : 0.80;
-    R.rightForearmGroup.rotation.z += (targetWaveZ - R.rightForearmGroup.rotation.z) * 0.12;
-    R.rightForearmGroup.rotation.x += (targetWaveX - R.rightForearmGroup.rotation.x) * 0.12;
-  }
+  const isGuiding = isWaving || isSpeaking;
 
-  // Ayunan halus lengan kiri (breathing motion)
-  if (R.leftForearmGroup) {
-    R.leftForearmGroup.rotation.z = 0.18 + Math.sin(t * 1.8) * 0.02;
+  // Deteksi adaptif posisi bot (kiri atau kanan layar)
+  const botEl = document.getElementById('bot');
+  const isDockedLeft = botEl && botEl.classList.contains('left');
+
+  // LERP damping rate untuk pergerakan sendi yang halus dan luwes
+  const lerpArm = 0.085;
+
+  if (R.leftUpperArm && R.leftForearm && R.leftHand && R.rightUpperArm && R.rightForearm && R.rightHand) {
+    if (!isDockedLeft) {
+      // DEFAULT: Robot di kanan bawah -> Formulir berada di sebelah KIRI (-X)
+      // Lengan Kiri (Viewer's Left) bertindak sebagai TANGAN PENGARAH (Guiding Arm)
+      let tLUX, tLUY, tLUZ, tLFX, tLFY, tLFZ, tLHX, tLHY, tLHZ;
+      let tRUX, tRUY, tRUZ, tRFX, tRFY, tRFZ, tRHX, tRHY, tRHZ;
+
+      if (isGuiding) {
+        // GESTUR MENGARAHKAN KE FORMULIR: Lengan kiri terangkat anggun ke depan-kiri,
+        // siku menekuk natural ke depan, telapak tangan terbuka "mempersilakan" dengan ayunan ritmik lembut
+        const guidePulse = Math.sin(t * 3.0);
+        const guideDip   = Math.cos(t * 3.0);
+
+        tLUX = -0.46 + guidePulse * 0.05;
+        tLUY = -0.20 + guideDip * 0.03;
+        tLUZ = -0.30 + guidePulse * 0.04;
+
+        tLFX = -0.82 + guidePulse * 0.07;
+        tLFY = -0.25 + guideDip * 0.04;
+        tLFZ = -0.24 + guidePulse * 0.05;
+
+        tLHX = -0.16 + guidePulse * 0.04;
+        tLHY = -0.32;
+        tLHZ = 0.18;
+      } else {
+        // POISE SANTUN ISTIRAHAT: Lengan kiri rileks di depan pinggul
+        tLUX = -0.12;
+        tLUY = 0.04;
+        tLUZ = -0.14;
+
+        tLFX = -0.55 + Math.sin(t * 1.8) * 0.02;
+        tLFY = 0.08;
+        tLFZ = 0.22;
+
+        tLHX = -0.10;
+        tLHY = 0.12;
+        tLHZ = 0.10;
+      }
+
+      // Lengan Kanan (Viewer's Right): Sikap Santun Frontliner PLN di depan pinggang
+      tRUX = -0.10;
+      tRUY = -0.04;
+      tRUZ = 0.14;
+
+      tRFX = -0.58 + Math.sin(t * 1.8) * 0.025;
+      tRFY = -0.08;
+      tRFZ = -0.24;
+
+      tRHX = -0.10;
+      tRHY = -0.14;
+      tRHZ = -0.10;
+
+      // Terapkan LERP halus ke lengan kiri
+      R.leftUpperArm.rotation.x += (tLUX - R.leftUpperArm.rotation.x) * lerpArm;
+      R.leftUpperArm.rotation.y += (tLUY - R.leftUpperArm.rotation.y) * lerpArm;
+      R.leftUpperArm.rotation.z += (tLUZ - R.leftUpperArm.rotation.z) * lerpArm;
+
+      R.leftForearm.rotation.x  += (tLFX - R.leftForearm.rotation.x) * lerpArm;
+      R.leftForearm.rotation.y  += (tLFY - R.leftForearm.rotation.y) * lerpArm;
+      R.leftForearm.rotation.z  += (tLFZ - R.leftForearm.rotation.z) * lerpArm;
+
+      R.leftHand.rotation.x     += (tLHX - R.leftHand.rotation.x) * lerpArm;
+      R.leftHand.rotation.y     += (tLHY - R.leftHand.rotation.y) * lerpArm;
+      R.leftHand.rotation.z     += (tLHZ - R.leftHand.rotation.z) * lerpArm;
+
+      // Terapkan LERP halus ke lengan kanan
+      R.rightUpperArm.rotation.x += (tRUX - R.rightUpperArm.rotation.x) * lerpArm;
+      R.rightUpperArm.rotation.y += (tRUY - R.rightUpperArm.rotation.y) * lerpArm;
+      R.rightUpperArm.rotation.z += (tRUZ - R.rightUpperArm.rotation.z) * lerpArm;
+
+      R.rightForearm.rotation.x  += (tRFX - R.rightForearm.rotation.x) * lerpArm;
+      R.rightForearm.rotation.y  += (tRFY - R.rightForearm.rotation.y) * lerpArm;
+      R.rightForearm.rotation.z  += (tRFZ - R.rightForearm.rotation.z) * lerpArm;
+
+      R.rightHand.rotation.x     += (tRHX - R.rightHand.rotation.x) * lerpArm;
+      R.rightHand.rotation.y     += (tRHY - R.rightHand.rotation.y) * lerpArm;
+      R.rightHand.rotation.z     += (tRHZ - R.rightHand.rotation.z) * lerpArm;
+
+    } else {
+      // Robot di kiri bawah -> Formulir berada di sebelah KANAN (+X)
+      // Lengan Kanan (Viewer's Right) bertindak sebagai TANGAN PENGARAH
+      let tRUX, tRUY, tRUZ, tRFX, tRFY, tRFZ, tRHX, tRHY, tRHZ;
+      let tLUX, tLUY, tLUZ, tLFX, tLFY, tLFZ, tLHX, tLHY, tLHZ;
+
+      if (isGuiding) {
+        const guidePulse = Math.sin(t * 3.0);
+        const guideDip   = Math.cos(t * 3.0);
+
+        tRUX = -0.46 + guidePulse * 0.05;
+        tRUY = 0.20 - guideDip * 0.03;
+        tRUZ = 0.30 - guidePulse * 0.04;
+
+        tRFX = -0.82 + guidePulse * 0.07;
+        tRFY = 0.25 - guideDip * 0.04;
+        tRFZ = 0.24 - guidePulse * 0.05;
+
+        tRHX = -0.16 + guidePulse * 0.04;
+        tRHY = 0.32;
+        tRHZ = -0.18;
+      } else {
+        tRUX = -0.12;
+        tRUY = -0.04;
+        tRUZ = 0.14;
+
+        tRFX = -0.55 + Math.sin(t * 1.8) * 0.02;
+        tRFY = -0.08;
+        tRFZ = -0.22;
+
+        tRHX = -0.10;
+        tRHY = -0.12;
+        tRHZ = -0.10;
+      }
+
+      tLUX = -0.10;
+      tLUY = 0.04;
+      tLUZ = -0.14;
+
+      tLFX = -0.58 + Math.sin(t * 1.8) * 0.025;
+      tLFY = 0.08;
+      tLFZ = 0.24;
+
+      tLHX = -0.10;
+      tLHY = 0.14;
+      tLHZ = 0.10;
+
+      R.leftUpperArm.rotation.x += (tLUX - R.leftUpperArm.rotation.x) * lerpArm;
+      R.leftUpperArm.rotation.y += (tLUY - R.leftUpperArm.rotation.y) * lerpArm;
+      R.leftUpperArm.rotation.z += (tLUZ - R.leftUpperArm.rotation.z) * lerpArm;
+
+      R.leftForearm.rotation.x  += (tLFX - R.leftForearm.rotation.x) * lerpArm;
+      R.leftForearm.rotation.y  += (tLFY - R.leftForearm.rotation.y) * lerpArm;
+      R.leftForearm.rotation.z  += (tLFZ - R.leftForearm.rotation.z) * lerpArm;
+
+      R.leftHand.rotation.x     += (tLHX - R.leftHand.rotation.x) * lerpArm;
+      R.leftHand.rotation.y     += (tLHY - R.leftHand.rotation.y) * lerpArm;
+      R.leftHand.rotation.z     += (tLHZ - R.leftHand.rotation.z) * lerpArm;
+
+      R.rightUpperArm.rotation.x += (tRUX - R.rightUpperArm.rotation.x) * lerpArm;
+      R.rightUpperArm.rotation.y += (tRUY - R.rightUpperArm.rotation.y) * lerpArm;
+      R.rightUpperArm.rotation.z += (tRUZ - R.rightUpperArm.rotation.z) * lerpArm;
+
+      R.rightForearm.rotation.x  += (tRFX - R.rightForearm.rotation.x) * lerpArm;
+      R.rightForearm.rotation.y  += (tRFY - R.rightForearm.rotation.y) * lerpArm;
+      R.rightForearm.rotation.z  += (tRFZ - R.rightForearm.rotation.z) * lerpArm;
+
+      R.rightHand.rotation.x     += (tRHX - R.rightHand.rotation.x) * lerpArm;
+      R.rightHand.rotation.y     += (tRHY - R.rightHand.rotation.y) * lerpArm;
+      R.rightHand.rotation.z     += (tRHZ - R.rightHand.rotation.z) * lerpArm;
+    }
   }
 
   // 9. Kedipan Mata Cerdas & Lembut (Natural Blink)

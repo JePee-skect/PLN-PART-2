@@ -240,7 +240,7 @@ function createHumanAvatar(T) {
     return tex;
   }
 
-  const CACHE_V = '?v=20261112e';
+  const CACHE_V = '?v=20261112f';
   const texIdle       = loadAvatarTex('img/human-avatar.png' + CACHE_V);
   const texBlink      = loadAvatarTex('img/human-avatar-blink.png' + CACHE_V);
   const texTalk       = loadAvatarTex('img/human-avatar-talk.png' + CACHE_V);
@@ -272,6 +272,23 @@ function createHumanAvatar(T) {
   const avatarMesh = new T.Mesh(geom, avatarMat);
   avatarMesh.position.set(0, 0.14, 0);
   g.add(avatarMesh);
+
+  // Lengan & Tangan Interaktif Proaktif (Melambai & Mengarahkan Formulir)
+  const texHand = loadAvatarTex('img/avatar-hand.png' + CACHE_V);
+  const handMat = new T.MeshBasicMaterial({
+    map: texHand,
+    transparent: true,
+    alphaTest: 0.02,
+    side: T.DoubleSide
+  });
+
+  const armRig = new T.Group();
+  armRig.position.set(0.48, -0.85, 0.04); // Pivot di siku/lengan kanan
+
+  const handMesh = new T.Mesh(new T.PlaneGeometry(0.63, 0.85), handMat);
+  handMesh.position.set(0.20, 0.28, 0); // Offset dari pivot siku
+  armRig.add(handMesh);
+  avatarMesh.add(armRig);
 
   // Dudukan Levitasi Holografik Futuristik PLN di Bawah
   const ring1 = new T.Mesh(
@@ -316,7 +333,9 @@ function createHumanAvatar(T) {
     ring1,
     ring2,
     badgeMesh,
-    shadow
+    shadow,
+    armRig,
+    handMesh
   };
 }
 
@@ -392,9 +411,19 @@ function animate(ms) {
   const hoverLiftY  = avatarHovered ? 0.04 : 0;
   const hoverPitchX = avatarHovered ? -0.035 : 0;
 
+  // 5. Orientasi Tubuh Proaktif ke Formulir saat Berbicara / Memandu
+  const isGuiding = (typeof waveUntil !== 'undefined' && waveUntil > performance.now());
+  let guideBodyTurnY = 0;
+  let guideBodyLeanX = 0;
+  if (isGuiding || isSpeaking) {
+    // Menoleh proaktif ke arah formulir input dan condong antusias
+    guideBodyTurnY = isDockedLeft ? 0.18 : -0.18;
+    guideBodyLeanX = 0.04;
+  }
+
   // 6. Komposisi Rotasi & Posisi 3D yang Halus (Smooth Interpolation)
-  const targetRotY = baseAngleY + idleTurnY + mouseTargetX * 0.44 + Math.sin(t * 0.7) * 0.020;
-  const targetRotX = -mouseTargetY * 0.28 + hoverPitchX + idlePitchX + speechNodX + Math.sin(t * 0.5) * 0.012;
+  const targetRotY = baseAngleY + guideBodyTurnY + idleTurnY + mouseTargetX * 0.40 + Math.sin(t * 0.7) * 0.020;
+  const targetRotX = -mouseTargetY * 0.26 + guideBodyLeanX + hoverPitchX + idlePitchX + speechNodX + Math.sin(t * 0.5) * 0.012;
   const targetRotZ = mouseTargetX * 0.12 + idleTiltZ + speechTiltZ;
 
   const lerpSpeed = isSpeaking ? 0.10 : 0.07;
@@ -430,6 +459,48 @@ function animate(ms) {
   if (R.avatarMat.map !== nextTex && nextTex) {
     R.avatarMat.map = nextTex;
     R.avatarMat.needsUpdate = true;
+  }
+
+  // 10. Animasi Lengan & Tangan Proaktif (Melambai & Mengarahkan Formulir)
+  let targetArmRotZ = 0;
+  let targetArmRotX = 0;
+  let targetArmRotY = 0;
+  let targetArmPosY = -0.85;
+
+  const speechElapsed = isSpeaking ? (ms - speechStartTime) : 99999;
+
+  if (isSpeaking && speechElapsed < 2200) {
+    // Gestur A: Lambaian Tangan Ramah saat Menyapa (Welcoming Wave)
+    const waveProgress = speechElapsed / 2200;
+    const waveEnvelope = Math.sin(waveProgress * Math.PI);
+    const waveCycle = Math.sin(t * 7.5) * 0.28;
+    targetArmRotZ = -0.32 + waveCycle * waveEnvelope;
+    targetArmRotX = 0.12 * waveEnvelope;
+    targetArmPosY = -0.85 + 0.12 * waveEnvelope;
+  } else if (isGuiding || isSpeaking) {
+    // Gestur B: Mengarahkan Tangan Proaktif ke Formulir (Form Guiding Gesture)
+    const guideSway = Math.sin(t * 2.2) * 0.08;
+    targetArmRotZ = -0.36 + guideSway;
+    targetArmRotY = 0.20;
+    targetArmRotX = 0.05;
+    targetArmPosY = -0.82 + Math.sin(t * 1.8) * 0.03;
+  } else if (avatarHovered) {
+    // Gestur C: Tangan menyapa saat disentuh kursor
+    targetArmRotZ = -0.22 + Math.sin(t * 4.0) * 0.10;
+    targetArmPosY = -0.83;
+  } else {
+    // Gestur D: Santun Alami Beristirahat & Bernafas
+    targetArmRotZ = Math.sin(t * 1.2) * 0.025;
+    targetArmRotX = 0;
+    targetArmRotY = 0;
+    targetArmPosY = -0.85;
+  }
+
+  if (R.armRig) {
+    R.armRig.rotation.z += (targetArmRotZ - R.armRig.rotation.z) * 0.12;
+    R.armRig.rotation.x += (targetArmRotX - R.armRig.rotation.x) * 0.12;
+    R.armRig.rotation.y += (targetArmRotY - R.armRig.rotation.y) * 0.12;
+    R.armRig.position.y += (targetArmPosY - R.armRig.position.y) * 0.12;
   }
 
   // 10. Putaran & Levitasi Fisika Cincin Orbital Holografik PLN

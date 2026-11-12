@@ -26,9 +26,11 @@ function initRobot3D() {
     });
 
     // Retina HD Ultra-Sharp Rendering (Jernih, Tajam & Bebas Buram)
-    const pr = Math.min(window.devicePixelRatio || 1, 2.5);
+    // Sesuai ukuran standar ringkas 130x190 (tidak membesar) dengan buffer HD Retina
+    const pr = Math.min(window.devicePixelRatio || 1, 2.0);
     renderer.setPixelRatio(pr);
-    renderer.setSize(260, 380, true);
+    // PENTING: updateStyle = false agar Three.js TIDAK menginjeksi inline CSS lebar/tinggi
+    renderer.setSize(130, 190, false);
 
     if (THREE.NoToneMapping) {
       renderer.toneMapping = THREE.NoToneMapping;
@@ -40,8 +42,8 @@ function initRobot3D() {
     }
 
     scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(36, 260 / 380, 0.1, 50);
-    camera.position.set(0, 0.05, 7.8);
+    camera = new THREE.PerspectiveCamera(34, 130 / 190, 0.1, 50);
+    camera.position.set(0, 0.08, 8.2);
 
     // Pencahayaan Alami Studio Lembut (Menjaga Warna Asli Foto Tetap Cerah & Bersih)
     scene.add(new THREE.AmbientLight(0xffffff, 0.98));
@@ -225,15 +227,16 @@ function createHumanAvatar(T) {
     return tex;
   }
 
-  const texIdle       = loadAvatarTex('img/human-avatar.png');
-  const texBlink      = loadAvatarTex('img/human-avatar-blink.png');
-  const texTalk       = loadAvatarTex('img/human-avatar-talk.png');
-  const texTalkBlink  = loadAvatarTex('img/human-avatar-talk-blink.png');
+  const CACHE_V = '?v=20261112c';
+  const texIdle       = loadAvatarTex('img/human-avatar.png' + CACHE_V);
+  const texBlink      = loadAvatarTex('img/human-avatar-blink.png' + CACHE_V);
+  const texTalk       = loadAvatarTex('img/human-avatar-talk.png' + CACHE_V);
+  const texTalkBlink  = loadAvatarTex('img/human-avatar-talk-blink.png' + CACHE_V);
 
   // Bidang 3D bervolume kurvatur halus (Cylindrical depth mapping)
-  // Memberikan kedalaman perspektif 3D yang nyata saat kepala menoleh
-  const meshW = 3.10;
-  const meshH = 4.15;
+  // Ukuran proporsional & rapi, pas di dalam kanvas (tidak membesar)
+  const meshW = 2.45;
+  const meshH = 3.30;
   const geom = new T.PlaneGeometry(meshW, meshH, 24, 24);
 
   const posAttr = geom.attributes.position;
@@ -254,39 +257,39 @@ function createHumanAvatar(T) {
   });
 
   const avatarMesh = new T.Mesh(geom, avatarMat);
-  avatarMesh.position.set(0, 0.12, 0);
+  avatarMesh.position.set(0, 0.14, 0);
   g.add(avatarMesh);
 
   // Dudukan Levitasi Holografik Futuristik PLN di Bawah
   const ring1 = new T.Mesh(
-    new T.TorusGeometry(1.22, 0.022, 8, 48),
+    new T.TorusGeometry(1.10, 0.020, 8, 48),
     new T.MeshStandardMaterial({ color: 0x00e5ff, emissive: 0x00e5ff, emissiveIntensity: 1.6 })
   );
-  ring1.position.y = -2.12;
+  ring1.position.y = -1.65;
   ring1.rotation.x = Math.PI / 2;
   g.add(ring1);
 
   const ring2 = new T.Mesh(
-    new T.TorusGeometry(1.44, 0.016, 8, 48),
+    new T.TorusGeometry(1.28, 0.015, 8, 48),
     new T.MeshStandardMaterial({ color: 0xffe600, emissive: 0xffaa00, emissiveIntensity: 1.4 })
   );
-  ring2.position.y = -2.22;
+  ring2.position.y = -1.74;
   ring2.rotation.x = Math.PI / 2;
   g.add(ring2);
 
   // Lencana Name Plate di Bagian Bawah
   const badgeMat = createPedestalBadgeTexture(T);
-  const badgeMesh = new T.Mesh(new T.PlaneGeometry(1.30, 0.32), badgeMat);
-  badgeMesh.position.set(0, -1.98, 0.25);
+  const badgeMesh = new T.Mesh(new T.PlaneGeometry(1.18, 0.28), badgeMat);
+  badgeMesh.position.set(0, -1.52, 0.25);
   g.add(badgeMesh);
 
   // Bayangan ambient lembut di lantai
   const shadow = new T.Mesh(
-    new T.CircleGeometry(1.20, 36),
+    new T.CircleGeometry(1.05, 36),
     new T.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.18 })
   );
   shadow.rotation.x = -Math.PI / 2;
-  shadow.position.y = -2.30;
+  shadow.position.y = -1.80;
   g.add(shadow);
 
   return {
@@ -373,7 +376,7 @@ function animate(ms) {
 
   // 7. Animasi Lencana Sambutan Interaktif
   if (R.badgeMesh) {
-    R.badgeMesh.position.y = -1.98 + breath * 0.5;
+    R.badgeMesh.position.y = -1.52 + breath * 0.5;
   }
 
   if (renderer && scene && camera) {

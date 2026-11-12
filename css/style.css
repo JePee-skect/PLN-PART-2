@@ -7,6 +7,7 @@
    1. TEMA & VARIABEL WARNA
    ============================================================= */
 :root {
+  color-scheme: light;
   --card:  #ffffff;
   --text:  #1e293b;
   --muted: #475569;
@@ -25,22 +26,24 @@
 /* Dark mode otomatis */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme=light]) {
+    color-scheme: dark;
     --bg:    #11191f;
     --card:  #1f2a30;
     --text:  #eef2f3;
     --muted: #b5c0c5;
-    --input: #17212626;
+    --input: #172126;
     --line:  #3b4a52;
   }
 }
 
 /* Dark mode manual */
 :root[data-theme=dark] {
+  color-scheme: dark;
   --bg:    #11191f;
   --card:  #1f2a30;
   --text:  #eef2f3;
   --muted: #b5c0c5;
-  --input: #17212626;
+  --input: #172126;
   --line:  #3b4a52;
 }
 
@@ -174,6 +177,58 @@ select {
   color: var(--text);
   font: inherit;
   transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+select {
+  cursor: pointer;
+  color-scheme: light dark;
+}
+
+/* Opsi Dropdown: Wajib berkontras tajam & mudah dibaca jelas */
+select option {
+  background-color: #ffffff;
+  color: #0f172a;
+  padding: 10px 14px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+:root[data-theme=dark] select,
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme=light]) select {
+    color-scheme: dark;
+    background-color: #172126;
+    color: #f1f5f9;
+  }
+  :root:not([data-theme=light]) select option {
+    background-color: #1f2a30 !important;
+    color: #f8fafc !important;
+  }
+}
+
+:root[data-theme=light] select,
+:root:not([data-theme=dark]) select {
+  color-scheme: light;
+  background-color: #ffffff;
+  color: #0f172a;
+}
+:root[data-theme=light] select option,
+:root:not([data-theme=dark]) select option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+/* Khusus Dropdown Jumlah Tamu (#jml) */
+#jml {
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#jml option {
+  padding: 10px 14px;
+  font-size: 15px;
+  font-weight: 600;
 }
 
 input[type=text]:focus,

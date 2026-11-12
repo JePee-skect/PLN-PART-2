@@ -1,6 +1,6 @@
 /* =====================================================================
    VISITOR MANAGEMENT SYSTEM - PT PLN (PERSERO) PUSHARLIS
-   Voice Engine: Normalizer Teks, Sintesis Suara Safety Buddy (Female) & ElevenLabs
+   Voice Engine: Normalizer Teks, Sintesis Suara Gadis Neural Studio & AI
    ===================================================================== */
 
 let voices = [];
@@ -68,7 +68,6 @@ function playBuddyChime() {
 const OFFICIAL_EASYVOICE_KEY = 'ev_a8dd782ce24e59571a03d3cbda4039cd73c68d9a0013647a9d295a6e7cc87e16';
 let voiceMode      = store.get('vms-voice-mode', 'online');
 let easyVoiceKey   = store.get('vms-ev-key', OFFICIAL_EASYVOICE_KEY);
-// Auto-heal jika key di localStorage pernah terpotong atau rusak
 if (!easyVoiceKey || easyVoiceKey.length < 60 || (easyVoiceKey.startsWith('ev_a8dd782c') && easyVoiceKey.length < 67)) {
   easyVoiceKey = OFFICIAL_EASYVOICE_KEY;
   store.set('vms-ev-key', easyVoiceKey);
@@ -81,22 +80,73 @@ const audioCache   = new Map();
 let currentAudioPlayer = null;
 let activeTtsAbort     = null;
 let voiceSelectDebounce = null;
+let speechSequence     = 0;
+
+/* Manifest Suara Resmi PLN Gadis Neural Studio (Pre-rendered, 0ms Delay, 100% Konsisten) */
+const GADIS_MANIFEST = {
+  "Selamat datang di P T P L N Persero Pusharlis. Saya P L N ners, asisten virtual Anda. Dengan senang hati, saya siap memandu Bapak dan Ibu dalam proses pengisian formulir registrasi kunjungan. Silakan tekan tombol Mulai Panduan untuk bimbingan langkah demi langkah.": "4bb513dcf93e070d005849552a7b385c.mp3",
+  "Selamat datang, Bapak dan Ibu Petugas. Saya P L N ners. Anda dapat memantau data tamu, melakukan check in dan check out, serta mengunduh laporan ke Excel.": "8dc9178ed83d55574ca94f059436468f.mp3",
+  "Langkah pertama. Silakan tekan tombol Ambil Foto, arahkan pandangan wajah ke kamera, kemudian tekan Ambil Foto kembali untuk menyimpan potret.": "be9e5eada3f06f3a5b0dab8381293ff4.mp3",
+  "Silakan tekan tombol Ambil Foto, arahkan pandangan wajah ke kamera, kemudian tekan Ambil Foto kembali untuk menyimpan potret.": "53438735eb5a7c353897603752abd0c6.mp3",
+  "Langkah kedua. Mohon ketikkan nama lengkap Anda sesuai dengan kartu identitas resmi.": "e05a45fa9c22b8be2d8556b921f5f89f.mp3",
+  "Mohon ketikkan nama lengkap Anda sesuai dengan kartu identitas resmi.": "73e947c5949158c8f97e5df33f384eb7.mp3",
+  "Langkah ketiga. Silakan masukkan nama instansi atau perusahaan yang Anda wakili.": "b54758bd1f44060006daa0e40b853877.mp3",
+  "Silakan masukkan nama instansi atau perusahaan yang Anda wakili.": "af1b804c4631e5c9b5231f8386b9cc5f.mp3",
+  "Langkah keempat. Mohon isi alamat lengkap kantor atau domisili instansi Anda.": "65bbea03fc8a5f0a0ef450d01631798d.mp3",
+  "Mohon isi alamat lengkap kantor atau domisili instansi Anda.": "7caa609df82db5a4bcefa9d40a010c5c.mp3",
+  "Langkah kelima. Silakan tuliskan nama pejabat atau pegawai P L N yang hendak Anda temui.": "53ddb5359f2f3049ec4f071586d9d1c1.mp3",
+  "Silakan tuliskan nama pejabat atau pegawai P L N yang hendak Anda temui.": "db8e05cfd2e7579621153f077c7f6c8f.mp3",
+  "Langkah keenam. Demi keselamatan bersama, mohon pilih perlengkapan alat pelindung diri yang Anda kenakan. Jika tidak membawa, silakan pilih Tidak Memakai A P D.": "4acf4387f266eba5c1f9d2d580b70a1e.mp3",
+  "Demi keselamatan bersama, mohon pilih perlengkapan alat pelindung diri yang Anda kenakan. Jika tidak membawa, silakan pilih Tidak Memakai A P D.": "257d1cb3195354a8579de83206da3762.mp3",
+  "Langkah ketujuh. Mohon jelaskan secara singkat keperluan kunjungan kerja Anda hari ini.": "f11f0d9fea48fdd1987a2a049880dd5f.mp3",
+  "Mohon jelaskan secara singkat keperluan kunjungan kerja Anda hari ini.": "1f79676928f08a684f9f2f4bd1f7ed1a.mp3",
+  "Langkah kedelapan. Silakan masukkan enam belas digit nomor induk kependudukan K T P, atau nomor S I M maupun paspor Anda.": "66d2b3f4e9cf961d4432c4f9aff83388.mp3",
+  "Silakan masukkan enam belas digit nomor induk kependudukan K T P, atau nomor S I M maupun paspor Anda.": "1f1cf4b8c996060413257d2fb5d96aec.mp3",
+  "Langkah kesembilan. Mohon cantumkan jenis kendaraan beserta nomor polisi yang Anda gunakan.": "3e0d917d373d9e28caa35b2ac10d6719.mp3",
+  "Mohon cantumkan jenis kendaraan beserta nomor polisi yang Anda gunakan.": "464bf4f0c8f9649ba3ed0cd5abf44a86.mp3",
+  "Langkah kesepuluh. Silakan masukkan nomor kartu tanda pengenal tamu yang telah diberikan oleh petugas keamanan di pos.": "d5386f0580562c4f67aa4daa58e06db1.mp3",
+  "Silakan masukkan nomor kartu tanda pengenal tamu yang telah diberikan oleh petugas keamanan di pos.": "acca2405cb516f329e431368d3e99710.mp3",
+  "Langkah kesebelas. Silakan tentukan total jumlah tamu yang hadir dalam kunjungan Anda.": "761883da3c6bfb40512898eef2e2ab74.mp3",
+  "Silakan tentukan total jumlah tamu yang hadir dalam kunjungan Anda.": "19cc1373523948ecec65a79e8a59f775.mp3",
+  "Langkah kedua belas. Mohon cermati peraturan Keselamatan dan Keamanan Kerja pada poster di atas, kemudian beri tanda centang persetujuan sebagai komitmen keselamatan bersama.": "b69d1c7f018906a81c8b9a889b95b26f.mp3",
+  "Mohon cermati peraturan Keselamatan dan Keamanan Kerja pada poster di atas, kemudian beri tanda centang persetujuan sebagai komitmen keselamatan bersama.": "3592cc8418492b37b88360b9d7fae83a.mp3",
+  "Langkah terakhir. Seluruh data registrasi telah lengkap. Silakan tekan tombol Kirim Registrasi untuk menyelesaikan pendaftaran kunjungan Anda.": "f0ff52f9101a0354546343700a6748f6.mp3",
+  "Seluruh data registrasi telah lengkap. Silakan tekan tombol Kirim Registrasi untuk menyelesaikan pendaftaran kunjungan Anda.": "3b1ec3d9843c4cc1386e9357ff86878f.mp3",
+  "Apakah Bapak dan Ibu membutuhkan bantuan dalam pengisian formulir? Silakan ketuk saya untuk panduan langkah demi langkah.": "675acf4446b2a70eedb90896f335b737.mp3",
+  "Sama-sama! Dengan senang hati saya siap melayani Bapak dan Ibu.": "385434a43d20defc18ac3fcf1f3ca5e4.mp3",
+  "Silakan masukkan username dan password petugas admin.": "47f95fd00825f276b8c12c4e7bacc2af.mp3",
+  "Login berhasil. Selamat datang, Administrator P L N.": "68e2cc16c9598bc8099b895157bdd55e.mp3",
+  "Maaf, username atau password yang Anda masukkan salah.": "868ccfb6f2843f50a9a2576c082e3a2d.mp3",
+  "Admin telah keluar. Mode formulir pendaftaran tamu kembali aktif.": "25092375d531ba5235a081fef31065ab.mp3",
+  "Akses ditolak. Silakan login sebagai petugas admin terlebih dahulu.": "d59b0578908a8f85c6331c6af7b801ae.mp3",
+  "Di menu Dashboard, tekan tombol Check In saat tamu tiba di lokasi. Saat tamu hendak pulang, tekan tombol Check Out pada baris tamu tersebut.": "b516e779a3b15ff4b3db9d7ff7eb3498.mp3",
+  "Tekan tombol Export to Excel. File Excel akan langsung terunduh otomatis ke komputer Anda, dan nomor K T P sudah rapi dalam format teks enam belas digit.": "292d73ee467cdf53b6c291830ea0364d.mp3",
+  "Gunakan filter Tanggal Awal dan Tanggal Akhir untuk menentukan rentang waktu, atau ketik nama tamu pada kolom pencarian.": "7df0a19691ca0e3582514feabf5814d6.mp3",
+  "Safety and Security Induction P T P L N Pusharlis memuat 8 peraturan keselamatan dan keamanan kerja, termasuk kewajiban mematuhi K 3, mengenakan ID Card, larangan merokok dan narkoba, serta petunjuk evakuasi darurat.": "75a87bc4ce3bcdf24c9918e4f276e49b.mp3",
+  "K 3 L H adalah Keselamatan, Kesehatan Kerja, dan Lingkungan Hidup. Di seluruh area kerja P L N Pusharlis, setiap orang wajib mematuhi protokol K 3 dan mengenakan A P D: safety helmet, rompi reflektif, safety shoes, serta kartu tanda pengenal.": "be780a5a0c157b6ff5fb5d0e0bdd6f31.mp3",
+  "Isi enam belas digit angka N I K K T P Anda. Bila tidak membawa K T P fisik, Anda dapat memasukkan nomor S I M dua belas digit atau nomor paspor.": "2a5cc477f3ca57985f027efa4a098855.mp3",
+  "Centang perlengkapan A P D yang Anda gunakan: safety helmet, safety shoes, rompi reflektif, atau seragam kerja.": "2b166c12c3b4f94a4bcab5de1069e69c.mp3",
+  "Tuliskan jenis kendaraan beserta nomor plat polisinya, contoh: Avanza B 1234 CD.": "7d7d37b0b174c6bc89203b0d6fa12370.mp3",
+  "Nomor name tag tamu tertera pada kartu fisik yang diserahkan oleh petugas pengamanan di pos gerbang masuk.": "9cabd5282b7e8b5314c44522e59cdea8.mp3",
+  "Tekan tombol Ambil Foto untuk mengaktifkan kamera depan, lalu tekan tombol Ambil Foto untuk menangkap potret wajah.": "193cfbc4a51aee17ccb75106ca008408.mp3",
+  "Tentukan total tamu yang ikut serta dalam kunjungan, termasuk diri Anda sendiri.": "8763dfb58a3f1a83a99f8b805132da83.mp3",
+  "Pastikan seluruh kolom bertanda bintang telah terisi, kemudian tekan Kirim Registrasi.": "f97d3b41c69a16442e59d8a644c1edbf.mp3",
+  "Selamat datang di P T P L N Persero Pusharlis. Saya P L N ners, asisten virtual Anda. Apakah ada yang dapat saya bantu terkait pendaftaran kunjungan Bapak dan Ibu?": "9c2278a9896674605ffc3181beca70a7.mp3",
+  "Maaf, saya belum memahami pertanyaan tersebut. Anda dapat bertanya seputar K T P, A P D, kendaraan, name tag, atau tekan tombol Mulai panduan.": "243024a389e2d5965ff0ecb496454c90.mp3"
+};
 
 /**
  * Penghenti audio universal:
- * Memastikan tidak ada dua suara yang saling bertumpuk (HTML5 Audio, Browser SpeechSynthesis, atau Fetch in-flight).
+ * Memastikan tidak ada dua suara yang saling bertumpuk.
  */
 function stopAllAudio() {
-  // 1. Batalkan fetch async yang sedang berjalan di background
   if (activeTtsAbort) {
     try { activeTtsAbort.abort(); } catch (e) {}
     activeTtsAbort = null;
   }
 
-  // 2. Tingkatkan sequence agar semua callback async tertunda otomatis diabaikan
   speechSequence++;
 
-  // 3. Hentikan dan bersihkan pemutar audio HTML5
   if (currentAudioPlayer) {
     try {
       currentAudioPlayer.onended = null;
@@ -104,12 +154,10 @@ function stopAllAudio() {
       currentAudioPlayer.onplay  = null;
       currentAudioPlayer.pause();
       currentAudioPlayer.src = '';
-      currentAudioPlayer.load();
     } catch (e) {}
     currentAudioPlayer = null;
   }
 
-  // 4. Hentikan dan resume SpeechSynthesis browser jika sedang bicara
   if ('speechSynthesis' in window) {
     try {
       window.speechSynthesis.cancel();
@@ -127,6 +175,13 @@ function initVoice() {
   if ('speechSynthesis' in window) {
     window.speechSynthesis.onvoiceschanged = loadVoices;
   }
+
+  // Pre-load audio sambutan agar instan saat pertama diklik
+  try {
+    const pre = new Audio();
+    pre.preload = 'auto';
+    pre.src = 'audio/tts/4bb513dcf93e070d005849552a7b385c.mp3';
+  } catch (e) {}
 
   // Tombol Toggle Suara Aktif/Mati
   const btnSpk = $('#spk');
@@ -157,7 +212,7 @@ function initVoice() {
     };
   }
 
-  // Tab 1: Online TTS Wanita Indonesia (Gadis Neural - Default Rekomendasi)
+  // Tab 1: Online TTS Wanita Indonesia (Gadis Neural - Default Rekomendasi Resmi)
   const tabOnline = $('#tab-vonline');
   if (tabOnline) {
     tabOnline.onclick = () => {
@@ -165,7 +220,7 @@ function initVoice() {
       voiceMode = 'online';
       store.set('vms-voice-mode', voiceMode);
       updateVoiceTabs();
-      say('Mode suara wanita Indonesia aktif.');
+      say('Mode suara wanita Indonesia Gadis Neural aktif.');
     };
   }
 
@@ -230,7 +285,6 @@ function initVoice() {
 
       if (inputKey) {
         let val = inputKey.value.trim();
-        // Otomatis pulihkan jika key terpotong
         if (!val || val.length < 60 || (val.startsWith('ev_a8dd782c') && val.length < 67)) {
           val = (typeof OFFICIAL_EASYVOICE_KEY !== 'undefined') ? OFFICIAL_EASYVOICE_KEY : 'ev_a8dd782ce24e59571a03d3cbda4039cd73c68d9a0013647a9d295a6e7cc87e16';
           inputKey.value = val;
@@ -253,7 +307,7 @@ function initVoice() {
             statusEl.textContent = '✅ Berhasil terhubung! Suara AI EasyVoice (Kokoro-82m) aktif.';
             statusEl.style.color = '#2ecc71';
           } else {
-            statusEl.textContent = '⚠️ Gagal terhubung ke API EasyVoice. Sistem beralih ke suara browser.';
+            statusEl.textContent = '⚠️ Gagal terhubung ke API EasyVoice. Sistem beralih ke suara default.';
             statusEl.style.color = '#f39c12';
           }
         }
@@ -365,14 +419,7 @@ function initVoice() {
   const btnPlayMp3 = $('#btn-play-mp3');
   if (btnPlayMp3) {
     btnPlayMp3.onclick = () => {
-      if (currentAudioPlayer) {
-        currentAudioPlayer.pause();
-        currentAudioPlayer = null;
-      }
-      if ('speechSynthesis' in window) {
-        try { speechSynthesis.cancel(); } catch (e) {}
-      }
-
+      stopAllAudio();
       const audio = new Audio('audio/my-voice.mp3');
       currentAudioPlayer = audio;
 
@@ -447,14 +494,14 @@ function cleanSpeechText(text) {
     .replace(/Ctrl\s*V/gi, 'Control V')
     .replace(/16\s*digit/gi, 'enam belas digit')
     .replace(/12\s*digit/gi, 'dua belas digit')
-    .replace(/1–99/g, 'satu sampai sembilan puluh sembilan')
+    .replace(/1\s*[-–—]\s*99/g, 'satu sampai sembilan puluh sembilan')
     .replace(/([.!?])\s*/g, '$1 ')
     .replace(/\s+/g, ' ')
     .trim();
 }
 
 /**
- * Pemilihan suara wanita alami terbaik untuk Safety Buddy
+ * Pemilihan suara wanita alami terbaik untuk Safety Buddy (Khusus Mode Browser)
  */
 function pickVoice() {
   if (userVoiceIndex >= 0 && voices[userVoiceIndex]) {
@@ -464,7 +511,7 @@ function pickVoice() {
   const isMaleName = (name = '') => /ardi|andika|david|mark|male|pria|laki/i.test(name);
   const idVoices = voices.filter(v => /^id([-_]|$)/i.test(v.lang));
 
-  // 1. Suara wanita Indonesia Neural paling diutamakan (Microsoft Gadis / Siti / Reza / Hana)
+  // 1. Suara wanita Indonesia Neural diutamakan
   const femaleId = idVoices.find(v => /gadis|siti|reza|hana|yasmin/i.test(v.name) || /female|wanita/i.test(v.name));
   if (femaleId) return femaleId;
 
@@ -479,13 +526,7 @@ function pickVoice() {
   const msFemale = voices.find(v => /^ms([-_]|$)/i.test(v.lang) && !isMaleName(v.name));
   if (msFemale) return msFemale;
 
-  // 5. Suara wanita yang ada di Windows (seperti Microsoft Zira)
-  const winFemale = voices.find(v => /zira|susan|catherine|hazel|heera|helena|female/i.test(v.name));
-  if (winFemale) return winFemale;
-
-  // 6. Suara default sistem
-  const def = voices.find(v => v.default) || voices[0];
-  return def || null;
+  return null;
 }
 
 function populateVoiceSelect() {
@@ -519,7 +560,7 @@ function populateVoiceSelect() {
       tipEl.style.background = 'rgba(46, 204, 113, 0.15)';
       tipEl.style.color = 'var(--text)';
     } else {
-      tipEl.innerHTML = '💡 <b>Tips Suara:</b> Buka di <b>Microsoft Edge</b> untuk suara wanita Indonesia <b>Microsoft Gadis (Natural)</b> yang paling jernih & ramah.';
+      tipEl.innerHTML = '💡 <b>Tips Suara:</b> Mode bawaan menggunakan <b>Gadis Neural Studio (96kbps)</b> yang jernih, sopan, dan konsisten di semua perangkat.';
       tipEl.style.background = 'rgba(27, 99, 120, 0.1)';
       tipEl.style.color = 'var(--muted)';
     }
@@ -545,22 +586,22 @@ function updateVoiceTabs() {
   const badge = $('#admin-voice-badge');
   if (badge) {
     if (isOnline) {
-      badge.textContent = 'Aktif: 🌟 Gadis Neural (Studio 96kbps)';
+      badge.textContent = 'Aktif: 🎙️ Gadis Neural Studio (0ms Pre-cached)';
       badge.style.background = '#27ae60';
     } else if (isBrowser) {
       badge.textContent = 'Aktif: 🔊 Browser WebSpeech';
       badge.style.background = '#2980b9';
     } else if (isEasy) {
-      badge.textContent = 'Aktif: ✨ EasyVoice AI';
+      badge.textContent = 'Aktif: 🤖 EasyVoice AI';
       badge.style.background = '#e67e22';
     } else if (isEleven) {
-      badge.textContent = 'Aktif: 🎙️ ElevenLabs AI';
+      badge.textContent = 'Aktif: ⚡ ElevenLabs AI';
       badge.style.background = '#8e44ad';
     }
   }
 }
 
-/* SINTESIS SUARA ONLINE WANITA INDONESIA (DIRECT STREAMING - BEBAS CORS) */
+/* SINTESIS SUARA ONLINE WANITA INDONESIA GOOGLE (CADANGAN DARURAT) */
 function splitIntoSentences(text, maxLen = 160) {
   if (text.length <= maxLen) return [text];
   const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [text];
@@ -625,14 +666,12 @@ function speakWithGoogleTTS(text) {
     audio.onended = () => {
       playNext();
     };
-    audio.onerror = (e) => {
-      console.warn('Google TTS error, fallback ke suara browser:', e);
+    audio.onerror = () => {
       speaking = false;
       speakWithBrowser(text);
     };
 
-    audio.play().catch((err) => {
-      console.warn('Google TTS play failed, fallback ke suara browser:', err);
+    audio.play().catch(() => {
       speaking = false;
       speakWithBrowser(text);
     });
@@ -642,9 +681,7 @@ function speakWithGoogleTTS(text) {
   return true;
 }
 
-let speechSequence = 0;
-
-/* SINTESIS SUARA GADIS NEURAL (WANITA INDONESIA ASLI, JERNIH & SOPAN) */
+/* SINTESIS SUARA GADIS NEURAL (WANITA INDONESIA ASLI, JERNIH & SANTUN) */
 async function speakWithGadisTTS(text) {
   const clean = cleanSpeechText(text);
   if (!clean) return false;
@@ -653,6 +690,16 @@ async function speakWithGadisTTS(text) {
   const mySeq = ++speechSequence;
   playBuddyChime();
 
+  // 1. Prioritas Utama: File Audio Statis Pre-rendered (0ms delay, 100% konsisten)
+  if (GADIS_MANIFEST[clean]) {
+    const staticUrl = 'audio/tts/' + GADIS_MANIFEST[clean];
+    if (mySeq === speechSequence) {
+      playCachedAudio(staticUrl);
+    }
+    return true;
+  }
+
+  // 2. Cek memori audioCache lokal
   const cacheKey = 'gadis_v4_studio_' + clean;
   if (audioCache.has(cacheKey)) {
     if (mySeq === speechSequence) {
@@ -661,7 +708,7 @@ async function speakWithGadisTTS(text) {
     return true;
   }
 
-  // Jika web diakses melalui Local Server (http/https), panggil /api/tts (Gadis Neural + Disk Cache)
+  // 3. Panggil endpoint server /api/tts (Dynamic msedge-tts + Disk Cache)
   if (location.protocol.startsWith('http')) {
     try {
       activeTtsAbort = new AbortController();
@@ -688,19 +735,19 @@ async function speakWithGadisTTS(text) {
       }
     } catch (e) {
       if (e.name === 'AbortError') return false;
-      console.warn('[Gadis TTS API Warn, beralih ke Browser]:', e);
+      console.warn('[Gadis TTS API Warn]:', e);
     }
   }
 
   if (mySeq !== speechSequence) return false;
 
-  // Cadangan 1: Browser Native TTS (Di Edge otomatis Microsoft Gadis Natural)
-  if ('speechSynthesis' in window) {
+  // Cadangan: Hanya jika ada suara Indonesia resmi di browser
+  if (hasNativeIndonesianVoice()) {
     speakWithBrowser(text);
     return true;
   }
 
-  // Cadangan 2: Google TTS jika browser tidak mendukung
+  // Cadangan Terakhir
   return speakWithGoogleTTS(text);
 }
 
@@ -726,56 +773,53 @@ async function speakWithEasyVoice(text) {
     return true;
   }
 
-  // Gunakan proxy backend /api/tts (aman dari batasan CORS dan terlindungi enkripsi)
-  const targetUrl = '/api/tts';
-  const reqHeaders = { 'Content-Type': 'application/json' };
+  if (location.protocol.startsWith('http')) {
+    try {
+      activeTtsAbort = new AbortController();
+      const res = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          engine: 'easyvoice',
+          key: easyVoiceKey,
+          voice: easyVoiceVoice || 'af_heart',
+          text: clean
+        }),
+        signal: activeTtsAbort.signal
+      });
+      activeTtsAbort = null;
 
-  const payload = {
-    engine: 'easyvoice',
-    model: 'kokoro-82m',
-    input: clean,
-    voice: easyVoiceVoice || 'af_heart',
-    key: easyVoiceKey
-  };
+      if (mySeq !== speechSequence) return false;
 
-  try {
-    activeTtsAbort = new AbortController();
-    const res = await fetch(targetUrl, {
-      method: 'POST',
-      headers: reqHeaders,
-      body: JSON.stringify(payload),
-      signal: activeTtsAbort.signal
-    });
-    activeTtsAbort = null;
+      if (res.ok) {
+        const blob = await res.blob();
+        if (mySeq !== speechSequence) return false;
 
-    if (mySeq !== speechSequence) return false;
-
-    if (!res.ok) {
-      console.warn('EasyVoice API error, status:', res.status);
-      return false;
+        const url = URL.createObjectURL(blob);
+        audioCache.set(cacheKey, url);
+        if (mySeq === speechSequence) {
+          playCachedAudio(url);
+        }
+        return true;
+      }
+    } catch (e) {
+      if (e.name === 'AbortError') return false;
+      console.warn('EasyVoice failed:', e);
     }
-
-    const blob = await res.blob();
-    if (mySeq !== speechSequence) return false;
-
-    const url  = URL.createObjectURL(blob);
-    audioCache.set(cacheKey, url);
-
-    if (mySeq === speechSequence) {
-      playCachedAudio(url);
-    }
-    return true;
-  } catch (err) {
-    if (err.name === 'AbortError') return false;
-    console.warn('EasyVoice fetch failed, fallback ke Gadis TTS:', err);
-    return speakWithGadisTTS(text);
   }
+
+  if (mySeq !== speechSequence) return false;
+  return speakWithGadisTTS(text);
 }
 
 /* SINTESIS SUARA ELEVENLABS */
 async function speakWithElevenLabs(text) {
   const clean = cleanSpeechText(text);
-  if (!clean || !elevenApiKey || !elevenVoiceId) return false;
+  if (!clean) return false;
+
+  if (!elevenApiKey || !elevenVoiceId) {
+    return speakWithGadisTTS(text);
+  }
 
   stopAllAudio();
   const mySeq = ++speechSequence;
@@ -793,6 +837,7 @@ async function speakWithElevenLabs(text) {
     const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${elevenVoiceId}`, {
       method: 'POST',
       headers: {
+        'Accept': 'audio/mpeg',
         'xi-api-key': elevenApiKey,
         'Content-Type': 'application/json'
       },
@@ -811,14 +856,13 @@ async function speakWithElevenLabs(text) {
     if (mySeq !== speechSequence) return false;
 
     if (!res.ok) {
-      console.warn('ElevenLabs API error, fallback to Gadis TTS:', res.status);
       return speakWithGadisTTS(text);
     }
 
     const blob = await res.blob();
     if (mySeq !== speechSequence) return false;
 
-    const url  = URL.createObjectURL(blob);
+    const url = URL.createObjectURL(blob);
     audioCache.set(clean, url);
     if (mySeq === speechSequence) {
       playCachedAudio(url);
@@ -826,86 +870,29 @@ async function speakWithElevenLabs(text) {
     return true;
   } catch (err) {
     if (err.name === 'AbortError') return false;
-    console.warn('Gagal memanggil ElevenLabs, fallback ke Gadis:', err);
     return speakWithGadisTTS(text);
   }
 }
 
-let voiceAnalyser = null;
-let voiceFreqData = null;
-let visemeWindows = [];
-
-function initVoiceAnalyser(audioEl) {
-  try {
-    const ctx = getBuddyAudioContext();
-    if (!ctx) return;
-    if (!voiceAnalyser) {
-      voiceAnalyser = ctx.createAnalyser();
-      voiceAnalyser.fftSize = 256;
-      voiceAnalyser.smoothingTimeConstant = 0.35;
-      voiceFreqData = new Uint8Array(voiceAnalyser.frequencyBinCount);
-    }
-    if (audioEl && !audioEl._analyserConnected) {
-      try {
-        const src = ctx.createMediaElementSource(audioEl);
-        src.connect(voiceAnalyser);
-        voiceAnalyser.connect(ctx.destination);
-        audioEl._analyserConnected = true;
-      } catch (err) {
-        // Fallback jika createMediaElementSource dibatasi
-      }
-    }
-  } catch (e) {}
-}
-
-function triggerWordSyllables(word) {
-  const now = performance.now();
-  const vowels = (word.match(/[aiueo]/gi) || []).length;
-  const count = Math.max(1, Math.min(5, vowels || Math.round(word.length / 2.5)));
-  const sylDuration = 105; // ms per silabel bahasa Indonesia
-  const openDuration = 72; // ms durasi buka mulut per silabel
-
-  visemeWindows = [];
-  for (let i = 0; i < count; i++) {
-    const s = now + i * sylDuration;
-    visemeWindows.push([s, s + openDuration]);
-  }
-}
-
+/**
+ * Sinkronisasi Gerakan Mulut Alami (Lip-Sync Simetris & Lembut)
+ */
 function isMouthOpenNow() {
   if (!speaking) return false;
 
-  // 1. Analisis Spektrum Akustik Suara Riil (Web Audio API)
-  if (voiceAnalyser && voiceFreqData && currentAudioPlayer && !currentAudioPlayer.paused) {
-    try {
-      voiceAnalyser.getByteFrequencyData(voiceFreqData);
-      let sum = 0;
-      const startBin = 2;
-      const endBin = Math.min(26, voiceFreqData.length);
-      for (let i = startBin; i < endBin; i++) {
-        sum += voiceFreqData[i];
-      }
-      const vocalLevel = sum / (endBin - startBin);
-      if (vocalLevel > 14) return true;
-    } catch (e) {}
-  }
-
-  // 2. Viseme Sinkronisasi Kata/Silabel SpeechSynthesis
   const now = performance.now();
-  if (visemeWindows && visemeWindows.length > 0) {
-    for (let i = 0; i < visemeWindows.length; i++) {
-      if (now >= visemeWindows[i][0] && now <= visemeWindows[i][1]) {
-        return true;
-      }
-    }
-  }
-
-  // 3. Fallback irama percakapan alami
   const t = now / 1000;
-  return (Math.sin(t * 8.5) > 0.12) && (Math.sin(t * 2.2) > -0.65);
+
+  // Irama artikulasi bicara wanita alami yang halus & santun (buka-tutup simetris)
+  const wave1 = Math.sin(t * 9.2);
+  const wave2 = Math.sin(t * 3.1);
+  return (wave1 > 0.08) && (wave2 > -0.70);
 }
 window.isMouthOpenNow = isMouthOpenNow;
 
+/**
+ * Pemutar Audio HTML5 Langsung (Bebas Glitch, Volume Penuh, 100% Stabil)
+ */
 function playCachedAudio(url) {
   if (currentAudioPlayer) {
     try {
@@ -914,7 +901,6 @@ function playCachedAudio(url) {
       currentAudioPlayer.onplay  = null;
       currentAudioPlayer.pause();
       currentAudioPlayer.src = '';
-      currentAudioPlayer.load();
     } catch (e) {}
     currentAudioPlayer = null;
   }
@@ -925,23 +911,21 @@ function playCachedAudio(url) {
 
   const audio = new Audio();
   currentAudioPlayer = audio;
+  audio.preload = 'auto';
 
-  audio.onplay  = () => {
+  audio.onplay = () => {
     speaking = true;
-    initVoiceAnalyser(audio);
   };
   audio.onended = () => {
     if (currentAudioPlayer === audio) {
       speaking = false;
       currentAudioPlayer = null;
-      visemeWindows = [];
     }
   };
   audio.onerror = () => {
     if (currentAudioPlayer === audio) {
       speaking = false;
       currentAudioPlayer = null;
-      visemeWindows = [];
     }
   };
 
@@ -960,7 +944,7 @@ function playCachedAudio(url) {
   }
 }
 
-/* SINTESIS SUARA BROWSER (NATIVE TTS) */
+/* SINTESIS SUARA BROWSER (NATIVE TTS - KHUSUS JIKA MODE BROWSER DIPILIH) */
 function speakWithBrowser(text) {
   try {
     if (!('speechSynthesis' in window)) return;
@@ -984,34 +968,11 @@ function speakWithBrowser(text) {
       u.lang = 'id-ID';
     }
 
-    // Deteksi apakah suara terpilih wanita atau pria
-    const isMale = voice && /ardi|andika|david|mark|male|pria|laki/i.test(voice.name);
-    const isFemale = voice && /gadis|siti|reza|hana|yasmin|female|wanita|zira/i.test(voice.name);
-
-    if (isFemale) {
-      u.pitch = 1.0; // Artikulasi jernih & cerah
-      u.rate  = userVoiceRate * 0.98; // Tempo bicara natural & jelas
-    } else if (isMale) {
-      u.pitch = 1.15;
-      u.rate  = userVoiceRate * 0.96;
-    } else {
-      u.pitch = 1.0;
-      u.rate  = userVoiceRate * 0.98;
-    }
-
+    u.pitch = 1.0;
+    u.rate  = userVoiceRate * 0.98;
     u.volume = 1.0;
 
-    // Simpan utterance ke array global untuk mencegah garbage collection bug di Chromium/Edge
     activeUtterances.push(u);
-
-    u.onboundary = (e) => {
-      if (e.name === 'word') {
-        const textAfter = (spokenText || '').slice(e.charIndex);
-        const match = textAfter.match(/^\S+/);
-        const word = match ? match[0] : '';
-        triggerWordSyllables(word);
-      }
-    };
 
     u.onstart = () => {
       if (mySeq === speechSequence) {
@@ -1025,14 +986,12 @@ function speakWithBrowser(text) {
       const idx = activeUtterances.indexOf(u);
       if (idx >= 0) activeUtterances.splice(idx, 1);
       speaking = false;
-      visemeWindows = [];
     };
 
     u.onerror = (e) => {
       const idx = activeUtterances.indexOf(u);
       if (idx >= 0) activeUtterances.splice(idx, 1);
       speaking = false;
-      visemeWindows = [];
       if (e.error === 'not-allowed') {
         audioUnlocked = false;
         pendingSpeech = text;
@@ -1041,7 +1000,6 @@ function speakWithBrowser(text) {
 
     currentUtterance = u;
 
-    // Pastikan tidak dalam keadaan paused
     if (window.speechSynthesis.paused) {
       window.speechSynthesis.resume();
     }
@@ -1058,12 +1016,11 @@ function hasNativeIndonesianVoice() {
   return list.some(v => /^id([-_]|$)/i.test(v.lang) || /indonesia|gadis|siti/i.test(v.name));
 }
 
-/* Fungsi Utama Speak (Respon Instan Bebas Delay) */
+/* FUNGSI UTAMA SPEAK (KONSISTEN 100%, TANPA JEDA & TANPA PERUBAHAN SUARA) */
 function speak(text) {
   if (!voiceOn) return;
   if (!text || !text.trim()) return;
 
-  // Jika suara belum diizinkan oleh interaksi pengguna di browser, simpan antrian
   if (!audioUnlocked) {
     pendingSpeech = text;
     return;
@@ -1071,69 +1028,33 @@ function speak(text) {
 
   stopAllAudio();
 
-  const clean = cleanSpeechText(text);
-  const cacheKey = 'gadis_v4_studio_' + clean;
-
-  // 1. Jika audio sudah ada di memori cache, putar seketika (0ms delay)
-  if (audioCache.has(cacheKey)) {
-    speakWithGadisTTS(text);
-    return;
-  }
-
-  // 2. Respon Super Cepat (<50ms): Jika browser memiliki suara wanita Indonesia alami
-  // (seperti Microsoft Gadis Natural di Edge/Windows atau Google ID di Android),
-  // bicara seketika tanpa jeda/delay jaringan internet!
-  if (hasNativeIndonesianVoice() || voiceMode === 'browser') {
-    speakWithBrowser(text);
-    return;
-  }
-
-  // 3. Mode Suara Online Gadis Neural (jika browser belum terpasang suara ID)
+  // Mode 1 (Default): Suara Resmi Wanita Indonesia Gadis Neural Studio
   if (voiceMode === 'online') {
     speakWithGadisTTS(text);
     return;
   }
 
-  // 4. EasyVoice AI
+  // Mode 2: Browser TTS
+  if (voiceMode === 'browser') {
+    speakWithBrowser(text);
+    return;
+  }
+
+  // Mode 3: EasyVoice AI
   if (voiceMode === 'easyvoice') {
-    speakWithEasyVoice(text).then((success) => {
-      if (!success) speakWithBrowser(text);
+    speakWithEasyVoice(text).then((ok) => {
+      if (!ok) speakWithGadisTTS(text);
     });
     return;
   }
 
-  // 5. ElevenLabs
-  if (voiceMode === 'elevenlabs' && elevenApiKey && elevenVoiceId) {
-    speakWithElevenLabs(text).then((success) => {
-      if (!success) speakWithBrowser(text);
+  // Mode 4: ElevenLabs AI
+  if (voiceMode === 'elevenlabs') {
+    speakWithElevenLabs(text).then((ok) => {
+      if (!ok) speakWithGadisTTS(text);
     });
     return;
   }
 
-  // 6. Cadangan Browser Universal
-  speakWithBrowser(text);
+  speakWithGadisTTS(text);
 }
-
-// Preload audio sambutan & panduan di background agar selalu instan
-setTimeout(() => {
-  try {
-    if (typeof fetch === 'undefined') return;
-    const preloads = [
-      'Selamat datang di PT PLN (Persero) Pusharlis. Saya PLN ners, asisten virtual Anda. Dengan senang hati, saya siap memandu Bapak dan Ibu dalam proses pengisian formulir registrasi kunjungan. Silakan tekan tombol Mulai Panduan untuk bimbingan langkah demi langkah.',
-      'Langkah pertama. Silakan tekan tombol Ambil Foto, arahkan pandangan wajah ke kamera, kemudian tekan Ambil Foto kembali untuk menyimpan potret.'
-    ];
-    preloads.forEach((txt) => {
-      const clean = cleanSpeechText(txt);
-      const cacheKey = 'gadis_v4_studio_' + clean;
-      if (!audioCache.has(cacheKey)) {
-        fetch('/api/tts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ engine: 'gadis', text: clean })
-        }).then(r => r.ok ? r.blob() : null).then(b => {
-          if (b) audioCache.set(cacheKey, URL.createObjectURL(b));
-        }).catch(() => {});
-      }
-    });
-  } catch (e) {}
-}, 1200);

@@ -100,7 +100,7 @@ function initApp() {
       if (!passInput) return;
       const isPass = (passInput.type === 'password');
       passInput.type = isPass ? 'text' : 'password';
-      btnTogglePass.textContent = isPass ? '🙈' : '👁️';
+      btnTogglePass.textContent = isPass ? '👁️' : '🙈';
     };
   }
 

@@ -37,7 +37,7 @@ function cleanSpeechText(text) {
     .replace(/Ctrl\s*V/gi, 'Control V')
     .replace(/16\s*digit/gi, 'enam belas digit')
     .replace(/12\s*digit/gi, 'dua belas digit')
-    .replace(/1–99/g, 'satu sampai sembilan puluh sembilan')
+    .replace(/1\s*[-–—]\s*99/g, 'satu sampai sembilan puluh sembilan')
     .replace(/([.!?])\s*/g, '$1 ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -107,9 +107,11 @@ module.exports = async (req, res) => {
   const cachePrefix = (engine === 'easyvoice') ? `ev_${voice}` : 'gadis_v4_studio';
   const hash = crypto.createHash('md5').update(cachePrefix + '_' + text).digest('hex');
   const cacheFile = path.join(TMP_CACHE, `${hash}.mp3`);
+  const staticFile = path.join(__dirname, '..', 'audio', 'tts', `${hash}.mp3`);
+  const fileToServe = fs.existsSync(cacheFile) ? cacheFile : (fs.existsSync(staticFile) ? staticFile : null);
 
-  if (fs.existsSync(cacheFile)) {
-    const stat = fs.statSync(cacheFile);
+  if (fileToServe) {
+    const stat = fs.statSync(fileToServe);
     if (stat.size > 1000) {
       res.writeHead(200, {
         'Content-Type': 'audio/mpeg',
@@ -117,7 +119,7 @@ module.exports = async (req, res) => {
         'X-Cache': 'HIT',
         'Cache-Control': 'public, max-age=31536000'
       });
-      fs.createReadStream(cacheFile).pipe(res);
+      fs.createReadStream(fileToServe).pipe(res);
       return;
     }
   }

@@ -175,7 +175,7 @@ function cleanSpeechText(text) {
     .replace(/Ctrl\s*V/gi, 'Control V')
     .replace(/16\s*digit/gi, 'enam belas digit')
     .replace(/12\s*digit/gi, 'dua belas digit')
-    .replace(/1–99/g, 'satu sampai sembilan puluh sembilan')
+    .replace(/1\s*[-–—]\s*99/g, 'satu sampai sembilan puluh sembilan')
     .replace(/([.!?])\s*/g, '$1 ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -306,13 +306,15 @@ const server = http.createServer(async (req, res) => {
           return;
         }
 
-        // 1. Cek Disk Cache Lokal
+        // 1. Cek Disk Cache & Static Pre-rendered Audio
         const cachePrefix = (engine === 'easyvoice') ? `ev_${voice}` : 'gadis_v4_studio';
         const hash = crypto.createHash('md5').update(cachePrefix + '_' + text).digest('hex');
         const cacheFile = path.join(CACHE_DIR, `${hash}.mp3`);
+        const staticFile = path.join(ROOT, 'audio', 'tts', `${hash}.mp3`);
+        const fileToServe = fs.existsSync(cacheFile) ? cacheFile : (fs.existsSync(staticFile) ? staticFile : null);
 
-        if (fs.existsSync(cacheFile)) {
-          const stat = fs.statSync(cacheFile);
+        if (fileToServe) {
+          const stat = fs.statSync(fileToServe);
           if (stat.size > 1000) {
             console.log(`[Cache Hit] ${hash.slice(0, 8)} (${stat.size} bytes) - "${text.slice(0, 30)}..."`);
             res.writeHead(200, {
@@ -321,7 +323,7 @@ const server = http.createServer(async (req, res) => {
               'X-Cache': 'HIT',
               'Cache-Control': 'public, max-age=31536000'
             });
-            fs.createReadStream(cacheFile).pipe(res);
+            fs.createReadStream(fileToServe).pipe(res);
             return;
           }
         }

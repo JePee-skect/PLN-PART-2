@@ -11,12 +11,12 @@ let lastKtpMsg = '';
 let apdBoxes = [];
 
 function initForm() {
-  // Inisialisasi dropdown jumlah tamu (1–99) dengan format yang jelas dan mudah dibaca
+  // Inisialisasi dropdown jumlah tamu (1–99)
   const jmlSelect = $('#jml');
   if (jmlSelect) {
     jmlSelect.innerHTML =
-      '<option value="" disabled selected>— Pilih Jumlah Tamu (1–99 Orang) —</option>' +
-      Array.from({ length: 99 }, (_, i) => `<option value="${i + 1}">${i + 1} Orang</option>`).join('');
+      '<option value="">Pilih jumlah (1–99)</option>' +
+      Array.from({ length: 99 }, (_, i) => `<option>${i + 1}</option>`).join('');
   }
 
   const f = $('#f');

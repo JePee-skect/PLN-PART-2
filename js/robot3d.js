@@ -240,7 +240,7 @@ function createHumanAvatar(T) {
     return tex;
   }
 
-  const CACHE_V = '?v=20261112g';
+  const CACHE_V = '?v=20261112i';
   const texIdle       = loadAvatarTex('img/human-avatar.png' + CACHE_V);
   const texBlink      = loadAvatarTex('img/human-avatar-blink.png' + CACHE_V);
   const texTalk       = loadAvatarTex('img/human-avatar-talk.png' + CACHE_V);
@@ -400,9 +400,9 @@ function animate(ms) {
   let guideBodyLeanX = 0;
   if (isGuiding || isSpeaking) {
     // Menoleh proaktif ke arah formulir input dan condong antusias
-    guideBodyTurnY = isDockedLeft ? 0.20 : -0.20;
-    guideBodyLeanX = 0.045;
-    if (!speechLeanZ) speechLeanZ = 0.04;
+    guideBodyTurnY = isDockedLeft ? 0.28 : -0.28;
+    guideBodyLeanX = 0.055;
+    if (!speechLeanZ) speechLeanZ = 0.06;
   }
 
   // 6. Komposisi Rotasi & Posisi 3D yang Halus (Smooth Interpolation)

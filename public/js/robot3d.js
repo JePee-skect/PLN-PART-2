@@ -25,14 +25,13 @@ function initRobot3D() {
       powerPreference: 'high-performance'
     });
 
-    // Retina HD Ultra-Sharp Rendering
+    // Retina HD Ultra-Sharp Rendering (Jernih, Tajam & Bebas Buram)
     const pr = Math.min(window.devicePixelRatio || 1, 2.5);
     renderer.setPixelRatio(pr);
-    renderer.setSize(260, 380, false);
+    renderer.setSize(260, 380, true);
 
-    if (THREE.ACESFilmicToneMapping) {
-      renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.05;
+    if (THREE.NoToneMapping) {
+      renderer.toneMapping = THREE.NoToneMapping;
     }
     if (THREE.sRGBEncoding) {
       renderer.outputEncoding = THREE.sRGBEncoding;
@@ -247,12 +246,10 @@ function createHumanAvatar(T) {
   }
   geom.computeVertexNormals();
 
-  const avatarMat = new T.MeshStandardMaterial({
+  const avatarMat = new T.MeshBasicMaterial({
     map: texIdle,
     transparent: true,
-    roughness: 0.55,
-    metalness: 0.02,
-    alphaTest: 0.03,
+    alphaTest: 0.02,
     side: T.DoubleSide
   });
 

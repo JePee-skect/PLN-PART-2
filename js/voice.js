@@ -961,7 +961,13 @@ function speakWithBrowser(text) {
   }
 }
 
-/* Fungsi Utama Speak */
+function hasNativeIndonesianVoice() {
+  if (!('speechSynthesis' in window)) return false;
+  const list = window.speechSynthesis.getVoices() || [];
+  return list.some(v => /^id([-_]|$)/i.test(v.lang) || /indonesia|gadis|siti/i.test(v.name));
+}
+
+/* Fungsi Utama Speak (Respon Instan Bebas Delay) */
 function speak(text) {
   if (!voiceOn) return;
   if (!text || !text.trim()) return;
@@ -974,30 +980,69 @@ function speak(text) {
 
   stopAllAudio();
 
-  // 1. Mode Suara Wanita Indonesia (Default: Gadis Neural / Edge Natural)
+  const clean = cleanSpeechText(text);
+  const cacheKey = 'gadis_v4_studio_' + clean;
+
+  // 1. Jika audio sudah ada di memori cache, putar seketika (0ms delay)
+  if (audioCache.has(cacheKey)) {
+    speakWithGadisTTS(text);
+    return;
+  }
+
+  // 2. Respon Super Cepat (<50ms): Jika browser memiliki suara wanita Indonesia alami
+  // (seperti Microsoft Gadis Natural di Edge/Windows atau Google ID di Android),
+  // bicara seketika tanpa jeda/delay jaringan internet!
+  if (hasNativeIndonesianVoice() || voiceMode === 'browser') {
+    speakWithBrowser(text);
+    return;
+  }
+
+  // 3. Mode Suara Online Gadis Neural (jika browser belum terpasang suara ID)
   if (voiceMode === 'online') {
     speakWithGadisTTS(text);
     return;
   }
 
-  // 2. EasyVoice AI
+  // 4. EasyVoice AI
   if (voiceMode === 'easyvoice') {
     speakWithEasyVoice(text).then((success) => {
-      if (!success) {
-        speakWithGadisTTS(text);
-      }
+      if (!success) speakWithBrowser(text);
     });
     return;
   }
 
-  // 3. ElevenLabs
+  // 5. ElevenLabs
   if (voiceMode === 'elevenlabs' && elevenApiKey && elevenVoiceId) {
     speakWithElevenLabs(text).then((success) => {
-      if (!success) speakWithGadisTTS(text);
+      if (!success) speakWithBrowser(text);
     });
     return;
   }
 
-  // 4. Suara Browser Bawaan (Offline Fallback)
+  // 6. Cadangan Browser Universal
   speakWithBrowser(text);
 }
+
+// Preload audio sambutan & panduan di background agar selalu instan
+setTimeout(() => {
+  try {
+    if (typeof fetch === 'undefined') return;
+    const preloads = [
+      'Selamat datang di PT PLN (Persero) Pusharlis. Saya PLN ners, asisten virtual Anda. Dengan senang hati, saya siap memandu Bapak dan Ibu dalam proses pengisian formulir registrasi kunjungan. Silakan tekan tombol Mulai Panduan untuk bimbingan langkah demi langkah.',
+      'Langkah pertama. Silakan tekan tombol Ambil Foto, arahkan pandangan wajah ke kamera, kemudian tekan Ambil Foto kembali untuk menyimpan potret.'
+    ];
+    preloads.forEach((txt) => {
+      const clean = cleanSpeechText(txt);
+      const cacheKey = 'gadis_v4_studio_' + clean;
+      if (!audioCache.has(cacheKey)) {
+        fetch('/api/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ engine: 'gadis', text: clean })
+        }).then(r => r.ok ? r.blob() : null).then(b => {
+          if (b) audioCache.set(cacheKey, URL.createObjectURL(b));
+        }).catch(() => {});
+      }
+    });
+  } catch (e) {}
+}, 1200);

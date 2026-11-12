@@ -227,7 +227,7 @@ function createHumanAvatar(T) {
     return tex;
   }
 
-  const CACHE_V = '?v=20261112c';
+  const CACHE_V = '?v=20261112d';
   const texIdle       = loadAvatarTex('img/human-avatar.png' + CACHE_V);
   const texBlink      = loadAvatarTex('img/human-avatar-blink.png' + CACHE_V);
   const texTalk       = loadAvatarTex('img/human-avatar-talk.png' + CACHE_V);
@@ -341,8 +341,8 @@ function animate(ms) {
   const isBlinking = blinkCycle < 0.14;
 
   // 4. Siklus Gerakan Bibir Berbicara (Lip Articulation Sync saat speaking)
-  // Mengikuti irama frekuensi suku kata bahasa Indonesia (~5-6 suku kata per detik)
-  const isTalking = isSpeaking && (Math.sin(t * 16.0) > 0.10);
+  // Irama artikulasi lembut & natural bahasa Indonesia (~3-4 suku kata per detik)
+  const isTalking = isSpeaking && (Math.sin(t * 9.0) > -0.15);
 
   // 5. Pergantian Tekstur Realistis (State Machine)
   let nextTex = R.texIdle;
@@ -369,9 +369,8 @@ function animate(ms) {
     R.ring2.rotation.z -= 0.022;
     R.ring2.rotation.y = Math.cos(t * 1.1) * 0.06;
 
-    // Denyut cahaya cincin saat berbicara
-    const ringPulse = isSpeaking ? (1.8 + Math.sin(t * 10) * 0.4) : (1.4 + Math.sin(t * 2.0) * 0.25);
-    R.ring1.material.emissiveIntensity = ringPulse;
+    // Cahaya cincin stabil & elegan (tanpa efek kedip disko)
+    R.ring1.material.emissiveIntensity = isSpeaking ? 1.6 : 1.3;
   }
 
   // 7. Animasi Lencana Sambutan Interaktif

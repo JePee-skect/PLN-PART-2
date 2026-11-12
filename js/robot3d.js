@@ -233,8 +233,8 @@ function createHumanAvatar(T) {
 
   // Bidang 3D bervolume kurvatur halus (Cylindrical depth mapping)
   // Memberikan kedalaman perspektif 3D yang nyata saat kepala menoleh
-  const meshW = 3.02;
-  const meshH = 4.48;
+  const meshW = 3.10;
+  const meshH = 4.15;
   const geom = new T.PlaneGeometry(meshW, meshH, 24, 24);
 
   const posAttr = geom.attributes.position;

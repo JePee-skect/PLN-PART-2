@@ -831,6 +831,81 @@ async function speakWithElevenLabs(text) {
   }
 }
 
+let voiceAnalyser = null;
+let voiceFreqData = null;
+let visemeWindows = [];
+
+function initVoiceAnalyser(audioEl) {
+  try {
+    const ctx = getBuddyAudioContext();
+    if (!ctx) return;
+    if (!voiceAnalyser) {
+      voiceAnalyser = ctx.createAnalyser();
+      voiceAnalyser.fftSize = 256;
+      voiceAnalyser.smoothingTimeConstant = 0.35;
+      voiceFreqData = new Uint8Array(voiceAnalyser.frequencyBinCount);
+    }
+    if (audioEl && !audioEl._analyserConnected) {
+      try {
+        const src = ctx.createMediaElementSource(audioEl);
+        src.connect(voiceAnalyser);
+        voiceAnalyser.connect(ctx.destination);
+        audioEl._analyserConnected = true;
+      } catch (err) {
+        // Fallback jika createMediaElementSource dibatasi
+      }
+    }
+  } catch (e) {}
+}
+
+function triggerWordSyllables(word) {
+  const now = performance.now();
+  const vowels = (word.match(/[aiueo]/gi) || []).length;
+  const count = Math.max(1, Math.min(5, vowels || Math.round(word.length / 2.5)));
+  const sylDuration = 105; // ms per silabel bahasa Indonesia
+  const openDuration = 72; // ms durasi buka mulut per silabel
+
+  visemeWindows = [];
+  for (let i = 0; i < count; i++) {
+    const s = now + i * sylDuration;
+    visemeWindows.push([s, s + openDuration]);
+  }
+}
+
+function isMouthOpenNow() {
+  if (!speaking) return false;
+
+  // 1. Analisis Spektrum Akustik Suara Riil (Web Audio API)
+  if (voiceAnalyser && voiceFreqData && currentAudioPlayer && !currentAudioPlayer.paused) {
+    try {
+      voiceAnalyser.getByteFrequencyData(voiceFreqData);
+      let sum = 0;
+      const startBin = 2;
+      const endBin = Math.min(26, voiceFreqData.length);
+      for (let i = startBin; i < endBin; i++) {
+        sum += voiceFreqData[i];
+      }
+      const vocalLevel = sum / (endBin - startBin);
+      if (vocalLevel > 14) return true;
+    } catch (e) {}
+  }
+
+  // 2. Viseme Sinkronisasi Kata/Silabel SpeechSynthesis
+  const now = performance.now();
+  if (visemeWindows && visemeWindows.length > 0) {
+    for (let i = 0; i < visemeWindows.length; i++) {
+      if (now >= visemeWindows[i][0] && now <= visemeWindows[i][1]) {
+        return true;
+      }
+    }
+  }
+
+  // 3. Fallback irama percakapan alami
+  const t = now / 1000;
+  return (Math.sin(t * 8.5) > 0.12) && (Math.sin(t * 2.2) > -0.65);
+}
+window.isMouthOpenNow = isMouthOpenNow;
+
 function playCachedAudio(url) {
   if (currentAudioPlayer) {
     try {
@@ -851,17 +926,22 @@ function playCachedAudio(url) {
   const audio = new Audio();
   currentAudioPlayer = audio;
 
-  audio.onplay  = () => { speaking = true; };
+  audio.onplay  = () => {
+    speaking = true;
+    initVoiceAnalyser(audio);
+  };
   audio.onended = () => {
     if (currentAudioPlayer === audio) {
       speaking = false;
       currentAudioPlayer = null;
+      visemeWindows = [];
     }
   };
   audio.onerror = () => {
     if (currentAudioPlayer === audio) {
       speaking = false;
       currentAudioPlayer = null;
+      visemeWindows = [];
     }
   };
 
@@ -924,6 +1004,15 @@ function speakWithBrowser(text) {
     // Simpan utterance ke array global untuk mencegah garbage collection bug di Chromium/Edge
     activeUtterances.push(u);
 
+    u.onboundary = (e) => {
+      if (e.name === 'word') {
+        const textAfter = (spokenText || '').slice(e.charIndex);
+        const match = textAfter.match(/^\S+/);
+        const word = match ? match[0] : '';
+        triggerWordSyllables(word);
+      }
+    };
+
     u.onstart = () => {
       if (mySeq === speechSequence) {
         speaking = true;
@@ -936,12 +1025,14 @@ function speakWithBrowser(text) {
       const idx = activeUtterances.indexOf(u);
       if (idx >= 0) activeUtterances.splice(idx, 1);
       speaking = false;
+      visemeWindows = [];
     };
 
     u.onerror = (e) => {
       const idx = activeUtterances.indexOf(u);
       if (idx >= 0) activeUtterances.splice(idx, 1);
       speaking = false;
+      visemeWindows = [];
       if (e.error === 'not-allowed') {
         audioUnlocked = false;
         pendingSpeech = text;

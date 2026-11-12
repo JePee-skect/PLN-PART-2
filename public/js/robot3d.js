@@ -10,6 +10,13 @@ let wasDragged = false;
 let mouseTargetX = 0;
 let mouseTargetY = 0;
 
+/* State & Variasi Gerakan 3D PLN ners */
+let wasSpeaking = false;
+let speechStartTime = 0;
+let currentMood = 0; // 0: fokus ramah, 1: miringkan kepala manis, 2: melirik ke formulir
+let nextMoodTime = 0;
+let avatarHovered = false;
+
 function initRobot3D() {
   enableDrag();
   enableCursorTracking();
@@ -82,6 +89,12 @@ function enableCursorTracking() {
     mouseTargetX = (e.clientX / window.innerWidth - 0.5) * 0.40;
     mouseTargetY = (e.clientY / window.innerHeight - 0.5) * 0.30;
   }, { passive: true });
+
+  const fab = $('#fab');
+  if (fab) {
+    fab.addEventListener('pointerenter', () => { avatarHovered = true; });
+    fab.addEventListener('pointerleave', () => { avatarHovered = false; });
+  }
 }
 
 function enableDrag() {
@@ -227,7 +240,7 @@ function createHumanAvatar(T) {
     return tex;
   }
 
-  const CACHE_V = '?v=20261112d';
+  const CACHE_V = '?v=20261112e';
   const texIdle       = loadAvatarTex('img/human-avatar.png' + CACHE_V);
   const texBlink      = loadAvatarTex('img/human-avatar-blink.png' + CACHE_V);
   const texTalk       = loadAvatarTex('img/human-avatar-talk.png' + CACHE_V);
@@ -302,7 +315,8 @@ function createHumanAvatar(T) {
     texTalkBlink,
     ring1,
     ring2,
-    badgeMesh
+    badgeMesh,
+    shadow
   };
 }
 
@@ -315,36 +329,93 @@ function animate(ms) {
 
   const isSpeaking = (typeof speaking !== 'undefined' && speaking);
 
-  // 1. Gerakan Mengapung & Nafas Alami (Natural Breathing & Floating Bob)
-  const breath = Math.sin(t * 1.8) * 0.038;
-  R.avatarMesh.position.y = 0.12 + breath;
+  // Deteksi transisi mulai berbicara untuk gestur salam awal (Welcoming Bow)
+  if (isSpeaking && !wasSpeaking) {
+    speechStartTime = ms;
+  }
+  wasSpeaking = isSpeaking;
 
-  // 2. Interaksi Tatapan Kursor 3D (3D Head & Eye Gaze Tracking)
-  // Menoleh dan memiringkan kepala secara halus mengikuti gerakan kursor pengguna
+  // 1. Pernafasan & Apungan Organik Multi-Harmonis (Bebas Kaku)
+  const breathY = Math.sin(t * 1.6) * 0.038 + Math.sin(t * 0.8) * 0.016;
+  const swayX   = Math.cos(t * 0.9) * 0.020;
+
+  // 2. Interaksi Tatapan Kursor 3D (Head Gaze Tracking)
   const botEl = document.getElementById('bot');
   const isDockedLeft = botEl && botEl.classList.contains('left');
-
-  // Jika bot di kanan, tubuh sedikit menghadap kiri (-0.08) ke arah form; jika di kiri sebaliknya (+0.08)
   const baseAngleY = isDockedLeft ? 0.08 : -0.08;
 
-  const targetRotY = baseAngleY + mouseTargetX * 0.48 + Math.sin(t * 0.8) * 0.025;
-  const targetRotX = -mouseTargetY * 0.32 + Math.sin(t * 0.6) * 0.015;
-  const targetRotZ = mouseTargetX * 0.10 + Math.sin(t * 0.8) * 0.012;
+  // 3. Gestur Khusus Saat Berbicara vs Saat Menyimak (Variatif & Hidup)
+  let speechNodX = 0;
+  let speechTiltZ = 0;
+  let speechLeanZ = 0;
 
-  const lerpSpeed = 0.08;
+  if (isSpeaking) {
+    const speechElapsed = ms - speechStartTime;
+
+    // A. Gestur Awal: Anggukan Sambutan Sopan / Welcoming Bow (pada 1.1 detik pertama)
+    if (speechElapsed < 1100) {
+      const bowP = speechElapsed / 1100;
+      const bowArc = Math.sin(bowP * Math.PI);
+      speechNodX += bowArc * 0.08;
+      speechTiltZ += bowArc * 0.04;
+    }
+
+    // B. Variasi Gerakan Bicara Hidup: Penekanan irama suara & ayunan luwes
+    const speechRhythm = Math.sin(t * 3.6) * 0.030 + Math.sin(t * 1.5) * 0.018;
+    speechNodX += speechRhythm;
+    speechTiltZ += Math.sin(t * 2.0) * 0.035;
+    speechLeanZ = 0.05 + Math.sin(t * 1.4) * 0.018; // condong ke depan ke arah user
+  }
+
+  // 4. Variasi Perilaku Saat Diam / Menunggu (Idle Companion Behaviors)
+  let idleTiltZ = 0;
+  let idlePitchX = 0;
+  let idleTurnY = 0;
+
+  if (!isSpeaking) {
+    if (ms > nextMoodTime) {
+      currentMood = (currentMood + 1) % 3;
+      nextMoodTime = ms + 6500 + Math.random() * 2500;
+    }
+
+    if (currentMood === 1) {
+      // Mood 1: Miringkan kepala manis (curious friendly companion tilt)
+      idleTiltZ = 0.065;
+    } else if (currentMood === 2) {
+      // Mood 2: Melirik ke arah formulir & menyimak dengan anggukan lembut
+      idleTurnY = isDockedLeft ? 0.06 : -0.06;
+      idlePitchX = -0.028 + Math.sin(t * 1.2) * 0.015;
+    }
+  }
+
+  // 5. Reaksi Interaktif Saat Kursor Hover di atas Asisten
+  const hoverLiftY  = avatarHovered ? 0.04 : 0;
+  const hoverPitchX = avatarHovered ? -0.035 : 0;
+
+  // 6. Komposisi Rotasi & Posisi 3D yang Halus (Smooth Interpolation)
+  const targetRotY = baseAngleY + idleTurnY + mouseTargetX * 0.44 + Math.sin(t * 0.7) * 0.020;
+  const targetRotX = -mouseTargetY * 0.28 + hoverPitchX + idlePitchX + speechNodX + Math.sin(t * 0.5) * 0.012;
+  const targetRotZ = mouseTargetX * 0.12 + idleTiltZ + speechTiltZ;
+
+  const lerpSpeed = isSpeaking ? 0.10 : 0.07;
   R.avatarMesh.rotation.y += (targetRotY - R.avatarMesh.rotation.y) * lerpSpeed;
   R.avatarMesh.rotation.x += (targetRotX - R.avatarMesh.rotation.x) * lerpSpeed;
   R.avatarMesh.rotation.z += (targetRotZ - R.avatarMesh.rotation.z) * lerpSpeed;
 
-  // 3. Siklus Kedipan Mata Alami (Natural Blink Cycle: tiap ~4 detik selama 140ms)
-  const blinkCycle = t % 4.0;
-  const isBlinking = blinkCycle < 0.14;
+  R.avatarMesh.position.x += (swayX - R.avatarMesh.position.x) * 0.08;
+  R.avatarMesh.position.y += (0.14 + breathY + hoverLiftY - R.avatarMesh.position.y) * 0.08;
+  R.avatarMesh.position.z += (speechLeanZ - R.avatarMesh.position.z) * 0.08;
 
-  // 4. Siklus Gerakan Bibir Berbicara (Lip Articulation Sync saat speaking)
-  // Irama artikulasi lembut & natural bahasa Indonesia (~3-4 suku kata per detik)
-  const isTalking = isSpeaking && (Math.sin(t * 9.0) > -0.15);
+  // 7. Kedipan Mata Alami (Kombinasi Kedipan Tunggal & Ganda Alami)
+  const blinkCycle = t % 4.6;
+  const isBlinking = (blinkCycle < 0.12) || (blinkCycle > 0.26 && blinkCycle < 0.38);
 
-  // 5. Pergantian Tekstur Realistis (State Machine)
+  // 8. Sinkronisasi Gerakan Bibir Riil Akustik & Silabel (True Lip-Sync)
+  const isTalking = (typeof window.isMouthOpenNow === 'function')
+    ? window.isMouthOpenNow()
+    : (isSpeaking && (Math.sin(t * 8.0) > 0.12));
+
+  // 9. Pergantian Tekstur Realistis (State Machine)
   let nextTex = R.texIdle;
   if (isTalking && isBlinking) {
     nextTex = R.texTalkBlink;
@@ -361,21 +432,29 @@ function animate(ms) {
     R.avatarMat.needsUpdate = true;
   }
 
-  // 6. Putaran Halus Cincin Orbital Holografik PLN
+  // 10. Putaran & Levitasi Fisika Cincin Orbital Holografik PLN
   if (R.ring1 && R.ring2) {
-    R.ring1.rotation.z += 0.016;
-    R.ring1.rotation.x = Math.PI / 2 + Math.sin(t * 1.4) * 0.05;
+    const spinSpeed = avatarHovered ? 0.024 : (isSpeaking ? 0.019 : 0.014);
+    R.ring1.rotation.z += spinSpeed;
+    R.ring1.rotation.x = Math.PI / 2 + Math.sin(t * 1.3) * 0.04;
 
-    R.ring2.rotation.z -= 0.022;
-    R.ring2.rotation.y = Math.cos(t * 1.1) * 0.06;
+    R.ring2.rotation.z -= spinSpeed * 1.25;
+    R.ring2.rotation.y = Math.cos(t * 1.1) * 0.05;
 
-    // Cahaya cincin stabil & elegan (tanpa efek kedip disko)
-    R.ring1.material.emissiveIntensity = isSpeaking ? 1.6 : 1.3;
+    R.ring1.position.y = -1.65 + breathY * 0.45;
+    R.ring2.position.y = -1.74 + breathY * 0.65;
+    R.ring1.material.emissiveIntensity = isSpeaking ? 1.6 : (avatarHovered ? 1.5 : 1.3);
   }
 
-  // 7. Animasi Lencana Sambutan Interaktif
+  // 11. Animasi Lencana Sambutan & Bayangan Lantai
   if (R.badgeMesh) {
-    R.badgeMesh.position.y = -1.52 + breath * 0.5;
+    R.badgeMesh.position.y = -1.52 + breathY * 0.50;
+  }
+
+  if (R.shadow) {
+    const sScale = Math.max(0.85, 1.0 - breathY * 1.6);
+    R.shadow.scale.set(sScale, sScale, 1.0);
+    R.shadow.material.opacity = 0.18 - breathY * 0.06;
   }
 
   if (renderer && scene && camera) {

@@ -150,6 +150,14 @@ function initAssistant() {
     };
   }
 
+  const pclose = $('#pclose');
+  if (pclose) {
+    pclose.onclick = (e) => {
+      e.stopPropagation();
+      if ($('#panel')) $('#panel').classList.add('hide');
+    };
+  }
+
   const bub = $('#bub');
   if (bub && fab) {
     bub.onclick = () => fab.click();
@@ -244,12 +252,13 @@ function showBubble(text) {
       <span>PLN ners • PLN Pusharlis</span>
     </div>
     <div class="bub-text">${esc(text)}</div>
+    <div class="bub-hint">💬 Ketuk balon untuk buka Chat AI</div>
   `;
   b.classList.remove('hide');
   clearTimeout(bubbleTimer);
   bubbleTimer = setTimeout(() => {
     b.classList.add('hide');
-  }, Math.max(5000, text.length * 75));
+  }, Math.max(7000, text.length * 85));
 }
 
 function botHello(page, force = false) {

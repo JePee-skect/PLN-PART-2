@@ -72,9 +72,9 @@
 #bub {
   position: absolute;
   right: 122px;
-  bottom: 62px;
+  bottom: 50px;
   width: max-content;
-  max-width: min(280px, calc(100vw - 180px));
+  max-width: min(290px, calc(100vw - 160px));
   padding: 12px 16px;
   border: 2.5px solid #3bb7e6;
   border-radius: 18px;
@@ -85,6 +85,10 @@
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  box-sizing: border-box;
+  z-index: 45;
 }
 
 #bub:hover {
@@ -119,6 +123,19 @@
   font-weight: 600;
   line-height: 1.42;
   color: #f8fafc;
+}
+
+.bub-hint {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 11px;
+  font-weight: 600;
+  color: #3bb7e6;
+  letter-spacing: 0.2px;
 }
 
 #bub::after {
@@ -163,15 +180,17 @@
   position: absolute;
   right: 0;
   bottom: 198px;
-  width: 270px;
-  max-width: calc(100vw - 36px);
-  max-height: calc(100vh - 250px);
+  width: 300px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 220px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   border-radius: 16px;
   background: var(--card);
-  box-shadow: 0 10px 40px #0007;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  border: 1.5px solid var(--acc);
+  z-index: 50;
 }
 
 #stage {
@@ -347,7 +366,8 @@
 }
 
 /* =============================================================
-   4. RESPONSIF ROBOT & BALON PADA LAYAR KECIL
+   4. RESPONSIF ROBOT & BALON PADA LAYAR KECIL (MOBILE)
+   Balon dan panel tampil di atas karakter agar tidak terpotong ke samping
    ============================================================= */
 @media (max-width: 600px) {
   #fab {
@@ -356,21 +376,50 @@
   }
 
   #bub {
-    right: 92px;
-    bottom: 40px;
-    font-size: 12.5px;
+    right: 0 !important;
+    left: auto !important;
+    bottom: 165px !important;
+    width: max-content !important;
+    max-width: min(300px, calc(100vw - 28px)) !important;
+    font-size: 12.5px !important;
   }
 
-  #panel {
-    bottom: 152px;
-    max-height: calc(100vh - 210px);
+  #bub::after {
+    right: 36px !important;
+    left: auto !important;
+    top: auto !important;
+    bottom: -11px !important;
+    border-top: 11px solid #3bb7e6 !important;
+    border-left: 9px solid transparent !important;
+    border-right: 9px solid transparent !important;
+    border-bottom: 0 !important;
   }
 
   #bot.left #bub {
-    left: 92px;
+    left: 0 !important;
+    right: auto !important;
+  }
+
+  #bot.left #bub::after {
+    left: 36px !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: -11px !important;
+    border-top: 11px solid #3bb7e6 !important;
+    border-left: 9px solid transparent !important;
+    border-right: 9px solid transparent !important;
+    border-bottom: 0 !important;
+  }
+
+  #panel {
+    bottom: 165px !important;
+    width: calc(100vw - 32px) !important;
+    max-width: 320px !important;
+    max-height: calc(100vh - 190px) !important;
   }
 
   #bot.top #panel {
-    top: 152px;
+    top: 165px !important;
+    bottom: auto !important;
   }
 }

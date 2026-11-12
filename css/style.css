@@ -4,7 +4,9 @@
    ============================================================= */
 
 /* =============================================================
-   1. TEMA & VARIABEL WARNA
+   1. TEMA & VARIABEL WARNA (KONSISTEN KORPORAT PLN PUSHARLIS)
+   Tema disamakan dengan identitas web PLN lama (#186174 & #144456)
+   dan tidak mengikuti tema gelap browser (prefers-color-scheme).
    ============================================================= */
 :root {
   --card:  #ffffff;
@@ -12,36 +14,15 @@
   --muted: #475569;
   --input: #ffffff;
   --line:  #d1d5db;
-  --th:    #fff;
-  --side:  #17435a;
-  --bg:    #f3f6f9;
-  --acc:   #1b6378;
+  --th:    #ffffff;
+  --side:  #144456; /* Navy Teal Sidebar dari web lama */
+  --bg:    #186174; /* Rich Teal Body Background dari web lama */
+  --acc:   #186174; /* Button / Primary Action Color */
+  --pri:   #186174;
 
   box-sizing: border-box;
   padding-top:    env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-
-/* Dark mode otomatis */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme=light]) {
-    --bg:    #11191f;
-    --card:  #1f2a30;
-    --text:  #eef2f3;
-    --muted: #b5c0c5;
-    --input: #17212626;
-    --line:  #3b4a52;
-  }
-}
-
-/* Dark mode manual */
-:root[data-theme=dark] {
-  --bg:    #11191f;
-  --card:  #1f2a30;
-  --text:  #eef2f3;
-  --muted: #b5c0c5;
-  --input: #17212626;
-  --line:  #3b4a52;
 }
 
 html { scroll-padding-top: env(safe-area-inset-top, 0px); }
@@ -84,12 +65,12 @@ main {
   padding: 36px 44px;
   border-radius: 12px;
   background: var(--card);
-  border: 1px solid var(--line);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
 }
 
-h1 { font-size: 23px; margin: 0 0 24px; }
-h2 { font-size: 20px; margin: 26px 0 12px; }
+h1 { font-size: 23px; margin: 0 0 24px; color: #0f172a; font-weight: 700; }
+h2 { font-size: 20px; margin: 26px 0 12px; color: #0f172a; font-weight: 600; }
 
 /* =============================================================
    3. BILAH SAMPING (SIDEBAR)
@@ -159,8 +140,9 @@ nav a.on { background: rgba(255, 255, 255, .12); }
 label {
   display: block;
   margin: 18px 0 8px;
-  color: var(--muted);
-  font-size: 15px;
+  color: #334155;
+  font-size: 14.5px;
+  font-weight: 600;
 }
 
 input[type=text],
@@ -225,7 +207,8 @@ select:focus {
 }
 
 .btn:hover {
-  opacity: 0.9;
+  background: #144456;
+  opacity: 0.95;
 }
 
 .btn.sm {

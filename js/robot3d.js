@@ -1,7 +1,8 @@
 /* =====================================================================
    VISITOR MANAGEMENT SYSTEM - PT PLN (PERSERO) PUSHARLIS
    Robot 3D Three.js: Asisten Virtual Concierge K3 "PLN ners"
-   Desain Ultra-HD, Lengan & Tangan Proporsional Anggun, Bebas Aksesoris Berlebih
+   Desain Futuristik, Elegan & Profesional Khas PT PLN (Persero)
+   Dilengkapi Helm K3 Kuning PLN, Visor Digital, Rompi & Lencana Korporat
    ===================================================================== */
 
 let renderer, scene, camera, rig, robot;
@@ -31,7 +32,7 @@ function initRobot3D() {
 
     if (THREE.ACESFilmicToneMapping) {
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.05;
+      renderer.toneMappingExposure = 1.08;
     }
     if (THREE.sRGBEncoding) {
       renderer.outputEncoding = THREE.sRGBEncoding;
@@ -43,22 +44,22 @@ function initRobot3D() {
     camera = new THREE.PerspectiveCamera(36, 260 / 380, 0.1, 50);
     camera.position.set(0, 0.1, 8.0);
 
-    // Pencahayaan Studio Bersih & Lembut (HD Soft Balanced Lighting)
-    scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+    // Pencahayaan Studio Korporat Terang & Bersih
+    scene.add(new THREE.AmbientLight(0xffffff, 0.88));
 
     // Key Light Utama (Putih Terang Bersih dari atas kanan)
-    const keyLight = new THREE.DirectionalLight(0xffffff, 0.85);
-    keyLight.position.set(2.2, 3.5, 4.0);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 0.90);
+    keyLight.position.set(2.4, 3.8, 4.2);
     scene.add(keyLight);
 
-    // Fill Light Biru Cyan PLN Lembut (Memberikan refleksi biru khas PLN dari kiri)
-    const fillLight = new THREE.DirectionalLight(0x00d2f0, 0.40);
-    fillLight.position.set(-2.5, 0.0, 3.0);
+    // Fill Light Biru Cyan Khas PLN (Memberikan kilau futuristik dari kiri)
+    const fillLight = new THREE.DirectionalLight(0x00d2f0, 0.45);
+    fillLight.position.set(-2.6, 0.2, 3.2);
     scene.add(fillLight);
 
-    // Rim Light Emas Mewah di Belakang (Mempertegas siluet cantik & helm)
-    const rimLight = new THREE.DirectionalLight(0xffdf6d, 0.50);
-    rimLight.position.set(0, 3.0, -3.5);
+    // Rim Light Emas di Belakang (Mempertegas siluet helm & bahu)
+    const rimLight = new THREE.DirectionalLight(0xffe600, 0.55);
+    rimLight.position.set(0, 3.2, -3.5);
     scene.add(rimLight);
 
     rig = new THREE.Group();
@@ -121,10 +122,12 @@ function enableDrag() {
     if (moved) {
       wasDragged = true;
       setTimeout(() => { wasDragged = false; }, 60);
-      store.set('vms-pos', {
-        x: parseFloat(bot.style.left),
-        y: parseFloat(bot.style.top)
-      });
+      if (typeof store !== 'undefined' && store.set) {
+        store.set('vms-pos', {
+          x: parseFloat(bot.style.left),
+          y: parseFloat(bot.style.top)
+        });
+      }
     }
   }
 
@@ -151,9 +154,11 @@ function enableDrag() {
   fab.addEventListener('pointerup', end);
   fab.addEventListener('pointercancel', end);
 
-  const saved = store.get('vms-pos', null);
-  if (saved && isFinite(saved.x) && isFinite(saved.y)) {
-    place(saved.x, saved.y);
+  if (typeof store !== 'undefined' && store.get) {
+    const saved = store.get('vms-pos', null);
+    if (saved && isFinite(saved.x) && isFinite(saved.y)) {
+      place(saved.x, saved.y);
+    }
   }
 
   window.addEventListener('resize', () => {
@@ -164,7 +169,7 @@ function enableDrag() {
 }
 
 /**
- * Texture Logo Miniatur untuk Emblem Helm APD PLN (256x256)
+ * Texture Logo Resmi Miniatur untuk Helm K3 PLN (256x256)
  */
 function createHelmetPLNLogo(T) {
   const canvas = document.createElement('canvas');
@@ -172,13 +177,16 @@ function createHelmetPLNLogo(T) {
   canvas.height = 256;
   const ctx = canvas.getContext('2d');
 
+  // Latar kuning PLN
   ctx.fillStyle = '#ffe600';
   ctx.fillRect(0, 0, 256, 256);
 
+  // Border putih & emas
   ctx.strokeStyle = '#ffffff';
   ctx.lineWidth = 8;
-  ctx.strokeRect(4, 4, 248, 248);
+  ctx.strokeRect(6, 6, 244, 244);
 
+  // Tiga Gelombang Air Biru
   ctx.strokeStyle = '#0093d8';
   ctx.lineWidth = 14;
   ctx.lineCap = 'round';
@@ -192,8 +200,9 @@ function createHelmetPLNLogo(T) {
     ctx.stroke();
   }
 
+  // Kilat Petir Merah PLN
   ctx.fillStyle = '#ed1c24';
-  ctx.strokeStyle = '#c4131b';
+  ctx.strokeStyle = '#b8141b';
   ctx.lineWidth = 3;
   ctx.beginPath();
   ctx.moveTo(148, 16);
@@ -206,11 +215,12 @@ function createHelmetPLNLogo(T) {
   ctx.fill();
   ctx.stroke();
 
+  // Teks PLN
   ctx.fillStyle = '#002855';
-  ctx.font = '900 52px "Poppins", Arial, sans-serif';
+  ctx.font = '900 50px "Poppins", Arial, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('PLN', 128, 215);
+  ctx.fillText('PLN', 128, 216);
 
   const canvasTex = new T.CanvasTexture(canvas);
   canvasTex.generateMipmaps = true;
@@ -222,7 +232,7 @@ function createHelmetPLNLogo(T) {
 }
 
 /**
- * Texture Name Tag Logam Korporat Ramping & Elegan (512x200)
+ * Texture Name Tag Korporat Elegan "PLN ners" (512x200)
  */
 function createCompactBadgeTexture(T) {
   const canvas = document.createElement('canvas');
@@ -234,10 +244,12 @@ function createCompactBadgeTexture(T) {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, 512, 200);
 
+    // Bingkai emas mewah
     ctx.strokeStyle = '#f2c94c';
-    ctx.lineWidth = 10;
+    ctx.lineWidth = 8;
     ctx.strokeRect(5, 5, 502, 190);
 
+    // Logo PLN di kiri
     if (imgObj && imgObj.complete && imgObj.naturalWidth > 0) {
       const dw = 110;
       const dh = Math.round(dw * (imgObj.height / imgObj.width));
@@ -249,36 +261,13 @@ function createCompactBadgeTexture(T) {
       else ctx.fillRect(25, 25, 110, 110);
       ctx.fill();
 
-      ctx.strokeStyle = '#0093d8';
-      ctx.lineWidth = 7;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      for (let row = 0; row < 3; row++) {
-        const y = 52 + row * 22;
-        ctx.beginPath();
-        ctx.moveTo(35, y);
-        ctx.bezierCurveTo(55, y - 10, 75, y + 10, 95, y);
-        ctx.bezierCurveTo(105, y - 10, 118, y + 10, 125, y);
-        ctx.stroke();
-      }
-
-      ctx.fillStyle = '#ed1c24';
-      ctx.beginPath();
-      ctx.moveTo(90, 32);
-      ctx.lineTo(55,  85);
-      ctx.lineTo(80,  85);
-      ctx.lineTo(75,  130);
-      ctx.lineTo(110, 78);
-      ctx.lineTo(88,  78);
-      ctx.closePath();
-      ctx.fill();
-
       ctx.fillStyle = '#002855';
       ctx.font = '900 36px "Poppins", Arial, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText('PLN', 80, 175);
     }
 
+    // Garis pemisah vertikal
     ctx.strokeStyle = '#d4af37';
     ctx.lineWidth = 3;
     ctx.beginPath();
@@ -297,9 +286,9 @@ function createCompactBadgeTexture(T) {
     ctx.font = '900 48px "Poppins", Arial, sans-serif';
     ctx.fillText('PLN ners', 175, 112);
 
-    ctx.fillStyle = '#27ae60';
+    ctx.fillStyle = '#16a34a';
     ctx.font = 'bold 18px "Poppins", Arial, sans-serif';
-    ctx.fillText('● ASISTEN VIRTUAL & PETUGAS K3', 175, 155);
+    ctx.fillText('● ASISTEN VIRTUAL K3 & CONCIERGE', 175, 155);
   }
 
   renderBadge(null);
@@ -328,35 +317,32 @@ function createCompactBadgeTexture(T) {
   });
 }
 
+/**
+ * Pembuatan Model 3D Robot Asisten Virtual PLN ners
+ * Desain Bersih, Modern, Formal & Ramah
+ */
 function createRobot(T) {
   const mat = (color, opt = {}) => new T.MeshStandardMaterial({
     color,
-    roughness: 0.25,
+    roughness: 0.22,
     metalness: 0.15,
     ...opt
   });
 
   const C = {
-    // Keramik porselen putih feminin anggun & bersih
-    porcelain:     mat(0xfcfdff, { roughness: 0.15, metalness: 0.10 }),
-    skin:          mat(0xffffff, { roughness: 0.12, metalness: 0.05 }),
-    hairWhite:     mat(0xf4f7fa, { roughness: 0.20, metalness: 0.12 }),
-    hairCyan:      mat(0x00d2f0, { roughness: 0.18, metalness: 0.35 }),
-    plnTeal:       mat(0x007a87, { roughness: 0.22, metalness: 0.28 }),
-    plnNavy:       mat(0x002855, { roughness: 0.25, metalness: 0.20 }),
-    gold:          mat(0xf5c518, { roughness: 0.18, metalness: 0.85 }),
-    silver:        mat(0xd8e2ec, { roughness: 0.20, metalness: 0.70 }),
-    visor:         mat(0x07111c, { roughness: 0.04, metalness: 0.90 }),
-    glow:          mat(0x00f0ff, { emissive: 0x00f0ff, emissiveIntensity: 1.6 }),
-    eyeSparkle:    mat(0xffffff, { emissive: 0xffffff, emissiveIntensity: 1.2 }),
-    blush:         mat(0xff5c8a, { emissive: 0xff3366, emissiveIntensity: 0.90 }),
-    coreGlow:      mat(0x00f7ff, { emissive: 0x00f7ff, emissiveIntensity: 1.8 }),
-    goldGlow:      mat(0xffd500, { emissive: 0xffaa00, emissiveIntensity: 1.4 }),
-    lash:          mat(0x0a1017, { roughness: 0.15, metalness: 0.50 }),
-
-    // APD Helm Keselamatan K3 PLN
-    helmetYellow:  mat(0xffe600, { roughness: 0.15, metalness: 0.18 }),
-    reflective:    mat(0xffffff, { roughness: 0.08, metalness: 0.95, emissive: 0x778899, emissiveIntensity: 0.22 })
+    // Sasis keramik putih aerodinamis mengkilap
+    ceramic:       mat(0xffffff, { roughness: 0.14, metalness: 0.08 }),
+    chassisDark:   mat(0x13232c, { roughness: 0.25, metalness: 0.40 }),
+    plnTeal:       mat(0x186174, { roughness: 0.20, metalness: 0.30 }),
+    plnNavy:       mat(0x144456, { roughness: 0.22, metalness: 0.25 }),
+    gold:          mat(0xf5c518, { roughness: 0.16, metalness: 0.85 }),
+    silver:        mat(0xd4dee6, { roughness: 0.18, metalness: 0.75 }),
+    visor:         mat(0x060e15, { roughness: 0.04, metalness: 0.94 }),
+    cyanGlow:      mat(0x00e5ff, { emissive: 0x00e5ff, emissiveIntensity: 1.8 }),
+    yellowGlow:    mat(0xffe600, { emissive: 0xffaa00, emissiveIntensity: 1.6 }),
+    eyeSparkle:    mat(0xffffff, { emissive: 0xffffff, emissiveIntensity: 1.4 }),
+    helmetYellow:  mat(0xffcc00, { roughness: 0.18, metalness: 0.15 }),
+    reflective:    mat(0xf8fafc, { roughness: 0.08, metalness: 0.95, emissive: 0x8899aa, emissiveIntensity: 0.30 })
   };
 
   const ball = (r, m, [sx, sy, sz], [x, y, z], parent, seg = 48) => {
@@ -376,353 +362,341 @@ function createRobot(T) {
 
   const g = new T.Group();
 
-  /* ================= 1. KEPALA, WAJAH & HELM APD K3 PLN ================= */
+  /* ================= 1. KEPALA, VISOR DIGITAL & HELM K3 PLN ================= */
   const head = new T.Group();
-  head.position.y = 1.05;
+  head.position.y = 1.02;
   g.add(head);
 
-  // Kepala porselen halus
-  ball(0.88, C.porcelain, [1.02, 1.08, 1.00], [0, 0, 0], head, 54);
+  // Kubah kepala keramik putih mulus berproporsi ramah (smooth droid egg head)
+  ball(0.86, C.ceramic, [1.02, 1.06, 0.98], [0, 0, 0], head, 52);
 
-  // Visor kaca obsidian gelap melengkung
-  ball(0.70, C.visor, [1.00, 0.78, 0.44], [0, 0.02, 0.66], head, 48);
+  // Visor kaca obsidian gelap melengkung (wajah digital resolusi tinggi)
+  ball(0.72, C.visor, [0.98, 0.78, 0.44], [0, 0.01, 0.64], head, 48);
 
-  // Rambut bob mutiara
-  const hairCap = new T.Mesh(
-    new T.SphereGeometry(0.91, 48, 28, 0, Math.PI * 2, 0, Math.PI * 0.56),
-    C.hairWhite
+  // Bezel/frame emas elegan melingkari visor
+  const visorTrim = new T.Mesh(
+    new T.TorusGeometry(0.72, 0.024, 10, 48, Math.PI * 0.85),
+    C.gold
   );
-  hairCap.scale.set(1.03, 1.09, 1.02);
-  hairCap.position.set(0, 0.05, -0.05);
-  hairCap.rotation.x = -0.12;
-  head.add(hairCap);
+  visorTrim.position.set(0, 0.01, 0.60);
+  visorTrim.rotation.x = 0.18;
+  head.add(visorTrim);
 
-  // Poni dahi anggun menyembul di bawah helm
-  ball(0.18, C.hairWhite, [0.95, 0.50, 0.28], [0, 0.40, 0.74], head);
-  ball(0.15, C.hairWhite, [0.80, 0.48, 0.26], [-0.24, 0.36, 0.72], head);
-  ball(0.15, C.hairWhite, [0.80, 0.48, 0.26], [0.24, 0.36, 0.72], head);
-
-  // Helai rambut samping membingkai pipi
-  const hairLocks = [];
-  [-1, 1].forEach((side) => {
-    const lock = cyl(0.10, 0.035, 0.85, C.hairWhite, [side * 0.88, -0.20, 0.18], head, false, 28);
-    lock.rotation.z = side * -0.15;
-    lock.rotation.x = 0.05;
-    hairLocks.push(lock);
-
-    const highlight = cyl(0.045, 0.016, 0.68, C.hairCyan, [side * 0.82, -0.18, 0.25], head, false, 20);
-    highlight.rotation.z = side * -0.18;
-
-    const clip = new T.Mesh(new T.BoxGeometry(0.05, 0.14, 0.02), C.gold);
-    clip.position.set(side * 0.84, 0.26, 0.45);
-    clip.rotation.y = side * 0.35;
-    head.add(clip);
-  });
-
-  // Helm Keselamatan K3 Kuning PLN
+  // --- HELM KESELAMATAN APD K3 KUNING PLN ---
+  // Kubah atas helm
   const helmetDome = new T.Mesh(
-    new T.SphereGeometry(0.96, 48, 28, 0, Math.PI * 2, 0, Math.PI * 0.48),
+    new T.SphereGeometry(0.95, 48, 28, 0, Math.PI * 2, 0, Math.PI * 0.48),
     C.helmetYellow
   );
-  helmetDome.scale.set(1.06, 1.08, 1.06);
-  helmetDome.position.set(0, 0.20, -0.04);
-  helmetDome.rotation.x = -0.10;
+  helmetDome.scale.set(1.05, 1.08, 1.05);
+  helmetDome.position.set(0, 0.22, -0.02);
+  helmetDome.rotation.x = -0.08;
   head.add(helmetDome);
 
+  // Lidah / visor depan helm APD K3
   const helmetBrim = new T.Mesh(
-    new T.TorusGeometry(0.98, 0.038, 12, 48, Math.PI * 0.62),
+    new T.TorusGeometry(0.96, 0.042, 12, 48, Math.PI * 0.64),
     C.helmetYellow
   );
-  helmetBrim.position.set(0, 0.18, 0.12);
-  helmetBrim.rotation.x = 0.32;
+  helmetBrim.position.set(0, 0.20, 0.14);
+  helmetBrim.rotation.x = 0.30;
   head.add(helmetBrim);
 
-  const helmetRidge = cyl(0.035, 0.045, 1.15, C.helmetYellow, [0, 1.16, -0.04], head);
+  // Tulang rusuk penguat aerodinamis atas helm (aerodynamic helmet crown ridge)
+  const helmetRidge = cyl(0.038, 0.048, 1.18, C.helmetYellow, [0, 1.18, -0.02], head);
   helmetRidge.rotation.x = Math.PI / 2.05;
 
-  const helmetLogoMat = createHelmetPLNLogo(T);
-  const helmetLogoBadge = new T.Mesh(new T.PlaneGeometry(0.22, 0.22), helmetLogoMat);
-  helmetLogoBadge.position.set(0, 0.66, 0.90);
-  helmetLogoBadge.rotation.x = -0.15;
-  head.add(helmetLogoBadge);
-
-  const helmetBadgeBezel = new T.Mesh(new T.BoxGeometry(0.24, 0.24, 0.015), C.gold);
-  helmetBadgeBezel.position.set(0, 0.66, 0.89);
-  helmetBadgeBezel.rotation.x = -0.15;
-  head.add(helmetBadgeBezel);
-
+  // Pita reflektif perak keselamatan K3 (High-visibility reflective safety strip)
   const helmetReflective = new T.Mesh(
-    new T.TorusGeometry(1.01, 0.018, 8, 48, Math.PI * 0.85),
+    new T.TorusGeometry(0.99, 0.020, 8, 48, Math.PI * 0.88),
     C.reflective
   );
-  helmetReflective.position.set(0, 0.36, -0.02);
+  helmetReflective.position.set(0, 0.38, -0.02);
   helmetReflective.rotation.x = 0.12;
   head.add(helmetReflective);
 
-  [-1, 1].forEach((k) => {
-    const earpod = cyl(0.20, 0.20, 0.12, C.porcelain, [k * 0.96, 0.02, 0], head);
+  // Emblem Lambang Resmi PT PLN (Persero) di Depan Helm
+  const helmetLogoMat = createHelmetPLNLogo(T);
+  const helmetLogoBadge = new T.Mesh(new T.PlaneGeometry(0.24, 0.24), helmetLogoMat);
+  helmetLogoBadge.position.set(0, 0.68, 0.90);
+  helmetLogoBadge.rotation.x = -0.15;
+  head.add(helmetLogoBadge);
+
+  const helmetBadgeBezel = new T.Mesh(new T.BoxGeometry(0.26, 0.26, 0.015), C.gold);
+  helmetBadgeBezel.position.set(0, 0.68, 0.89);
+  helmetBadgeBezel.rotation.x = -0.15;
+  head.add(helmetBadgeBezel);
+
+  // --- COMMUNICATOR AUDIO & BOOM MIC PADA TELINGA ---
+  [-1, 1].forEach((side) => {
+    // Earpod sasis keramik
+    const earpod = cyl(0.22, 0.22, 0.14, C.ceramic, [side * 0.94, 0.02, 0], head);
     earpod.rotation.z = Math.PI / 2;
 
-    const ring = new T.Mesh(new T.TorusGeometry(0.16, 0.018, 8, 24), C.gold);
-    ring.position.set(k * 1.04, 0.02, 0);
+    // Ring emas
+    const ring = new T.Mesh(new T.TorusGeometry(0.18, 0.020, 8, 28), C.gold);
+    ring.position.set(side * 1.02, 0.02, 0);
     ring.rotation.y = Math.PI / 2;
     head.add(ring);
 
-    const led = cyl(0.10, 0.10, 0.02, C.glow, [k * 1.05, 0.02, 0], head);
+    // Indikator LED cyan bercahaya
+    const led = cyl(0.11, 0.11, 0.025, C.cyanGlow, [side * 1.03, 0.02, 0], head);
     led.rotation.z = Math.PI / 2;
   });
 
-  const micArm = cyl(0.014, 0.014, 0.36, C.silver, [-0.85, -0.06, 0.30], head);
+  // Boom Mic di telinga kiri mengarah ke mulut
+  const micArm = cyl(0.015, 0.015, 0.38, C.silver, [-0.85, -0.06, 0.32], head);
   micArm.rotation.x = Math.PI / 2.6;
-  micArm.rotation.z = -0.38;
-  ball(0.032, C.glow, [1, 1, 1.2], [-0.68, -0.16, 0.58], head);
+  micArm.rotation.z = -0.36;
+  ball(0.035, C.cyanGlow, [1, 1, 1.2], [-0.68, -0.16, 0.60], head);
 
-  // Mata anime simetris & cantik
+  // --- MATA DIGITAL LED CYAN RAMAH & MODERN ---
   const eyesGroup = new T.Group();
   head.add(eyesGroup);
 
   [-1, 1].forEach((side) => {
     const eye = new T.Group();
-    eye.position.set(side * 0.27, 0.04, 0.98);
+    eye.position.set(side * 0.28, 0.04, 0.97);
     eye.scale.set(side, 1, 1);
     eyesGroup.add(eye);
 
-    const upperLash = new T.Mesh(
-      new T.TorusGeometry(0.125, 0.020, 10, 32, Math.PI * 0.65),
-      C.lash
+    // Bentuk mata LED melengkung ramah (friendly smiling curved capsule)
+    const eyeArc = new T.Mesh(
+      new T.TorusGeometry(0.125, 0.028, 10, 32, Math.PI * 0.68),
+      C.cyanGlow
     );
-    upperLash.rotation.z = Math.PI * 0.18;
-    eye.add(upperLash);
+    eyeArc.rotation.z = Math.PI * 0.16;
+    eye.add(eyeArc);
 
-    const irisGlow = new T.Mesh(
-      new T.TorusGeometry(0.100, 0.024, 10, 32, Math.PI * 0.62),
-      C.glow
-    );
-    irisGlow.position.set(0, -0.01, 0.01);
-    irisGlow.rotation.z = Math.PI * 0.19;
-    eye.add(irisGlow);
-
-    ball(0.034, C.eyeSparkle, [1, 1, 0.6], [0.03, 0.05, 0.02], eye);
+    // Titik kilau LED digital
+    ball(0.032, C.eyeSparkle, [1, 1, 0.6], [0.03, 0.05, 0.02], eye);
     ball(0.018, C.eyeSparkle, [1, 1, 0.6], [-0.04, 0.00, 0.02], eye);
-
-    const lash1 = cyl(0.005, 0.016, 0.11, C.lash, [0.12, 0.09, 0.01], eye);
-    lash1.rotation.z = -0.55;
-
-    const lash2 = cyl(0.004, 0.012, 0.08, C.lash, [0.13, 0.05, 0.01], eye);
-    lash2.rotation.z = -0.95;
   });
 
-  const blushGroup = new T.Group();
-  head.add(blushGroup);
-  [-0.36, 0.36].forEach((x) => {
-    ball(0.055, C.blush, [1.5, 0.6, 0.3], [x, -0.11, 0.94], blushGroup);
-  });
-
+  // --- MULUT INDIKATOR GELOMBANG DIGITAL (VOICE WAVEFORM) ---
   const smile = new T.Mesh(
-    new T.TorusGeometry(0.11, 0.016, 8, 24, Math.PI * 0.60),
-    C.glow
+    new T.TorusGeometry(0.10, 0.016, 8, 24, Math.PI * 0.58),
+    C.cyanGlow
   );
-  smile.rotation.z = Math.PI * 1.20;
-  smile.position.set(0, -0.19, 0.99);
+  smile.rotation.z = Math.PI * 1.21;
+  smile.position.set(0, -0.18, 0.98);
   head.add(smile);
 
   const mouthBars = [];
-  const barSpacing = 0.055;
+  const barSpacing = 0.052;
   for (let i = -2; i <= 2; i++) {
-    const bar = new T.Mesh(new T.BoxGeometry(0.020, 0.09, 0.02), C.glow);
-    bar.position.set(i * barSpacing, -0.19, 1.00);
+    const bar = new T.Mesh(new T.BoxGeometry(0.022, 0.09, 0.02), C.cyanGlow);
+    bar.position.set(i * barSpacing, -0.18, 0.99);
     bar.scale.y = 0.2;
     head.add(bar);
     mouthBars.push(bar);
   }
 
-  /* ================= 2. SERAGAM KORPORAT BERSIH & RAMPING ================= */
-  cyl(0.15, 0.17, 0.22, C.skin, [0, -0.03, 0], g);
-  cyl(0.18, 0.18, 0.035, C.gold, [0, -0.06, 0], g);
+  /* ================= 2. LEHER & BADAN KORPORAT PLN ================= */
+  // Sendi leher mekanis titanium
+  cyl(0.18, 0.22, 0.20, C.silver, [0, 0.02, 0], g);
+  const neckRing = cyl(0.24, 0.24, 0.035, C.gold, [0, 0.00, 0], g);
+  cyl(0.20, 0.20, 0.015, C.cyanGlow, [0, 0.04, 0], g);
 
   const torso = new T.Group();
-  torso.position.y = -0.68;
+  torso.position.y = -0.66;
   g.add(torso);
 
-  // Bodi porselen putih mulus
-  ball(0.78, C.porcelain, [0.74, 0.90, 0.60], [0, 0, 0], torso, 48);
+  // Bodi sasis keramik putih aerodinamis
+  ball(0.78, C.ceramic, [0.78, 0.92, 0.60], [0, 0, 0], torso, 48);
 
-  // Kerah Blazer PLN Signature Teal
+  // Rompi Keselamatan K3 PLN Signature Teal & High-Vis Yellow
   [-0.26, 0.26].forEach((x, idx) => {
     const side = (idx === 0) ? -1 : 1;
-    const lapel = new T.Mesh(new T.BoxGeometry(0.24, 0.54, 0.06), C.plnTeal);
-    lapel.position.set(x, 0.12, 0.46);
-    lapel.rotation.y = side * -0.20;
-    lapel.rotation.z = side * 0.08;
-    torso.add(lapel);
+    // Panel dada teal
+    const vestPanel = new T.Mesh(new T.BoxGeometry(0.25, 0.54, 0.06), C.plnTeal);
+    vestPanel.position.set(x, 0.12, 0.46);
+    vestPanel.rotation.y = side * -0.20;
+    vestPanel.rotation.z = side * 0.08;
+    torso.add(vestPanel);
 
-    const lapelGold = new T.Mesh(new T.BoxGeometry(0.024, 0.56, 0.07), C.gold);
-    lapelGold.position.set(x - side * 0.12, 0.12, 0.48);
-    lapelGold.rotation.y = side * -0.20;
-    lapelGold.rotation.z = side * 0.08;
-    torso.add(lapelGold);
+    // Garis strip kuning keselamatan K3
+    const vestYellow = new T.Mesh(new T.BoxGeometry(0.038, 0.56, 0.07), C.helmetYellow);
+    vestYellow.position.set(x - side * 0.11, 0.12, 0.48);
+    vestYellow.rotation.y = side * -0.20;
+    vestYellow.rotation.z = side * 0.08;
+    torso.add(vestYellow);
+
+    // Strip reflektif perak
+    const vestReflective = new T.Mesh(new T.BoxGeometry(0.018, 0.56, 0.075), C.reflective);
+    vestReflective.position.set(x - side * 0.08, 0.12, 0.49);
+    vestReflective.rotation.y = side * -0.20;
+    vestReflective.rotation.z = side * 0.08;
+    torso.add(vestReflective);
   });
 
-  // Reaktor Daya Bersih Arc Core Cyan di Tengah Dada
+  // Reaktor Daya Listrik Pusat / Arc Core Petir PLN di Tengah Dada
   const coreBezel = cyl(0.14, 0.14, 0.04, C.gold, [0, 0.18, 0.50], torso);
   coreBezel.rotation.x = Math.PI / 2;
 
-  const arcCore = cyl(0.10, 0.10, 0.05, C.coreGlow, [0, 0.18, 0.51], torso);
+  const arcCore = cyl(0.10, 0.10, 0.05, C.cyanGlow, [0, 0.18, 0.51], torso);
   arcCore.rotation.x = Math.PI / 2;
 
-  // Lencana Dada Horizontal Ramping: Name Tag "PLN ners"
+  // Lambang kilat emas di atas reaktor
+  const lightningCore = new T.Mesh(new T.ConeGeometry(0.04, 0.08, 3), C.yellowGlow);
+  lightningCore.position.set(0, 0.18, 0.54);
+  lightningCore.rotation.z = Math.PI;
+  torso.add(lightningCore);
+
+  // Lencana Name Tag "PLN ners"
   const compactBadgeMat = createCompactBadgeTexture(T);
   const badgeMesh = new T.Mesh(new T.PlaneGeometry(0.36, 0.14), compactBadgeMat);
-  badgeMesh.position.set(0.18, 0.18, 0.53);
+  badgeMesh.position.set(0.18, 0.18, 0.54);
   badgeMesh.rotation.set(-0.04, -0.16, 0);
   torso.add(badgeMesh);
 
   const badgeBackplate = new T.Mesh(new T.BoxGeometry(0.38, 0.16, 0.015), C.gold);
-  badgeBackplate.position.set(0.18, 0.18, 0.52);
+  badgeBackplate.position.set(0.18, 0.18, 0.53);
   badgeBackplate.rotation.set(-0.04, -0.16, 0);
   torso.add(badgeBackplate);
 
-  // Sabuk Emas Ramping di Pinggang
-  const belt = cyl(0.48, 0.48, 0.045, C.gold, [0, -0.32, 0], torso);
-  const beltBuckle = cyl(0.07, 0.07, 0.05, C.glow, [0, -0.32, 0.45], torso);
+  // Sabuk pinggang navy & emas
+  cyl(0.48, 0.48, 0.045, C.plnNavy, [0, -0.32, 0], torso);
+  const beltTrim = cyl(0.49, 0.49, 0.015, C.gold, [0, -0.32, 0], torso);
+  const beltBuckle = cyl(0.07, 0.07, 0.05, C.cyanGlow, [0, -0.32, 0.45], torso);
   beltBuckle.rotation.x = Math.PI / 2;
 
-  /* ================= 3. LENGAN & TANGAN NATURAL ANATOMIS & SISTEM GERAK PENGARAH ================= */
-  // Fungsi pembuat telapak tangan robotik android yang lentik, proporsional & jelas terlihat
+  /* ================= 3. LENGAN & TANGAN ROBOTIK ARTICULATED ================= */
   function createAndroidHand(side) {
     const handGroup = new T.Group();
 
-    // 1. Telapak Tangan Halus Porselen & Silikon (Proporsi Solid & Jelas)
-    ball(0.095, C.skin, [1.0, 0.85, 0.50], [0, -0.070, 0.018], handGroup, 24);
-    ball(0.088, C.porcelain, [0.95, 0.80, 0.38], [0, -0.065, -0.014], handGroup, 20);
-    ball(0.024, C.glow, [1, 0.6, 0.4], [0, -0.060, -0.030], handGroup, 14); // Indikator LED telapak punggung
+    // Telapak tangan robotik putih aerodinamis
+    ball(0.092, C.ceramic, [0.95, 0.85, 0.45], [0, -0.068, 0.018], handGroup, 24);
+    ball(0.024, C.cyanGlow, [1, 0.6, 0.4], [0, -0.060, -0.028], handGroup, 14);
 
-    // 2. Empat Jari Lentik Berartikulasi (Index, Middle, Ring, Pinky)
-    // Sisi dalam (dekat ibu jari) adalah +X untuk tangan kiri (side === -1), dan -X untuk tangan kanan (side === 1)
+    // 4 Jari berartikulasi proporsional
     const fingerOffsets = (side === -1)
-      ? [0.036, 0.012, -0.012, -0.036]
-      : [-0.036, -0.012, 0.012, 0.036];
-    const fingerLengths = [0.135, 0.150, 0.132, 0.108];
+      ? [0.034, 0.011, -0.011, -0.034]
+      : [-0.034, -0.011, 0.011, 0.034];
+    const fingerLengths = [0.130, 0.145, 0.128, 0.105];
 
     fingerOffsets.forEach((fx, idx) => {
       const fLen = fingerLengths[idx];
       const fGroup = new T.Group();
-      fGroup.position.set(fx, -0.122, 0.020);
+      fGroup.position.set(fx, -0.120, 0.018);
       handGroup.add(fGroup);
 
       // Buku jari emas
-      ball(0.016, C.gold, [1, 1, 1], [0, 0, 0], fGroup, 14);
+      ball(0.015, C.gold, [1, 1, 1], [0, 0, 0], fGroup, 14);
 
-      // Ruas pertama (proximal)
-      cyl(0.015, 0.013, fLen * 0.50, C.skin, [0, -fLen * 0.25, 0.006], fGroup, false, 14);
+      // Ruas proksimal
+      cyl(0.014, 0.012, fLen * 0.50, C.ceramic, [0, -fLen * 0.25, 0.006], fGroup, false, 14);
 
       // Sendi tengah perak
-      ball(0.013, C.silver, [1, 1, 1], [0, -fLen * 0.50, 0.012], fGroup, 12);
+      ball(0.012, C.silver, [1, 1, 1], [0, -fLen * 0.50, 0.012], fGroup, 12);
 
-      // Ruas kedua (distal)
-      cyl(0.0125, 0.0105, fLen * 0.45, C.skin, [0, -fLen * 0.725, 0.018], fGroup, false, 14);
+      // Ruas distal
+      cyl(0.012, 0.010, fLen * 0.45, C.ceramic, [0, -fLen * 0.725, 0.018], fGroup, false, 14);
 
       // Ujung jari halus
-      ball(0.0105, C.skin, [1, 1, 1], [0, -fLen * 0.95, 0.025], fGroup, 12);
+      ball(0.010, C.silver, [1, 1, 1], [0, -fLen * 0.95, 0.025], fGroup, 12);
     });
 
-    // 3. Ibu Jari (Thumb) di Sisi Dalam Menghadap Tubuh
-    const thumbX = (side === -1) ? 0.065 : -0.065;
+    // Ibu Jari (Thumb) di sisi dalam
+    const thumbX = (side === -1) ? 0.062 : -0.062;
     const thumbGroup = new T.Group();
-    thumbGroup.position.set(thumbX, -0.055, 0.026);
+    thumbGroup.position.set(thumbX, -0.052, 0.024);
     thumbGroup.rotation.set(-0.25, side * 0.35, side * 0.45);
     handGroup.add(thumbGroup);
 
-    ball(0.018, C.gold, [1, 1, 1], [0, 0, 0], thumbGroup, 14);
-    cyl(0.0155, 0.0135, 0.068, C.skin, [side * -0.018, -0.034, 0.006], thumbGroup, false, 14);
-    ball(0.013, C.silver, [1, 1, 1], [side * -0.030, -0.068, 0.012], thumbGroup, 12);
-    cyl(0.0125, 0.0105, 0.052, C.skin, [side * -0.040, -0.094, 0.018], thumbGroup, false, 14);
-    ball(0.0105, C.skin, [1, 1, 1], [side * -0.048, -0.120, 0.025], thumbGroup, 12);
+    ball(0.016, C.gold, [1, 1, 1], [0, 0, 0], thumbGroup, 14);
+    cyl(0.015, 0.013, 0.065, C.ceramic, [side * -0.018, -0.032, 0.006], thumbGroup, false, 14);
+    ball(0.012, C.silver, [1, 1, 1], [side * -0.028, -0.065, 0.012], thumbGroup, 12);
+    cyl(0.012, 0.010, 0.050, C.ceramic, [side * -0.038, -0.090, 0.018], thumbGroup, false, 14);
+    ball(0.010, C.silver, [1, 1, 1], [side * -0.045, -0.115, 0.025], thumbGroup, 12);
 
     return handGroup;
   }
 
-  // --- A. LENGAN KIRI (PANDANGAN PENGGUNA: SISI KIRI / MENGARAH KE FORMULIR) ---
+  // --- LENGAN KIRI (PENGARAH KE FORMULIR) ---
   const leftShoulder = new T.Group();
-  leftShoulder.position.set(-0.58, 0.22, 0.04);
+  leftShoulder.position.set(-0.56, 0.20, 0.04);
   torso.add(leftShoulder);
 
-  ball(0.17, C.porcelain, [1, 1, 1], [0, 0, 0], leftShoulder, 32);
-  cyl(0.115, 0.115, 0.036, C.gold, [0, -0.06, 0], leftShoulder, false, 24);
+  ball(0.16, C.ceramic, [1, 1, 1], [0, 0, 0], leftShoulder, 32);
+  cyl(0.11, 0.11, 0.035, C.gold, [0, -0.06, 0], leftShoulder, false, 24);
 
   const leftUpperArm = new T.Group();
   leftUpperArm.position.set(0, -0.06, 0);
   leftShoulder.add(leftUpperArm);
 
-  cyl(0.115, 0.098, 0.32, C.porcelain, [0, -0.16, 0], leftUpperArm, false, 28);
-  ball(0.095, C.gold, [1, 1, 1], [0, -0.32, 0.015], leftUpperArm, 24);
-  cyl(0.088, 0.088, 0.024, C.silver, [0, -0.32, 0.015], leftUpperArm, false, 20);
+  cyl(0.11, 0.095, 0.32, C.ceramic, [0, -0.16, 0], leftUpperArm, false, 28);
+  ball(0.092, C.gold, [1, 1, 1], [0, -0.32, 0.015], leftUpperArm, 24);
+  cyl(0.085, 0.085, 0.024, C.silver, [0, -0.32, 0.015], leftUpperArm, false, 20);
 
   const leftForearm = new T.Group();
   leftForearm.position.set(0, -0.32, 0.015);
   leftUpperArm.add(leftForearm);
 
-  cyl(0.096, 0.085, 0.30, C.porcelain, [0, -0.15, 0.010], leftForearm, false, 28);
-  cyl(0.088, 0.088, 0.034, C.gold, [0, -0.29, 0.010], leftForearm, false, 24);
-  ball(0.075, C.silver, [1, 1, 1], [0, -0.30, 0.010], leftForearm, 20);
+  cyl(0.092, 0.082, 0.30, C.ceramic, [0, -0.15, 0.010], leftForearm, false, 28);
+  // Strip cyan bercahaya di lengan bawah
+  cyl(0.085, 0.085, 0.030, C.cyanGlow, [0, -0.28, 0.010], leftForearm, false, 24);
+  ball(0.072, C.silver, [1, 1, 1], [0, -0.30, 0.010], leftForearm, 20);
 
   const leftHand = createAndroidHand(-1);
   leftHand.position.set(0, -0.30, 0.010);
   leftForearm.add(leftHand);
 
-  // --- B. LENGAN KANAN (PANDANGAN PENGGUNA: SISI KANAN / POISE SANTUN CONCIERGE) ---
+  // --- LENGAN KANAN (POISE SANTUN CONCIERGE) ---
   const rightShoulder = new T.Group();
-  rightShoulder.position.set(0.58, 0.22, 0.04);
+  rightShoulder.position.set(0.56, 0.20, 0.04);
   torso.add(rightShoulder);
 
-  ball(0.17, C.porcelain, [1, 1, 1], [0, 0, 0], rightShoulder, 32);
-  cyl(0.115, 0.115, 0.036, C.gold, [0, -0.06, 0], rightShoulder, false, 24);
+  ball(0.16, C.ceramic, [1, 1, 1], [0, 0, 0], rightShoulder, 32);
+  cyl(0.11, 0.11, 0.035, C.gold, [0, -0.06, 0], rightShoulder, false, 24);
 
   const rightUpperArm = new T.Group();
   rightUpperArm.position.set(0, -0.06, 0);
   rightShoulder.add(rightUpperArm);
 
-  cyl(0.115, 0.098, 0.32, C.porcelain, [0, -0.16, 0], rightUpperArm, false, 28);
-  ball(0.095, C.gold, [1, 1, 1], [0, -0.32, 0.015], rightUpperArm, 24);
-  cyl(0.088, 0.088, 0.024, C.silver, [0, -0.32, 0.015], rightUpperArm, false, 20);
+  cyl(0.11, 0.095, 0.32, C.ceramic, [0, -0.16, 0], rightUpperArm, false, 28);
+  ball(0.092, C.gold, [1, 1, 1], [0, -0.32, 0.015], rightUpperArm, 24);
+  cyl(0.085, 0.085, 0.024, C.silver, [0, -0.32, 0.015], rightUpperArm, false, 20);
 
   const rightForearm = new T.Group();
   rightForearm.position.set(0, -0.32, 0.015);
   rightUpperArm.add(rightForearm);
 
-  cyl(0.096, 0.085, 0.30, C.porcelain, [0, -0.15, 0.010], rightForearm, false, 28);
-  cyl(0.088, 0.088, 0.034, C.gold, [0, -0.29, 0.010], rightForearm, false, 24);
-  ball(0.075, C.silver, [1, 1, 1], [0, -0.30, 0.010], rightForearm, 20);
+  cyl(0.092, 0.082, 0.30, C.ceramic, [0, -0.15, 0.010], rightForearm, false, 28);
+  cyl(0.085, 0.085, 0.030, C.cyanGlow, [0, -0.28, 0.010], rightForearm, false, 24);
+  ball(0.072, C.silver, [1, 1, 1], [0, -0.30, 0.010], rightForearm, 20);
 
   const rightHand = createAndroidHand(1);
   rightHand.position.set(0, -0.30, 0.010);
   rightForearm.add(rightHand);
 
-  /* ================= 4. ROK HOVER & CHASSIS LEVITASI ELEGAN ================= */
-  const hoverSkirt = cyl(0.48, 0.22, 0.54, C.porcelain, [0, -1.26, 0], g, false, 48);
-  cyl(0.49, 0.40, 0.08, C.plnTeal, [0, -1.14, 0], g);
-  cyl(0.32, 0.22, 0.05, C.gold,    [0, -1.40, 0], g);
+  /* ================= 4. BASE LEVITASI & PROPULSI ANTI-GRAVITASI ================= */
+  // Skirt propulsi keramik aerodinamis
+  cyl(0.46, 0.20, 0.52, C.ceramic, [0, -1.24, 0], g, false, 48);
+  cyl(0.47, 0.38, 0.08, C.plnTeal,  [0, -1.12, 0], g);
+  cyl(0.30, 0.20, 0.05, C.gold,     [0, -1.38, 0], g);
 
-  const thrusterGlow = cyl(0.18, 0.06, 0.10, C.coreGlow, [0, -1.48, 0], g);
+  // Nozel plasma cyan terang di dasar
+  const thrusterGlow = cyl(0.17, 0.06, 0.10, C.cyanGlow, [0, -1.46, 0], g);
 
-  // Cincin Orbital Holografik
-  const ring1 = new T.Mesh(new T.TorusGeometry(0.85, 0.022, 8, 48), C.glow);
-  ring1.position.y = -1.58;
+  // Cincin Orbital Holografik Ganda
+  const ring1 = new T.Mesh(new T.TorusGeometry(0.82, 0.022, 8, 48), C.cyanGlow);
+  ring1.position.y = -1.56;
   ring1.rotation.x = Math.PI / 2;
   g.add(ring1);
 
-  const ring2 = new T.Mesh(new T.TorusGeometry(1.10, 0.018, 8, 48), C.goldGlow);
-  ring2.position.y = -1.70;
+  const ring2 = new T.Mesh(new T.TorusGeometry(1.06, 0.018, 8, 48), C.yellowGlow);
+  ring2.position.y = -1.68;
   ring2.rotation.x = Math.PI / 2;
   g.add(ring2);
 
-  // Bayangan ambient lembut di lantai
+  // Bayangan halus di lantai
   const shadow = new T.Mesh(
-    new T.CircleGeometry(0.92, 36),
+    new T.CircleGeometry(0.88, 36),
     new T.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.18 })
   );
   shadow.rotation.x = -Math.PI / 2;
-  shadow.position.y = -2.05;
+  shadow.position.y = -2.02;
   g.add(shadow);
 
   return {
@@ -731,7 +705,6 @@ function createRobot(T) {
     eyes: eyesGroup,
     mouthBars,
     smile,
-    blushGroup,
     arcCore,
     leftUpperArm,
     leftForearm,
@@ -739,7 +712,6 @@ function createRobot(T) {
     rightUpperArm,
     rightForearm,
     rightHand,
-    hairLocks,
     ring1,
     ring2,
     thrusterGlow
@@ -748,17 +720,18 @@ function createRobot(T) {
 
 function animate(ms) {
   requestAnimationFrame(animate);
+
   const t = ms / 1000;
   const R = robot;
   if (!R) return;
 
   const isSpeaking = (typeof speaking !== 'undefined' && speaking);
 
-  // 1. Levitasi Mengapung Anggun & Halus
+  // 1. Levitasi Mengapung Halus & Alami
   R.g.position.y = Math.sin(t * 1.8) * 0.055;
 
   // 2. Interaksi Pandangan & Head Tracking Halus Mengikuti Kursor
-  const targetHeadY = mouseTargetX * 0.70 + Math.sin(t * 0.8) * 0.08;
+  const targetHeadY = mouseTargetX * 0.70 + Math.sin(t * 0.8) * 0.06;
   const targetHeadX = -mouseTargetY * 0.50 + Math.sin(t * 0.6) * 0.025;
   const targetHeadZ = mouseTargetX * 0.15 + Math.sin(t * 0.8) * 0.025;
 
@@ -766,10 +739,14 @@ function animate(ms) {
   R.head.rotation.x += (targetHeadX - R.head.rotation.x) * 0.08;
   R.head.rotation.z += (targetHeadZ - R.head.rotation.z) * 0.08;
 
-  // 3. Ayunan Halus Helai Rambut
-  if (R.hairLocks && R.hairLocks.length === 2) {
-    R.hairLocks[0].rotation.z = -0.15 + Math.sin(t * 1.8) * 0.035;
-    R.hairLocks[1].rotation.z =  0.15 - Math.sin(t * 1.8) * 0.035;
+  // 3. Kedipan Mata Digital Halus & Alami (Blink Cycle)
+  const blinkCycle = t % 4.2;
+  let eyeScaleY = 1.0;
+  if (blinkCycle < 0.15) {
+    eyeScaleY = Math.max(0.08, 1.0 - Math.sin((blinkCycle / 0.15) * Math.PI) * 0.92);
+  }
+  if (R.eyes) {
+    R.eyes.scale.y = eyeScaleY;
   }
 
   // 4. Putaran Cincin Orbital Holografik
@@ -781,11 +758,11 @@ function animate(ms) {
     R.ring2.rotation.y = Math.cos(t * 1.1) * 0.10;
   }
 
-  // 5. Denyut Hangat Reaktor Listrik PLN (Arc Core Pulse)
+  // 5. Denyut Hangat Reaktor Daya Listrik PLN (Arc Core Pulse)
   if (R.arcCore) {
     const corePulse = isSpeaking
-      ? (1.7 + Math.sin(t * 12) * 0.5)
-      : (1.0 + Math.sin(t * 2.2) * 0.3);
+      ? (1.8 + Math.sin(t * 12) * 0.5)
+      : (1.1 + Math.sin(t * 2.2) * 0.35);
     R.arcCore.material.emissiveIntensity = corePulse;
   }
 
@@ -808,13 +785,7 @@ function animate(ms) {
     }
   }
 
-  // 7. Rona Pipi Merona Lembut Saat Berbicara
-  if (R.blushGroup) {
-    const blushScale = isSpeaking ? (1.0 + Math.sin(t * 6) * 0.12) : 1.0;
-    R.blushGroup.scale.set(blushScale, blushScale, 1.0);
-  }
-
-  // 8. Gerakan Lengan & Tangan Realistis Mengarahkan Pengguna (Interactive Directing & Guiding)
+  // 7. Gerakan Lengan & Tangan Realistis Mengarahkan Pengguna
   const isWaving = (typeof waveUntil !== 'undefined') ? (isSpeaking || ms < waveUntil) : isSpeaking;
   const isGuiding = isWaving || isSpeaking;
 
@@ -828,13 +799,13 @@ function animate(ms) {
   if (R.leftUpperArm && R.leftForearm && R.leftHand && R.rightUpperArm && R.rightForearm && R.rightHand) {
     if (!isDockedLeft) {
       // DEFAULT: Robot di kanan bawah -> Formulir berada di sebelah KIRI (-X)
-      // Lengan Kiri (Viewer's Left) bertindak sebagai TANGAN PENGARAH (Guiding Arm)
+      // Lengan Kiri bertindak sebagai TANGAN PENGARAH
       let tLUX, tLUY, tLUZ, tLFX, tLFY, tLFZ, tLHX, tLHY, tLHZ;
       let tRUX, tRUY, tRUZ, tRFX, tRFY, tRFZ, tRHX, tRHY, tRHZ;
 
       if (isGuiding) {
         // GESTUR MENGARAHKAN KE FORMULIR: Lengan kiri terangkat anggun ke depan-kiri,
-        // siku menekuk natural ke depan, telapak tangan terbuka "mempersilakan" dengan ayunan ritmik lembut
+        // siku menekuk natural, telapak tangan terbuka "mempersilakan"
         const guidePulse = Math.sin(t * 3.0);
         const guideDip   = Math.cos(t * 3.0);
 
@@ -864,7 +835,7 @@ function animate(ms) {
         tLHZ = 0.10;
       }
 
-      // Lengan Kanan (Viewer's Right): Sikap Santun Frontliner PLN di depan pinggang
+      // Lengan Kanan: Sikap Santun Concierge di depan pinggang
       tRUX = -0.10;
       tRUY = -0.04;
       tRUZ = 0.14;
@@ -902,10 +873,9 @@ function animate(ms) {
       R.rightHand.rotation.x     += (tRHX - R.rightHand.rotation.x) * lerpArm;
       R.rightHand.rotation.y     += (tRHY - R.rightHand.rotation.y) * lerpArm;
       R.rightHand.rotation.z     += (tRHZ - R.rightHand.rotation.z) * lerpArm;
-
     } else {
-      // Robot di kiri bawah -> Formulir berada di sebelah KANAN (+X)
-      // Lengan Kanan (Viewer's Right) bertindak sebagai TANGAN PENGARAH
+      // Robot di sisi KIRI layar -> Formulir berada di sebelah KANAN (+X)
+      // Lengan Kanan bertindak sebagai TANGAN PENGARAH
       let tRUX, tRUY, tRUZ, tRFX, tRFY, tRFZ, tRHX, tRHY, tRHZ;
       let tLUX, tLUY, tLUZ, tLFX, tLFY, tLFZ, tLHX, tLHY, tLHZ;
 
@@ -950,18 +920,6 @@ function animate(ms) {
       tLHY = 0.14;
       tLHZ = 0.10;
 
-      R.leftUpperArm.rotation.x += (tLUX - R.leftUpperArm.rotation.x) * lerpArm;
-      R.leftUpperArm.rotation.y += (tLUY - R.leftUpperArm.rotation.y) * lerpArm;
-      R.leftUpperArm.rotation.z += (tLUZ - R.leftUpperArm.rotation.z) * lerpArm;
-
-      R.leftForearm.rotation.x  += (tLFX - R.leftForearm.rotation.x) * lerpArm;
-      R.leftForearm.rotation.y  += (tLFY - R.leftForearm.rotation.y) * lerpArm;
-      R.leftForearm.rotation.z  += (tLFZ - R.leftForearm.rotation.z) * lerpArm;
-
-      R.leftHand.rotation.x     += (tLHX - R.leftHand.rotation.x) * lerpArm;
-      R.leftHand.rotation.y     += (tLHY - R.leftHand.rotation.y) * lerpArm;
-      R.leftHand.rotation.z     += (tLHZ - R.leftHand.rotation.z) * lerpArm;
-
       R.rightUpperArm.rotation.x += (tRUX - R.rightUpperArm.rotation.x) * lerpArm;
       R.rightUpperArm.rotation.y += (tRUY - R.rightUpperArm.rotation.y) * lerpArm;
       R.rightUpperArm.rotation.z += (tRUZ - R.rightUpperArm.rotation.z) * lerpArm;
@@ -973,12 +931,22 @@ function animate(ms) {
       R.rightHand.rotation.x     += (tRHX - R.rightHand.rotation.x) * lerpArm;
       R.rightHand.rotation.y     += (tRHY - R.rightHand.rotation.y) * lerpArm;
       R.rightHand.rotation.z     += (tRHZ - R.rightHand.rotation.z) * lerpArm;
+
+      R.leftUpperArm.rotation.x += (tLUX - R.leftUpperArm.rotation.x) * lerpArm;
+      R.leftUpperArm.rotation.y += (tLUY - R.leftUpperArm.rotation.y) * lerpArm;
+      R.leftUpperArm.rotation.z += (tLUZ - R.leftUpperArm.rotation.z) * lerpArm;
+
+      R.leftForearm.rotation.x  += (tLFX - R.leftForearm.rotation.x) * lerpArm;
+      R.leftForearm.rotation.y  += (tLFY - R.leftForearm.rotation.y) * lerpArm;
+      R.leftForearm.rotation.z  += (tLFZ - R.leftForearm.rotation.z) * lerpArm;
+
+      R.leftHand.rotation.x     += (tLHX - R.leftHand.rotation.x) * lerpArm;
+      R.leftHand.rotation.y     += (tLHY - R.leftHand.rotation.y) * lerpArm;
+      R.leftHand.rotation.z     += (tLHZ - R.leftHand.rotation.z) * lerpArm;
     }
   }
 
-  // 9. Kedipan Mata Cerdas & Lembut (Natural Blink)
-  const isBlinking = (Math.sin(t * 1.1) > 0.985 || (t % 4.6) > 4.5);
-  R.eyes.scale.y = isBlinking ? 0.05 : 1.0;
-
-  renderer.render(scene, camera);
+  if (renderer && scene && camera) {
+    renderer.render(scene, camera);
+  }
 }

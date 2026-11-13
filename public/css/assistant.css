@@ -43,26 +43,41 @@
   left: 50%;
   transform: translateX(-50%);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4px 10px;
-  background: rgba(16, 38, 46, 0.94);
-  backdrop-filter: blur(6px);
-  border: 1.5px solid #3bb7e6;
-  border-radius: 12px;
+  padding: 3px 12px;
+  background: linear-gradient(180deg, #18222a 0%, #0d151c 100%);
+  border: 1.5px solid #d4af37;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.25);
   color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
   white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
   pointer-events: none;
-  transition: transform 0.2s, background 0.2s, border-color 0.2s;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.fab-badge-name {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: #ffffff;
+  line-height: 1.15;
+}
+
+.fab-badge-sub {
+  font-size: 7.5px;
+  font-weight: 700;
+  color: #f5c518;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  line-height: 1.1;
 }
 
 #fab:hover .fab-badge {
-  background: rgba(23, 67, 90, 0.98);
+  transform: translateX(-50%) scale(1.05);
   border-color: #ffe600;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.65), 0 0 10px rgba(245, 197, 24, 0.4);
 }
 
 #bot.drag #fab {

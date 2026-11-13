@@ -255,7 +255,7 @@ function createHumanAvatar(T) {
     return tex;
   }
 
-  const CACHE_V = '?v=20261113d';
+  const CACHE_V = '?v=20261113h';
   const texIdle       = loadAvatarTex('img/human-avatar.png' + CACHE_V);
   const texBlink      = loadAvatarTex('img/human-avatar-blink.png' + CACHE_V);
   const texTalk       = loadAvatarTex('img/human-avatar-talk.png' + CACHE_V);
@@ -305,12 +305,6 @@ function createHumanAvatar(T) {
   ring2.rotation.x = Math.PI / 2;
   g.add(ring2);
 
-  // Lencana Name Plate di Bagian Bawah
-  const badgeMat = createPedestalBadgeTexture(T);
-  const badgeMesh = new T.Mesh(new T.PlaneGeometry(1.18, 0.28), badgeMat);
-  badgeMesh.position.set(0, -1.52, 0.25);
-  g.add(badgeMesh);
-
   // Bayangan ambient lembut di lantai
   const shadow = new T.Mesh(
     new T.CircleGeometry(1.05, 36),
@@ -330,7 +324,6 @@ function createHumanAvatar(T) {
     texTalkBlink,
     ring1,
     ring2,
-    badgeMesh,
     shadow
   };
 }

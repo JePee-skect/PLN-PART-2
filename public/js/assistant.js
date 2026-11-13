@@ -21,22 +21,58 @@ const STEP_LABELS = [
   'Langkah terakhir.'
 ];
 
+const STEP_LABELS_EN = [
+  'Step one.',
+  'Step two.',
+  'Step three.',
+  'Step four.',
+  'Step five.',
+  'Step six.',
+  'Step seven.',
+  'Step eight.',
+  'Step nine.',
+  'Step ten.',
+  'Step eleven.',
+  'Step twelve.',
+  'Step thirteen.',
+  'Step fourteen.',
+  'Final step.'
+];
+
 const GUIDE = [
   ['pb',              'Silakan tekan tombol Ambil Foto, arahkan pandangan wajah ke kamera, kemudian tekan Ambil Foto kembali untuk menyimpan potret.'],
   ['nama',            'Mohon ketikkan nama lengkap Anda sesuai dengan kartu identitas resmi.'],
-  ['ktp',             'Silakan masukkan enam belas digit nomor induk kependudukan KTP, atau nomor SIM maupun paspor Anda.'],
   ['usaha',           'Silakan masukkan nama instansi atau perusahaan yang Anda wakili.'],
   ['alamat',          'Mohon isi alamat lengkap kantor atau domisili instansi Anda.'],
   ['telp',            'Silakan masukkan nomor telepon atau WhatsApp aktif yang dapat dihubungi.'],
   ['email',           'Silakan cantumkan alamat email Anda jika ada, atau lewati jika tidak memiliki email.'],
   ['pegawai',         'Silakan tuliskan nama pejabat atau pegawai PLN yang hendak Anda temui.'],
-  ['perlu',           'Mohon pilih atau ketikkan tujuan kedatangan Anda, seperti rapat, kunjungan kerja, atau pengiriman barang.'],
   ['apd',             'Demi keselamatan bersama, mohon pilih perlengkapan alat pelindung diri yang Anda kenakan. Jika tidak membawa, silakan pilih Tidak Memakai APD.'],
+  ['perlu',           'Mohon jelaskan secara singkat keperluan kunjungan kerja Anda, atau pilih opsi cepat yang tersedia.'],
+  ['ktp',             'Silakan masukkan enam belas digit nomor induk kependudukan KTP, atau nomor SIM maupun paspor Anda.'],
   ['kend',            'Mohon cantumkan jenis kendaraan beserta nomor polisi yang Anda gunakan.'],
   ['tag',             'Silakan masukkan nomor kartu tanda pengenal tamu yang telah diberikan oleh petugas keamanan di pos.'],
   ['jml',             'Silakan tentukan total jumlah tamu yang hadir dalam kunjungan Anda.'],
   ['agree-induction', 'Mohon cermati peraturan Keselamatan dan Keamanan Kerja pada poster di atas, kemudian beri tanda centang persetujuan sebagai komitmen keselamatan bersama.'],
   ['sub',             'Seluruh data registrasi telah lengkap. Silakan tekan tombol Kirim Registrasi untuk menyelesaikan pendaftaran kunjungan Anda.']
+];
+
+const GUIDE_EN = [
+  ['pb',              'Please click the Take Photo button, look directly at the camera, then click Capture to save your picture.'],
+  ['nama',            'Please enter your full name as shown on your official identification.'],
+  ['usaha',           'Please enter the company or institution you represent.'],
+  ['alamat',          'Please provide the full address of your company or institution.'],
+  ['telp',            'Please enter an active phone or WhatsApp number where you can be reached.'],
+  ['email',           'Please enter your email address if available, or skip if you do not have one.'],
+  ['pegawai',         'Please enter the name of the PLN personnel or division you wish to visit.'],
+  ['apd',             'For safety compliance, please select the Personal Protective Equipment you are wearing. If none, select No PPE.'],
+  ['perlu',           'Please describe the purpose of your visit, or select one of the quick options.'],
+  ['ktp',             'Please enter your sixteen-digit National ID number, driver license, or passport number.'],
+  ['kend',            'Please specify your vehicle type and license plate number.'],
+  ['tag',             'Please enter the visitor badge number provided by security.'],
+  ['jml',             'Please select the total number of visitors in your party.'],
+  ['agree-induction', 'Please review the workplace Safety and Security Induction above and check the agreement box.'],
+  ['sub',             'All details have been completed. Please click Submit Registration to finish your visitor registration.']
 ];
 
 const ADMIN_HELP = {
@@ -92,6 +128,53 @@ const FAQ = [
   ]
 ];
 
+const FAQ_EN = [
+  [
+    /induksi|induction|safety induction|poster|rules|regulation/,
+    'The Safety and Security Induction of PT PLN Pusharlis outlines 8 workplace safety and security regulations, including compliance with HSE rules, wearing ID cards, no smoking or illicit drugs, and emergency evacuation procedures.'
+  ],
+  [
+    /k3|hse|safety|helmet|ppe|boot|vest/,
+    'HSE stands for Health, Safety, and Environment. Within all PT PLN Pusharlis facilities, everyone must comply with safety protocols and wear required PPE: safety helmet, reflective vest, safety shoes, and an official visitor ID badge.'
+  ],
+  [
+    /ktp|identitas|sim|paspor|passport|id|nik/,
+    'Please enter your 16-digit National ID (NIK), driver license, or passport number.'
+  ],
+  [
+    /apd|vest|shoes|helmet|uniform/,
+    'Please select the PPE you are currently wearing: safety helmet, safety shoes, reflective vest, or work uniform. If you do not have any, choose No PPE.'
+  ],
+  [
+    /vehicle|car|motorcycle|plate|police|kendaraan|mobil|motor/,
+    'Please specify your vehicle type and license plate number, for example: Avanza B 1234 CD or Pedestrian.'
+  ],
+  [
+    /tag|name|badge|card|kartu/,
+    'Your visitor badge number is printed on the physical visitor card handed to you by security at the entrance post.'
+  ],
+  [
+    /photo|camera|picture|foto/,
+    'Click the Take Photo button to activate your camera, position your face clearly in the frame, and click Capture to save.'
+  ],
+  [
+    /number of visitors|party|guests|jumlah|orang/,
+    'Please specify the total number of persons in your visit party, including yourself.'
+  ],
+  [
+    /submit|send|finish|kirim|simpan/,
+    'Please ensure all fields marked with an asterisk are filled, then click Submit Registration.'
+  ],
+  [
+    /hello|hi|good morning|good afternoon|good evening|halo|hai/,
+    'Welcome to PT PLN Pusharlis. I am E.V.A, your virtual assistant. How may I assist your visit today?'
+  ],
+  [
+    /start|guide|guide me|bimbingan|bantu|panduan/,
+    null
+  ]
+];
+
 /* State Asisten */
 let guideIdx     = -1;
 let lastHint     = '';
@@ -102,8 +185,51 @@ let idleNotified = false;
 let bubbleTimer  = null;
 const greeted    = {};
 
+let currentLang = (typeof store !== 'undefined' ? store.get('vms-lang', 'id') : 'id');
+
+function setAppLanguage(lang, announce = true) {
+  currentLang = (lang === 'en') ? 'en' : 'id';
+  if (typeof store !== 'undefined') store.set('vms-lang', currentLang);
+
+  if (currentLang === 'en') {
+    voiceMode = 'easyvoice';
+    if (typeof store !== 'undefined') store.set('vms-voice-mode', 'easyvoice');
+  } else {
+    voiceMode = 'online';
+    if (typeof store !== 'undefined') store.set('vms-voice-mode', 'online');
+  }
+  if (typeof updateVoiceTabs === 'function') updateVoiceTabs();
+
+  const isEn = (currentLang === 'en');
+  if ($('#btn-lang-id'))  $('#btn-lang-id').classList.toggle('on', !isEn);
+  if ($('#btn-lang-en'))  $('#btn-lang-en').classList.toggle('on', isEn);
+  if ($('#chat-lang-id')) $('#chat-lang-id').classList.toggle('on', !isEn);
+  if ($('#chat-lang-en')) $('#chat-lang-en').classList.toggle('on', isEn);
+
+  renderChips();
+
+  if (announce) {
+    if (isEn) {
+      say('Welcome to PT PLN Pusharlis. I am E.V.A, your virtual assistant. How may I assist your visit today?');
+    } else {
+      say('Selamat datang di PT PLN (Persero) Pusharlis. Saya E.V.A, asisten virtual Anda. Ada yang dapat saya bantu?');
+    }
+  }
+}
+window.setAppLanguage = setAppLanguage;
+
 function initAssistant() {
   renderChips();
+
+  ['btn-lang-id', 'chat-lang-id'].forEach(id => {
+    const el = $('#' + id);
+    if (el) el.onclick = () => setAppLanguage('id');
+  });
+  ['btn-lang-en', 'chat-lang-en'].forEach(id => {
+    const el = $('#' + id);
+    if (el) el.onclick = () => setAppLanguage('en');
+  });
+  setAppLanguage(currentLang, false);
 
   const cs = $('#cs');
   if (cs) cs.onclick = ask;
@@ -199,7 +325,9 @@ function initAssistant() {
     // Jeda debounce 400ms: cegah suara terpotong saat pengguna berpindah antar kolom input
     clearTimeout(focusDebounceTimer);
     focusDebounceTimer = setTimeout(() => {
-      say(GUIDE[i][1]);
+      const isEn = (currentLang === 'en' || voiceMode === 'easyvoice');
+      const textToSpeak = isEn && GUIDE_EN[i] ? GUIDE_EN[i][1] : GUIDE[i][1];
+      say(textToSpeak);
     }, 400);
   });
 
@@ -211,7 +339,10 @@ function initAssistant() {
 
     if (isIdle && !idleNotified && isFormActive) {
       idleNotified = true;
-      say('Apakah Bapak dan Ibu membutuhkan bantuan dalam pengisian formulir? Silakan ketuk saya untuk panduan langkah demi langkah.');
+      const isEn = (currentLang === 'en' || voiceMode === 'easyvoice');
+      say(isEn
+        ? 'Do you need assistance with filling out the form? Please tap on me for step-by-step guidance.'
+        : 'Apakah Bapak dan Ibu membutuhkan bantuan dalam pengisian formulir? Silakan ketuk saya untuk panduan langkah demi langkah.');
     }
   }, 5000);
 }
@@ -266,14 +397,23 @@ function showBubble(text) {
 }
 
 function botHello(page, force = false) {
-  const key = page + role;
+  const isEn = (currentLang === 'en' || voiceMode === 'easyvoice');
+  const key = page + role + (isEn ? '_en' : '_id');
   if (greeted[key] && !force) return;
   greeted[key] = true;
 
   if (page === 'registrasi') {
-    say('Selamat datang di PT PLN (Persero) Pusharlis. Saya E.V.A, asisten virtual Anda. Dengan senang hati, saya siap memandu Bapak dan Ibu dalam proses pengisian formulir registrasi kunjungan. Silakan tekan tombol Mulai Panduan untuk bimbingan langkah demi langkah.');
+    if (isEn) {
+      say('Welcome to PT PLN Pusharlis. I am E.V.A, your virtual assistant. I am delighted to guide you through the registration process. Please click Start Guide for step-by-step assistance.');
+    } else {
+      say('Selamat datang di PT PLN (Persero) Pusharlis. Saya E.V.A, asisten virtual Anda. Dengan senang hati, saya siap memandu Bapak dan Ibu dalam proses pengisian formulir registrasi kunjungan. Silakan tekan tombol Mulai Panduan untuk bimbingan langkah demi langkah.');
+    }
   } else {
-    say('Selamat datang, Bapak dan Ibu Petugas. Saya E.V.A. Anda dapat memantau data tamu, melakukan check in dan check out, serta mengunduh laporan ke Excel.');
+    if (isEn) {
+      say('Welcome, officers. I am E.V.A. You can monitor visitor logs, check in and check out guests, and download reports to Excel.');
+    } else {
+      say('Selamat datang, Bapak dan Ibu Petugas. Saya E.V.A. Anda dapat memantau data tamu, melakukan check in dan check out, serta mengunduh laporan ke Excel.');
+    }
   }
 }
 
@@ -281,7 +421,10 @@ function goStep(i) {
   if (i < 0 || i >= GUIDE.length) return;
   guideIdx = i;
 
-  const [id, text] = GUIDE[i];
+  const isEn = (currentLang === 'en' || voiceMode === 'easyvoice');
+  const [id, idText] = GUIDE[i];
+  const enText = (GUIDE_EN[i] && GUIDE_EN[i][1]) ? GUIDE_EN[i][1] : idText;
+
   const targetEl = (id === 'apd')
     ? $('#apdl')
     : (id === 'agree-induction')
@@ -299,8 +442,12 @@ function goStep(i) {
   setTimeout(() => { quiet = false; }, 600);
 
   lastHint = id;
-  const stepPrefix = (typeof STEP_LABELS !== 'undefined' && STEP_LABELS[i]) ? STEP_LABELS[i] : `Langkah ${i + 1}.`;
-  say(`${stepPrefix} ${text}`);
+  const stepPrefix = isEn
+    ? (typeof STEP_LABELS_EN !== 'undefined' ? STEP_LABELS_EN[i] : `Step ${i + 1}.`)
+    : ((typeof STEP_LABELS !== 'undefined' && STEP_LABELS[i]) ? STEP_LABELS[i] : `Langkah ${i + 1}.`);
+
+  const spoken = isEn ? `${stepPrefix} ${enText}` : `${stepPrefix} ${idText}`;
+  say(spoken);
 }
 
 function openForm() {
@@ -321,26 +468,44 @@ function todaySummary() {
 }
 
 function answer(q) {
+  const isEn = (currentLang === 'en' || voiceMode === 'easyvoice');
+
   if (/terima\s*kasih|makasih|thanks?|thank you/i.test(q)) {
     const vReg = $('#v-registrasi');
     const onForm = vReg && !vReg.classList.contains('hide');
-    return onForm ? showThanks('') : say('Sama-sama! Dengan senang hati saya siap melayani Bapak dan Ibu.');
+    return onForm
+      ? showThanks('')
+      : say(isEn ? 'You are very welcome! I am delighted to assist you.' : 'Sama-sama! Dengan senang hati saya siap melayani Bapak dan Ibu.');
   }
 
   if (role === 'admin') {
-    if (/ringkas|rekap|hari ini|berapa/i.test(q)) return say(todaySummary());
-    if (/check|masuk|keluar/i.test(q))            return say(ADMIN_HELP.how);
-    if (/export|excel|unduh|salin/i.test(q))      return say(ADMIN_HELP.exp);
-    if (/cari|filter|tanggal/i.test(q))          return say(ADMIN_HELP.fil);
+    if (/ringkas|rekap|hari ini|berapa|summary|today/i.test(q)) return say(todaySummary());
+    if (/check|masuk|keluar/i.test(q))                         return say(ADMIN_HELP.how);
+    if (/export|excel|unduh|salin|download/i.test(q))           return say(ADMIN_HELP.exp);
+    if (/cari|filter|tanggal|search|filter/i.test(q))           return say(ADMIN_HELP.fil);
   }
 
-  const hit = FAQ.find(([re]) => re.test(q));
+  const activeFaq = isEn ? FAQ_EN : FAQ;
+  const hit = activeFaq.find(([re]) => re.test(q));
   if (hit && hit[1] === null) {
     openForm();
     return goStep(0);
   }
 
-  say(hit ? hit[1] : 'Maaf, saya belum memahami pertanyaan tersebut. Anda dapat bertanya seputar KTP, APD, kendaraan, name tag, atau tekan tombol Mulai panduan.');
+  if (hit) return say(hit[1]);
+
+  // Fallback ke FAQ bahasa lain jika tidak cocok
+  const fallbackFaq = isEn ? FAQ : FAQ_EN;
+  const fallbackHit = fallbackFaq.find(([re]) => re.test(q));
+  if (fallbackHit && fallbackHit[1] === null) {
+    openForm();
+    return goStep(0);
+  }
+  if (fallbackHit) return say(fallbackHit[1]);
+
+  say(isEn
+    ? 'I apologize, I did not quite understand that. You can ask about ID/Passport, PPE, vehicle, visitor badge, or click Start Guide.'
+    : 'Maaf, saya belum memahami pertanyaan tersebut. Anda dapat bertanya seputar KTP, APD, kendaraan, name tag, atau tekan tombol Mulai panduan.');
 }
 
 function ask() {
@@ -357,12 +522,25 @@ function ask() {
 function renderChips() {
   const chips = $('#chips');
   if (!chips) return;
-  chips.innerHTML = (role === 'admin')
-    ? '<button data-c="sum">Ringkasan hari ini</button>' +
-      '<button data-c="how">Cara check in/out</button>' +
-      '<button data-c="exp">Export data</button>' +
-      '<button data-c="start">Panduan formulir</button>'
-    : '<button data-c="start">Mulai panduan</button>' +
-      '<button data-c="next">Lanjut</button>' +
-      '<button data-c="again">Ulangi</button>';
+  const isEn = (currentLang === 'en');
+
+  if (role === 'admin') {
+    chips.innerHTML = isEn
+      ? '<button data-c="sum">Today\'s Summary</button>' +
+        '<button data-c="how">How to Check In/Out</button>' +
+        '<button data-c="exp">Export to Excel</button>' +
+        '<button data-c="start">Form Guidance</button>'
+      : '<button data-c="sum">Ringkasan hari ini</button>' +
+        '<button data-c="how">Cara check in/out</button>' +
+        '<button data-c="exp">Export data</button>' +
+        '<button data-c="start">Panduan formulir</button>';
+  } else {
+    chips.innerHTML = isEn
+      ? '<button data-c="start">▶️ Start Guide</button>' +
+        '<button data-c="next">➡️ Next Step</button>' +
+        '<button data-c="again">🔄 Repeat Step</button>'
+      : '<button data-c="start">Mulai panduan</button>' +
+        '<button data-c="next">Lanjut</button>' +
+        '<button data-c="again">Ulangi</button>';
+  }
 }

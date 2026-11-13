@@ -109,7 +109,22 @@ function enableDrag() {
   let moved   = false;
   let down    = false;
 
-  fab.title = 'Geser untuk memindahkan posisi E.V.A';
+  fab.title = 'Geser untuk memindahkan posisi E.V.A (Ketuk 2x untuk mengembalikan ke posisi awal)';
+
+  fab.ondblclick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (typeof store !== 'undefined' && store.set) {
+      try { localStorage.removeItem('vms-pos'); } catch (err) {}
+    }
+    Object.assign(bot.style, {
+      left: '',
+      top: '',
+      right: '',
+      bottom: ''
+    });
+    bot.classList.remove('left', 'top');
+  };
 
   function place(x, y) {
     const w = bot.offsetWidth;
@@ -270,7 +285,7 @@ function createHumanAvatar(T) {
   });
 
   const avatarMesh = new T.Mesh(geom, avatarMat);
-  avatarMesh.position.set(0, 0.14, 0);
+  avatarMesh.position.set(0.27, 0.14, 0);
   g.add(avatarMesh);
 
   // Dudukan Levitasi Holografik Futuristik PLN di Bawah
@@ -405,17 +420,18 @@ function animate(ms) {
     if (!speechLeanZ) speechLeanZ = 0.06;
   }
 
-  // 6. Komposisi Rotasi & Posisi 3D yang Halus (Smooth Interpolation)
-  const targetRotY = baseAngleY + guideBodyTurnY + idleTurnY + mouseTargetX * 0.40 + Math.sin(t * 0.7) * 0.020;
-  const targetRotX = -mouseTargetY * 0.26 + guideBodyLeanX + hoverPitchX + idlePitchX + speechNodX + Math.sin(t * 0.5) * 0.012;
-  const targetRotZ = mouseTargetX * 0.12 + idleTiltZ + speechTiltZ;
+  // 6. Komposisi Rotasi & Posisi 3D yang Lurus, Tegak & Anggun (Centered & Upright)
+  const targetRotY = baseAngleY * 0.4 + (isGuiding ? (isDockedLeft ? 0.08 : -0.08) : 0) + mouseTargetX * 0.16;
+  const targetRotX = -mouseTargetY * 0.10 + hoverPitchX + speechNodX;
+  const targetRotZ = 0; // Postur lurus tegak, tidak miring miring ke samping
 
   const lerpSpeed = isSpeaking ? 0.10 : 0.07;
   R.avatarMesh.rotation.y += (targetRotY - R.avatarMesh.rotation.y) * lerpSpeed;
   R.avatarMesh.rotation.x += (targetRotX - R.avatarMesh.rotation.x) * lerpSpeed;
   R.avatarMesh.rotation.z += (targetRotZ - R.avatarMesh.rotation.z) * lerpSpeed;
 
-  R.avatarMesh.position.x += (swayX - R.avatarMesh.position.x) * 0.08;
+  // X offset +0.27 menyelaraskan tubuh & kepala E.V.A tepat di tengah lingkaran pedestal hologram
+  R.avatarMesh.position.x += (0.27 + swayX * 0.4 - R.avatarMesh.position.x) * 0.08;
   R.avatarMesh.position.y += (0.14 + breathY + hoverLiftY + bowDipY - R.avatarMesh.position.y) * 0.08;
   R.avatarMesh.position.z += (speechLeanZ - R.avatarMesh.position.z) * 0.08;
 

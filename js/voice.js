@@ -505,12 +505,23 @@ function cleanSpeechText(text) {
 /**
  * Pemilihan suara wanita alami terbaik untuk Safety Buddy (Khusus Mode Browser)
  */
-function pickVoice() {
+function pickVoice(preferredLang) {
   if (userVoiceIndex >= 0 && voices[userVoiceIndex]) {
     return voices[userVoiceIndex];
   }
 
   const isMaleName = (name = '') => /ardi|andika|david|mark|male|pria|laki/i.test(name);
+  const targetLang = preferredLang || ((typeof currentLang !== 'undefined' && currentLang === 'en') || voiceMode === 'easyvoice' ? 'en' : 'id');
+
+  if (targetLang === 'en') {
+    const enVoices = voices.filter(v => /^en([-_]|$)/i.test(v.lang));
+    const femaleEn = enVoices.find(v => /jenny|aria|zira|samantha|victoria|karen|female/i.test(v.name) && !isMaleName(v.name));
+    if (femaleEn) return femaleEn;
+    const anyFemaleEn = enVoices.find(v => !isMaleName(v.name));
+    if (anyFemaleEn) return anyFemaleEn;
+    if (enVoices.length > 0) return enVoices[0];
+  }
+
   const idVoices = voices.filter(v => /^id([-_]|$)/i.test(v.lang));
 
   // 1. Suara wanita Indonesia Neural diutamakan
@@ -1007,7 +1018,7 @@ async function speakWithEasyVoice(text) {
   }
 
   if (mySeq !== speechSequence) return false;
-  return speakWithGadisTTS(text);
+  return speakWithBrowser(clean, 'en');
 }
 
 /* SINTESIS SUARA ELEVENLABS */
@@ -1142,32 +1153,33 @@ function playCachedAudio(url) {
   }
 }
 
-/* SINTESIS SUARA BROWSER (NATIVE TTS - KHUSUS JIKA MODE BROWSER DIPILIH) */
-function speakWithBrowser(text) {
+/* SINTESIS SUARA BROWSER (NATIVE TTS - KHUSUS JIKA MODE BROWSER DIPILIH / FALLBACK) */
+function speakWithBrowser(text, preferredLang) {
   try {
     if (!('speechSynthesis' in window)) return;
     stopAllAudio();
     const mySeq = ++speechSequence;
 
     if (!voices.length) loadVoices();
-    const voice = pickVoice();
+    const targetLang = preferredLang || ((typeof currentLang !== 'undefined' && currentLang === 'en') || voiceMode === 'easyvoice' ? 'en' : 'id');
+    const voice = pickVoice(targetLang);
 
     playBuddyChime();
 
-    const spokenText = cleanSpeechText(text);
+    const spokenText = (targetLang === 'en') ? cleanEnglishSpeechText(text) : cleanSpeechText(text);
     if (!spokenText) return;
 
     const u = new SpeechSynthesisUtterance(spokenText);
 
     if (voice) {
       u.voice = voice;
-      u.lang  = voice.lang || 'id-ID';
+      u.lang  = voice.lang || (targetLang === 'en' ? 'en-US' : 'id-ID');
     } else {
-      u.lang = 'id-ID';
+      u.lang = (targetLang === 'en' ? 'en-US' : 'id-ID');
     }
 
     u.pitch = 1.0;
-    u.rate  = userVoiceRate * 0.98;
+    u.rate  = userVoiceRate * (targetLang === 'en' ? 0.95 : 0.98);
     u.volume = 1.0;
 
     activeUtterances.push(u);
@@ -1214,6 +1226,13 @@ function hasNativeIndonesianVoice() {
   return list.some(v => /^id([-_]|$)/i.test(v.lang) || /indonesia|gadis|siti/i.test(v.name));
 }
 
+window.setVoiceMode = function(mode) {
+  stopAllAudio();
+  voiceMode = mode;
+  if (typeof store !== 'undefined') store.set('vms-voice-mode', mode);
+  if (typeof updateVoiceTabs === 'function') updateVoiceTabs();
+};
+
 /* FUNGSI UTAMA SPEAK (KONSISTEN 100%, TANPA JEDA & TANPA PERUBAHAN SUARA) */
 function speak(text) {
   if (!voiceOn) return;
@@ -1226,27 +1245,23 @@ function speak(text) {
 
   stopAllAudio();
 
-  // Mode 1 (Default): Suara Resmi Wanita Indonesia Gadis Neural Studio
-  if (voiceMode === 'online') {
-    speakWithGadisTTS(text);
-    return;
-  }
+  const isEn = (typeof currentLang !== 'undefined' && currentLang === 'en') || voiceMode === 'easyvoice';
 
-  // Mode 2: Browser TTS
-  if (voiceMode === 'browser') {
-    speakWithBrowser(text);
-    return;
-  }
-
-  // Mode 3: EasyVoice AI
-  if (voiceMode === 'easyvoice') {
+  // Mode EasyVoice AI / Bahasa Inggris (Bilingual Tamu & Admin)
+  if (isEn || voiceMode === 'easyvoice') {
     speakWithEasyVoice(text).then((ok) => {
-      if (!ok) speakWithGadisTTS(text);
+      if (!ok) speakWithBrowser(text, 'en');
     });
     return;
   }
 
-  // Mode 4: ElevenLabs AI
+  // Mode Browser TTS
+  if (voiceMode === 'browser') {
+    speakWithBrowser(text, 'id');
+    return;
+  }
+
+  // Mode ElevenLabs AI
   if (voiceMode === 'elevenlabs') {
     speakWithElevenLabs(text).then((ok) => {
       if (!ok) speakWithGadisTTS(text);
@@ -1254,5 +1269,6 @@ function speak(text) {
     return;
   }
 
+  // Mode Default: Suara Resmi Wanita Indonesia Gadis Neural Studio
   speakWithGadisTTS(text);
 }

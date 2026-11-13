@@ -278,6 +278,64 @@ select:focus {
   opacity: 0.85;
 }
 
+/* Language Switcher Bar */
+.lang-switch-bar {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 3px;
+  gap: 3px;
+  margin-top: 10px;
+}
+.btn-lang {
+  background: none;
+  border: 0;
+  padding: 6px 14px;
+  border-radius: 20px;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-lang.on {
+  background: var(--acc);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(27, 99, 120, 0.35);
+}
+.btn-lang:hover:not(.on) {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Chat Header Language Pill */
+.chat-lang-toggle {
+  display: inline-flex;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  padding: 2px;
+  gap: 2px;
+}
+.lang-pill {
+  background: none;
+  border: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.lang-pill.on {
+  background: #ffe600;
+  color: #17435a;
+}
+
 .bad {
   border-color: #e5483b !important;
 }

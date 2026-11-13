@@ -12,8 +12,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- Stylesheets Terpisah & Rapi -->
-  <link rel="stylesheet" href="css/style.css?v=20261113a">
-  <link rel="stylesheet" href="css/assistant.css?v=20261113a">
+  <link rel="stylesheet" href="css/style.css?v=20261113g">
+  <link rel="stylesheet" href="css/assistant.css?v=20261113g">
 </head>
 <body>
 
@@ -222,22 +222,18 @@
 
   <!-- ========== HALAMAN: REGISTRASI TAMU ========== -->
   <section class="card hide" id="v-registrasi">
-    <div style="text-align:center;margin-bottom:20px;">
+    <div style="text-align:center;margin-bottom:18px;">
       <h1 style="margin:0 0 6px;">Formulir Tamu / <span style="font-style:italic;font-weight:600;color:var(--muted);font-size:0.92em;">Visitor Form</span></h1>
-      <p style="margin:0;font-size:13px;color:var(--muted);font-weight:500;">PT PLN (Persero) PUSHARLIS UP2WVI</p>
+      <p style="margin:0 0 10px;font-size:13px;color:var(--muted);font-weight:500;">PT PLN (Persero) PUSHARLIS UP2WVI</p>
+      
+      <!-- Pemilih Bahasa Cepat (Bilingual Language Switcher) -->
+      <div class="lang-switch-bar">
+        <button type="button" class="btn-lang on" id="btn-lang-id" data-lang="id">🇮🇩 Bahasa Indonesia</button>
+        <button type="button" class="btn-lang" id="btn-lang-en" data-lang="en">🇬🇧 English (EasyVoice AI)</button>
+      </div>
     </div>
     
     <form id="f">
-      <!-- 1. DATA PRIBADI / PERSONAL INFORMATION -->
-      <div class="form-section-header">
-        <span class="section-num">1</span>
-        <div class="section-text">
-          <span class="section-id">Data Pribadi</span>
-          <span class="section-sep">/</span>
-          <span class="section-en">Personal Information</span>
-        </div>
-      </div>
-
       <!-- Pengambilan Foto Wajah Tamu -->
       <div class="photo">
         <img class="ph" id="pv" alt="Foto tamu" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 168 233'%3E%3Crect width='168' height='233' fill='%23bdbdbd'/%3E%3Ccircle cx='84' cy='70' r='34' fill='%238a8a8a'/%3E%3Cpath d='M20 170c0-45 30-60 64-60s64 15 64 60z' fill='%238a8a8a'/%3E%3Ctext x='84' y='195' font-size='22' fill='%23f2f2f2' text-anchor='middle' font-family='sans-serif'%3ENo Image%3C/text%3E%3Ctext x='84' y='220' font-size='22' fill='%23f2f2f2' text-anchor='middle' font-family='sans-serif'%3EAvailable%3C/text%3E%3C/svg%3E">
@@ -245,49 +241,25 @@
         <input type="file" id="pf" accept="image/*" class="hide">
       </div>
 
-      <!-- Isian Data Diri Tamu Sesuai Gambar Referensi -->
+      <!-- Isian Data Tamu Sesuai Urutan Asli + Tambahan No. Telp/WA & Email -->
       <label for="nama">Nama Lengkap / <span class="lbl-en">Full Name</span><span class="req">*</span></label>
       <input type="text" id="nama" required placeholder="Masukkan nama lengkap / Enter your full name">
 
-      <label for="ktp">Nomor Identitas (KTP/Paspor) / <span class="lbl-en">ID Number (National ID/Passport)</span><span class="req">*</span></label>
-      <input type="text" id="ktp" required autocomplete="off" maxlength="20" placeholder="16 digit NIK KTP / Passport number">
-      <div class="err" id="ktp-e"></div>
-
-      <label for="usaha">Asal Instansi / Perusahaan / <span class="lbl-en">Company / Institution</span><span class="req">*</span></label>
+      <label for="usaha">Nama Perusahaan / <span class="lbl-en">Company / Institution</span><span class="req">*</span></label>
       <input type="text" id="usaha" required placeholder="Nama instansi atau perusahaan asal / Company name">
 
-      <label for="alamat">Alamat Instansi / Perusahaan / <span class="lbl-en">Company Address</span><span class="req">*</span></label>
+      <label for="alamat">Alamat Perusahaan Tamu / <span class="lbl-en">Company Address</span><span class="req">*</span></label>
       <input type="text" id="alamat" required placeholder="Alamat lengkap instansi atau perusahaan / Office address">
 
+      <!-- Kolom Tambahan Sesuai Gambar Referensi -->
       <label for="telp">Nomor Telepon / WhatsApp / <span class="lbl-en">Phone / WhatsApp Number</span><span class="req">*</span></label>
       <input type="tel" id="telp" required placeholder="Contoh: 08123456789 / +62812...">
 
       <label for="email">Alamat Email / <span class="lbl-en">Email Address</span></label>
       <input type="email" id="email" placeholder="Contoh: nama@perusahaan.com (Opsional / Optional)">
 
-      <!-- 2. DETAIL KUNJUNGAN / VISIT DETAILS -->
-      <div class="form-section-header">
-        <span class="section-num">2</span>
-        <div class="section-text">
-          <span class="section-id">Detail Kunjungan</span>
-          <span class="section-sep">/</span>
-          <span class="section-en">Visit Details</span>
-        </div>
-      </div>
-
-      <label for="pegawai">Nama Orang / Divisi yang Dituju / <span class="lbl-en">Person / Division to Visit</span><span class="req">*</span></label>
+      <label for="pegawai">Nama Pegawai Yang Dituju / <span class="lbl-en">Person / Division to Visit</span><span class="req">*</span></label>
       <input type="text" id="pegawai" required placeholder="Nama pegawai PLN atau bagian/divisi yang dituju">
-
-      <label for="perlu">Tujuan Kedatangan / <span class="lbl-en">Purpose of Visit</span><span class="req">*</span></label>
-      <div class="purpose-chips" id="purpose-chips">
-        <button type="button" class="purpose-chip" data-val="Rapat / Meeting">💼 Rapat / <em>Meeting</em></button>
-        <button type="button" class="purpose-chip" data-val="Kunjungan Kerja / Official Visit">🏢 Kunjungan Kerja / <em>Official Visit</em></button>
-        <button type="button" class="purpose-chip" data-val="Koordinasi Proyek / Project Coordination">⚡ Koordinasi Proyek / <em>Project Coordination</em></button>
-        <button type="button" class="purpose-chip" data-val="Pengiriman Barang / Delivery">📦 Pengiriman / <em>Delivery</em></button>
-        <button type="button" class="purpose-chip" data-val="Pemeliharaan / Maintenance">🛠️ Pemeliharaan / <em>Maintenance</em></button>
-        <button type="button" class="purpose-chip" data-val="Konsultasi / Consultation">💬 Konsultasi / <em>Consultation</em></button>
-      </div>
-      <input type="text" id="perlu" required placeholder="Pilih opsi di atas atau ketik tujuan kedatangan Anda">
 
       <!-- Pilihan APD Standar K3LH -->
       <label id="apdl">Pemakaian APD / <span class="lbl-en">Personal Protective Equipment (PPE)</span><span class="req">*</span></label>
@@ -318,6 +290,21 @@
         </label>
       </div>
 
+      <label for="perlu">Keperluan Kunjungan / <span class="lbl-en">Purpose of Visit</span><span class="req">*</span></label>
+      <div class="purpose-chips" id="purpose-chips">
+        <button type="button" class="purpose-chip" data-val="Rapat / Meeting">💼 Rapat / <em>Meeting</em></button>
+        <button type="button" class="purpose-chip" data-val="Kunjungan Kerja / Official Visit">🏢 Kunjungan Kerja / <em>Official Visit</em></button>
+        <button type="button" class="purpose-chip" data-val="Koordinasi Proyek / Project Coordination">⚡ Koordinasi Proyek / <em>Project Coordination</em></button>
+        <button type="button" class="purpose-chip" data-val="Pengiriman Barang / Delivery">📦 Pengiriman / <em>Delivery</em></button>
+        <button type="button" class="purpose-chip" data-val="Pemeliharaan / Maintenance">🛠️ Pemeliharaan / <em>Maintenance</em></button>
+        <button type="button" class="purpose-chip" data-val="Konsultasi / Consultation">💬 Konsultasi / <em>Consultation</em></button>
+      </div>
+      <input type="text" id="perlu" required placeholder="Pilih opsi di atas atau ketik tujuan kedatangan Anda">
+
+      <label for="ktp">No. KTP atau Identitas Lainnya / <span class="lbl-en">ID Number (National ID/Passport)</span><span class="req">*</span></label>
+      <input type="text" id="ktp" required autocomplete="off" maxlength="20" placeholder="16 digit NIK KTP / Passport number">
+      <div class="err" id="ktp-e"></div>
+
       <label for="kend">Kendaraan (Jenis / No. Pol) / <span class="lbl-en">Vehicle (Type / Plate Number)</span><span class="req">*</span></label>
       <input type="text" id="kend" required placeholder="Contoh: Avanza B 1234 CD / Motor / Pejalan Kaki">
 
@@ -326,16 +313,6 @@
 
       <label for="jml">Jumlah Tamu / <span class="lbl-en">Number of Visitors</span><span class="req">*</span></label>
       <select id="jml" required></select>
-
-      <!-- 3. INDUKSI K3 & KEAMANAN / SAFETY & SECURITY INDUCTION -->
-      <div class="form-section-header">
-        <span class="section-num">3</span>
-        <div class="section-text">
-          <span class="section-id">Induksi K3 &amp; Keamanan</span>
-          <span class="section-sep">/</span>
-          <span class="section-en">Safety &amp; Security Induction</span>
-        </div>
-      </div>
 
       <!-- ========== SAFETY AND SECURITY INDUCTION (PLN PUSHARLIS) ========== -->
       <div class="induction-container" id="induction-container">
@@ -430,8 +407,14 @@
           <div class="stage-subtitle">PLN PUSHARLIS UP2WVI</div>
         </div>
       </div>
-      <button id="spk" title="Nyalakan / Matikan Suara">🔊 Aktif</button>
-      <button id="pclose" title="Tutup Chat" style="background:none;border:0;color:#fff;font-size:18px;cursor:pointer;padding:2px 8px;margin-left:6px;line-height:1;opacity:0.85;">✕</button>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div class="chat-lang-toggle">
+          <button type="button" id="chat-lang-id" class="lang-pill on" title="Bahasa Indonesia">ID</button>
+          <button type="button" id="chat-lang-en" class="lang-pill" title="English (EasyVoice AI)">EN</button>
+        </div>
+        <button id="spk" title="Nyalakan / Matikan Suara">🔊 Aktif</button>
+        <button id="pclose" title="Tutup Chat" style="background:none;border:0;color:#fff;font-size:18px;cursor:pointer;padding:2px 8px;margin-left:2px;line-height:1;opacity:0.85;">✕</button>
+      </div>
     </div>
 
     <!-- Chat Messages, Quick Chips & Input -->
@@ -458,13 +441,13 @@
 
 <!-- Skrip Terpisah & Modular -->
 <script src="js/xlsx.full.min.js"></script>
-<script src="js/config.js?v=20261113e"></script>
-<script src="js/voice.js?v=20261113e"></script>
-<script src="js/robot3d.js?v=20261113e"></script>
-<script src="js/form.js?v=20261113e"></script>
-<script src="js/dashboard.js?v=20261113e"></script>
-<script src="js/assistant.js?v=20261113e"></script>
-<script src="js/app.js?v=20261113e"></script>
+<script src="js/config.js?v=20261113g"></script>
+<script src="js/voice.js?v=20261113g"></script>
+<script src="js/robot3d.js?v=20261113g"></script>
+<script src="js/form.js?v=20261113g"></script>
+<script src="js/dashboard.js?v=20261113g"></script>
+<script src="js/assistant.js?v=20261113g"></script>
+<script src="js/app.js?v=20261113g"></script>
 
 </body>
 </html>

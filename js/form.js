@@ -3,8 +3,8 @@
    Formulir Tamu: Kamera Wajah, APD, KTP, Safety Induction & Validasi
    ===================================================================== */
 
-const FIELDS = ['nama', 'ktp', 'usaha', 'alamat', 'telp', 'email', 'pegawai', 'perlu', 'kend', 'tag', 'jml'];
-const REQUIRED_FIELDS = ['nama', 'ktp', 'usaha', 'alamat', 'telp', 'pegawai', 'perlu', 'kend', 'tag', 'jml'];
+const FIELDS = ['nama', 'usaha', 'alamat', 'telp', 'email', 'pegawai', 'perlu', 'ktp', 'kend', 'tag', 'jml'];
+const REQUIRED_FIELDS = ['nama', 'usaha', 'alamat', 'telp', 'pegawai', 'perlu', 'ktp', 'kend', 'tag', 'jml'];
 
 let camStream = null;
 let ktpTimer = null;
@@ -350,32 +350,36 @@ function ktpAnnounce() {
 
 /* Submit Handler */
 function handleSubmit() {
+  const isEn  = (typeof currentLang !== 'undefined' && currentLang === 'en');
   const apd   = apdBoxes.filter((b) => b.checked).map((b) => b.value);
   const noApd = $('#apdnone') ? $('#apdnone').checked : false;
 
   const empty = (typeof REQUIRED_FIELDS !== 'undefined' ? REQUIRED_FIELDS : FIELDS).find((id) => !$('#' + id) || !$('#' + id).value.trim());
   if (empty) {
     const labelEl = $(`label[for="${empty}"]`);
-    const labelText = labelEl ? labelEl.textContent.split('/')[0].replace('*', '').trim() : empty;
-    say(`Mohon lengkapi kolom ${labelText} terlebih dahulu.`);
+    const labelParts = labelEl ? labelEl.textContent.replace('*', '').split('/') : [empty];
+    const labelText = isEn
+      ? ((labelParts[1] || labelParts[0]).trim())
+      : (labelParts[0].trim());
+    say(isEn ? `Please complete the ${labelText} field first.` : `Mohon lengkapi kolom ${labelText} terlebih dahulu.`);
     return $('#' + empty).focus();
   }
 
   const ktpErr = ktpError();
   if (ktpErr) {
-    say(ktpErr);
+    say(isEn ? 'Please enter a valid 16-digit National ID (NIK) or ID number.' : ktpErr);
     return $('#ktp').focus();
   }
 
   if (!apd.length && !noApd) {
-    say('Mohon pilih APD yang Anda kenakan, atau centang Tidak memakai APD.');
+    say(isEn ? 'Please select the PPE you are wearing, or choose No PPE.' : 'Mohon pilih APD yang Anda kenakan, atau centang Tidak memakai APD.');
     return $('#apdl').scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   const agree = $('#agree-induction');
   if (agree && !agree.checked) {
     if ($('#agree-e')) $('#agree-e').style.display = 'block';
-    say('Mohon baca dan centang persetujuan Safety and Security Induction terlebih dahulu.');
+    say(isEn ? 'Please review and accept the Safety and Security Induction before submitting.' : 'Mohon baca dan centang persetujuan Safety and Security Induction terlebih dahulu.');
     agree.scrollIntoView({ behavior: 'smooth', block: 'center' });
     agree.focus();
     return;
@@ -412,10 +416,14 @@ function handleSubmit() {
 
     const lacking = APD_LIST.filter((x) => !apd.includes(x));
     const apdNote = lacking.length
-      ? ` APD yang belum Anda kenakan: ${lacking.join(', ')}. Harap ambil di petugas keamanan.`
+      ? (isEn
+          ? ` Recommended PPE you are not wearing: ${lacking.join(', ')}. Please obtain them at the security post.`
+          : ` APD yang belum Anda kenakan: ${lacking.join(', ')}. Harap ambil di petugas keamanan.`)
       : '';
 
-    say(`Registrasi berhasil. Terima kasih, ${rec.nama}. Silakan menuju petugas keamanan untuk mengambil kartu name tag.${apdNote}`);
+    say(isEn
+      ? `Registration successful. Thank you, ${rec.nama}. Please proceed to the security post to pick up your visitor badge.${apdNote}`
+      : `Registrasi berhasil. Terima kasih, ${rec.nama}. Silakan menuju petugas keamanan untuk mengambil kartu name tag.${apdNote}`);
     showDone(rec.nama);
   });
 }
@@ -428,18 +436,19 @@ function openDialog(title, bodyHtml, actionsHtml) {
 }
 
 function showConfirm(apd, noApd, onOk) {
+  const isEn = (typeof currentLang !== 'undefined' && currentLang === 'en');
   const labels = {
     nama:    'Nama Lengkap / Full Name',
-    ktp:     'No. Identitas / ID Number',
-    usaha:   'Perusahaan / Company',
-    alamat:  'Alamat / Address',
-    telp:    'No. Telp/WA / Phone Number',
+    usaha:   'Nama Perusahaan / Company / Institution',
+    alamat:  'Alamat Perusahaan Tamu / Company Address',
+    telp:    'Nomor Telepon/WA / Phone/WhatsApp Number',
     email:   'Alamat Email / Email Address',
-    pegawai: 'Pegawai Dituju / Person to Visit',
-    perlu:   'Keperluan / Purpose of Visit',
-    kend:    'Kendaraan / Vehicle',
-    tag:     'No. Name Tag / Badge No',
-    jml:     'Jumlah Tamu / Guests'
+    pegawai: 'Nama Pegawai Dituju / Person to Visit',
+    perlu:   'Keperluan Kunjungan / Purpose of Visit',
+    ktp:     'No. KTP atau Identitas / ID Number',
+    kend:    'Kendaraan (Jenis / No. Pol) / Vehicle',
+    tag:     'Nomor Name Tag Tamu / Visitor Badge Number',
+    jml:     'Jumlah Tamu / Number of Visitors'
   };
 
   const rows = Object.keys(labels)
@@ -447,21 +456,30 @@ function showConfirm(apd, noApd, onOk) {
     .map((k) => `<dt>${labels[k]}</dt><dd>${esc($('#' + k).value.trim())}</dd>`)
     .join('');
 
-  const apdText = noApd ? 'Tidak memakai APD' : apd.join(', ');
+  const confirmTitle = isEn ? 'Confirm Registration Details' : 'Konfirmasi Data Registrasi';
+  const apdLabel = isEn ? 'Personal Protective Equipment (PPE)' : 'Pemakaian APD / PPE';
+  const apdText = noApd
+    ? (isEn ? 'No PPE' : 'Tidak memakai APD')
+    : apd.join(', ');
+
+  const btnReview = isEn ? 'Review Again' : 'Periksa Lagi';
+  const btnConfirm = isEn ? 'Confirm' : 'Konfirmasi';
 
   openDialog(
-    'Konfirmasi Data Registrasi',
-    `<dl>${rows}<dt>APD / PPE</dt><dd>${esc(apdText)}</dd></dl>`,
-    '<button class="btn ghost" id="ovn">Periksa Lagi</button>' +
-    '<button class="btn" id="ovy">Konfirmasi</button>'
+    confirmTitle,
+    `<dl>${rows}<dt>${apdLabel}</dt><dd>${esc(apdText)}</dd></dl>`,
+    `<button class="btn ghost" id="ovn">${btnReview}</button>` +
+    `<button class="btn" id="ovy">${btnConfirm}</button>`
   );
 
   if (typeof lastHint !== 'undefined') lastHint = '';
-  say('Mohon periksa kembali kelengkapan data Anda. Jika sudah sesuai, tekan Konfirmasi.');
+  say(isEn
+    ? 'Please review your registration details. If everything is correct, click Confirm.'
+    : 'Mohon periksa kembali kelengkapan data Anda. Jika sudah sesuai, tekan Konfirmasi.');
 
   $('#ovn').onclick = () => {
     $('#ov').classList.add('hide');
-    say('Silakan periksa dan perbaiki data Anda jika diperlukan.');
+    say(isEn ? 'Please check and revise your details if needed.' : 'Silakan periksa dan perbaiki data Anda jika diperlukan.');
   };
 
   $('#ovy').onclick = () => {
@@ -471,10 +489,13 @@ function showConfirm(apd, noApd, onOk) {
 }
 
 function showDone(name) {
+  const isEn = (typeof currentLang !== 'undefined' && currentLang === 'en');
   openDialog(
-    '✓ Registrasi Berhasil',
-    `<p>Terima kasih, <b>${esc(name)}</b>. Data kunjungan Anda sudah tersimpan di sistem. Silakan menuju petugas keamanan untuk mengambil name tag tamu.</p>`,
-    '<button class="btn" id="ovd">Selesai</button>'
+    isEn ? '✓ Registration Successful' : '✓ Registrasi Berhasil',
+    isEn
+      ? `<p>Thank you, <b>${esc(name)}</b>. Your visit details have been registered in our system. Please proceed to the security post to pick up your visitor badge.</p>`
+      : `<p>Terima kasih, <b>${esc(name)}</b>. Data kunjungan Anda sudah tersimpan di sistem. Silakan menuju petugas keamanan untuk mengambil name tag tamu.</p>`,
+    `<button class="btn" id="ovd">${isEn ? 'Finish' : 'Selesai'}</button>`
   );
 
   $('#ovd').onclick = () => {

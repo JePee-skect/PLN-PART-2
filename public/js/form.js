@@ -3,7 +3,8 @@
    Formulir Tamu: Kamera Wajah, APD, KTP, Safety Induction & Validasi
    ===================================================================== */
 
-const FIELDS = ['nama', 'usaha', 'alamat', 'pegawai', 'perlu', 'ktp', 'kend', 'tag', 'jml'];
+const FIELDS = ['nama', 'ktp', 'usaha', 'alamat', 'telp', 'email', 'pegawai', 'perlu', 'kend', 'tag', 'jml'];
+const REQUIRED_FIELDS = ['nama', 'ktp', 'usaha', 'alamat', 'telp', 'pegawai', 'perlu', 'kend', 'tag', 'jml'];
 
 let camStream = null;
 let ktpTimer = null;
@@ -56,6 +57,31 @@ function initForm() {
     };
   }
 
+  // Purpose quick chips listeners
+  $$('.purpose-chip').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      $$('.purpose-chip').forEach((c) => c.classList.remove('active'));
+      btn.classList.add('active');
+      const val = btn.dataset.val;
+      const perluInput = $('#perlu');
+      if (perluInput) {
+        perluInput.value = val;
+        perluInput.dispatchEvent(new Event('input', { bubbles: true }));
+        perluInput.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
+  });
+
+  const perluInput = $('#perlu');
+  if (perluInput) {
+    perluInput.addEventListener('input', () => {
+      const v = perluInput.value.trim().toLowerCase();
+      $$('.purpose-chip').forEach((c) => {
+        c.classList.toggle('active', c.dataset.val.toLowerCase() === v);
+      });
+    });
+  }
+
   // APD Listeners
   apdBoxes = $$('#apd input[value]');
   apdBoxes.forEach((b) => b.addEventListener('change', onApdChange));
@@ -78,8 +104,9 @@ function initForm() {
       apdBoxes.forEach((b) => b.checked = false);
       if ($('#apdall')) $('#apdall').checked = false;
       say('Anda tidak memakai APD. Demi keselamatan kerja, silakan ambil dan kenakan APD di pos petugas keamanan.');
-      if (typeof guideIdx !== 'undefined' && guideIdx === 5) {
-        setTimeout(() => goStep(6), 7000);
+      const apdIdx = (typeof GUIDE !== 'undefined') ? GUIDE.findIndex(g => g[0] === 'apd') : -1;
+      if (typeof guideIdx !== 'undefined' && guideIdx === apdIdx && apdIdx >= 0) {
+        setTimeout(() => goStep(apdIdx + 1), 7000);
       }
     });
   }
@@ -116,8 +143,9 @@ function initForm() {
       if (e.target.checked) {
         if ($('#agree-e')) $('#agree-e').style.display = 'none';
         say('Terima kasih telah membaca dan menyetujui Safety and Security Induction PLN Pusharlis.');
-        if (typeof guideIdx !== 'undefined' && guideIdx === 11) {
-          setTimeout(() => goStep(12), 400);
+        const indIdx = (typeof GUIDE !== 'undefined') ? GUIDE.findIndex(g => g[0] === 'agree-induction') : -1;
+        if (typeof guideIdx !== 'undefined' && guideIdx === indIdx && indIdx >= 0) {
+          setTimeout(() => goStep(indIdx + 1), 400);
         }
       }
     });
@@ -172,8 +200,9 @@ function setPhoto(source, srcW, srcH) {
   $('#pb').textContent = 'Ambil Ulang Foto';
 
   say('Foto berhasil diambil. Silakan lanjutkan mengisi nama tamu.');
-  if (typeof guideIdx !== 'undefined' && guideIdx === 0) {
-    setTimeout(() => goStep(1), 3500);
+  const namaIdx = (typeof GUIDE !== 'undefined') ? GUIDE.findIndex(g => g[0] === 'nama') : 1;
+  if (typeof guideIdx !== 'undefined' && guideIdx === 0 && namaIdx >= 0) {
+    setTimeout(() => goStep(namaIdx), 3500);
   }
 }
 
@@ -245,8 +274,9 @@ async function openCamera() {
 /* APD Logic */
 function onApdDone() {
   say('APD lengkap, sangat bagus! Terima kasih telah mengutamakan keselamatan kerja.');
-  if (typeof guideIdx !== 'undefined' && guideIdx === 5) {
-    setTimeout(() => goStep(6), 3500);
+  const apdIdx = (typeof GUIDE !== 'undefined') ? GUIDE.findIndex(g => g[0] === 'apd') : -1;
+  if (typeof guideIdx !== 'undefined' && guideIdx === apdIdx && apdIdx >= 0) {
+    setTimeout(() => goStep(apdIdx + 1), 3500);
   }
 }
 
@@ -323,9 +353,10 @@ function handleSubmit() {
   const apd   = apdBoxes.filter((b) => b.checked).map((b) => b.value);
   const noApd = $('#apdnone') ? $('#apdnone').checked : false;
 
-  const empty = FIELDS.find((id) => !$('#' + id) || !$('#' + id).value.trim());
+  const empty = (typeof REQUIRED_FIELDS !== 'undefined' ? REQUIRED_FIELDS : FIELDS).find((id) => !$('#' + id) || !$('#' + id).value.trim());
   if (empty) {
-    const labelText = $(`label[for=${empty}]`).textContent.replace('*', '').trim();
+    const labelEl = $(`label[for="${empty}"]`);
+    const labelText = labelEl ? labelEl.textContent.split('/')[0].replace('*', '').trim() : empty;
     say(`Mohon lengkapi kolom ${labelText} terlebih dahulu.`);
     return $('#' + empty).focus();
   }
@@ -362,7 +393,7 @@ function handleSubmit() {
     };
 
     FIELDS.forEach((id) => {
-      rec[id] = $('#' + id).value.trim();
+      rec[id] = $('#' + id) ? $('#' + id).value.trim() : '';
     });
 
     data.unshift(rec);
@@ -377,6 +408,7 @@ function handleSubmit() {
     $('#ktp').classList.remove('bad');
     if ($('#agree-induction')) $('#agree-induction').checked = false;
     if ($('#agree-e')) $('#agree-e').style.display = 'none';
+    $$('.purpose-chip').forEach(c => c.classList.remove('active'));
 
     const lacking = APD_LIST.filter((x) => !apd.includes(x));
     const apdNote = lacking.length
@@ -397,15 +429,21 @@ function openDialog(title, bodyHtml, actionsHtml) {
 
 function showConfirm(apd, noApd, onOk) {
   const labels = {
-    nama:    'Nama Tamu',
-    usaha:   'Perusahaan',
-    pegawai: 'Pegawai Dituju',
-    perlu:   'Keperluan',
-    ktp:     'No. Identitas',
-    jml:     'Jumlah Tamu'
+    nama:    'Nama Lengkap / Full Name',
+    ktp:     'No. Identitas / ID Number',
+    usaha:   'Perusahaan / Company',
+    alamat:  'Alamat / Address',
+    telp:    'No. Telp/WA / Phone Number',
+    email:   'Alamat Email / Email Address',
+    pegawai: 'Pegawai Dituju / Person to Visit',
+    perlu:   'Keperluan / Purpose of Visit',
+    kend:    'Kendaraan / Vehicle',
+    tag:     'No. Name Tag / Badge No',
+    jml:     'Jumlah Tamu / Guests'
   };
 
   const rows = Object.keys(labels)
+    .filter((k) => $('#' + k) && $('#' + k).value.trim())
     .map((k) => `<dt>${labels[k]}</dt><dd>${esc($('#' + k).value.trim())}</dd>`)
     .join('');
 
@@ -413,7 +451,7 @@ function showConfirm(apd, noApd, onOk) {
 
   openDialog(
     'Konfirmasi Data Registrasi',
-    `<dl>${rows}<dt>APD</dt><dd>${esc(apdText)}</dd></dl>`,
+    `<dl>${rows}<dt>APD / PPE</dt><dd>${esc(apdText)}</dd></dl>`,
     '<button class="btn ghost" id="ovn">Periksa Lagi</button>' +
     '<button class="btn" id="ovy">Konfirmasi</button>'
   );
@@ -459,6 +497,7 @@ function restartForm() {
   $('#v-registrasi').classList.remove('hide');
   if ($('#agree-induction')) $('#agree-induction').checked = false;
   if ($('#agree-e')) $('#agree-e').style.display = 'none';
+  $$('.purpose-chip').forEach(c => c.classList.remove('active'));
   if (typeof guideIdx !== 'undefined') guideIdx = -1;
   if (typeof lastHint !== 'undefined') lastHint = '';
   scrollTo({ top: 0, behavior: 'smooth' });

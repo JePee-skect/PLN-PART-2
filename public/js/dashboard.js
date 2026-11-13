@@ -94,11 +94,14 @@ function exportToExcel() {
     'No',
     'Tanggal Kunjungan',
     'Nama Tamu',
+    'No. KTP / Identitas',
     'Nama Perusahaan',
+    'Alamat Perusahaan',
+    'No. Telepon / WA',
+    'Alamat Email',
     'Pegawai Yang Dituju',
     'Pemakaian APD',
     'Keperluan Kunjungan',
-    'No. KTP / Identitas',
     'Kendaraan (Jenis / No.Pol)',
     'No Name Tag Tamu',
     'Jumlah Tamu',
@@ -110,11 +113,14 @@ function exportToExcel() {
     i + 1,
     r.tgl || '',
     r.nama || '',
+    String(r.ktp || ''), // Memastikan string murni agar tidak menjadi format ilmiah 1.26E+15
     r.usaha || '',
+    r.alamat || '',
+    String(r.telp || ''),
+    r.email || '',
     r.pegawai || '',
     Array.isArray(r.apd) ? r.apd.join(', ') : (r.apd || ''),
     r.perlu || '',
-    String(r.ktp || ''), // Memastikan string murni agar tidak menjadi format ilmiah 1.26E+15
     r.kend || '',
     String(r.tag || ''),
     Number(r.jml) || 1,
@@ -126,19 +132,16 @@ function exportToExcel() {
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
 
-    // Format kolom No. KTP (kolom indeks 7 / kolom H) dan Name Tag (kolom indeks 9 / kolom J)
+    // Format kolom No. KTP (c:3), Telp (c:6) dan Name Tag (c:12)
     const range = XLSX.utils.decode_range(ws['!ref']);
     for (let R = range.s.r + 1; R <= range.e.r; ++R) {
-      const ktpRef = XLSX.utils.encode_cell({ r: R, c: 7 });
-      if (ws[ktpRef]) {
-        ws[ktpRef].t = 's'; // Tipe data teks (String)
-        ws[ktpRef].z = '@'; // Format angka sebagai teks di Excel
-      }
-      const tagRef = XLSX.utils.encode_cell({ r: R, c: 9 });
-      if (ws[tagRef]) {
-        ws[tagRef].t = 's';
-        ws[tagRef].z = '@';
-      }
+      [3, 6, 12].forEach((cIdx) => {
+        const cellRef = XLSX.utils.encode_cell({ r: R, c: cIdx });
+        if (ws[cellRef]) {
+          ws[cellRef].t = 's'; // Tipe data teks (String)
+          ws[cellRef].z = '@'; // Format angka sebagai teks di Excel
+        }
+      });
     }
 
     // Penataan lebar kolom agar rapi saat dibuka di Microsoft Excel
@@ -146,11 +149,14 @@ function exportToExcel() {
       { wch: 6 },  // No
       { wch: 18 }, // Tanggal
       { wch: 25 }, // Nama Tamu
+      { wch: 24 }, // No KTP
       { wch: 26 }, // Perusahaan
+      { wch: 30 }, // Alamat
+      { wch: 18 }, // No Telp / WA
+      { wch: 24 }, // Email
       { wch: 24 }, // Pegawai Dituju
       { wch: 30 }, // APD
       { wch: 32 }, // Keperluan
-      { wch: 24 }, // No KTP (Lebar pas untuk 16 digit NIK)
       { wch: 22 }, // Kendaraan
       { wch: 18 }, // Name Tag
       { wch: 12 }, // Jumlah
@@ -273,6 +279,8 @@ function showVisitorDetail(id) {
           <div style="font-size:13px;line-height:1.65;">
             <div>🏢 <b>Nama Perusahaan:</b> ${esc(r.usaha || '—')}</div>
             <div>📍 <b>Alamat Perusahaan:</b> ${esc(r.alamat || '—')}</div>
+            <div>📞 <b>No. Telepon / WA:</b> ${esc(r.telp || '—')}</div>
+            <div>✉️ <b>Alamat Email:</b> ${esc(r.email || '—')}</div>
             <div>👤 <b>Pegawai PLN Tujuan:</b> ${esc(r.pegawai || '—')}</div>
             <div>🎯 <b>Keperluan:</b> ${esc(r.perlu || '—')}</div>
           </div>

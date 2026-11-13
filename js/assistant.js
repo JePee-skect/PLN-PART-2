@@ -16,18 +16,22 @@ const STEP_LABELS = [
   'Langkah kesepuluh.',
   'Langkah kesebelas.',
   'Langkah kedua belas.',
+  'Langkah ketiga belas.',
+  'Langkah keempat belas.',
   'Langkah terakhir.'
 ];
 
 const GUIDE = [
   ['pb',              'Silakan tekan tombol Ambil Foto, arahkan pandangan wajah ke kamera, kemudian tekan Ambil Foto kembali untuk menyimpan potret.'],
   ['nama',            'Mohon ketikkan nama lengkap Anda sesuai dengan kartu identitas resmi.'],
+  ['ktp',             'Silakan masukkan enam belas digit nomor induk kependudukan KTP, atau nomor SIM maupun paspor Anda.'],
   ['usaha',           'Silakan masukkan nama instansi atau perusahaan yang Anda wakili.'],
   ['alamat',          'Mohon isi alamat lengkap kantor atau domisili instansi Anda.'],
+  ['telp',            'Silakan masukkan nomor telepon atau WhatsApp aktif yang dapat dihubungi.'],
+  ['email',           'Silakan cantumkan alamat email Anda jika ada, atau lewati jika tidak memiliki email.'],
   ['pegawai',         'Silakan tuliskan nama pejabat atau pegawai PLN yang hendak Anda temui.'],
+  ['perlu',           'Mohon pilih atau ketikkan tujuan kedatangan Anda, seperti rapat, kunjungan kerja, atau pengiriman barang.'],
   ['apd',             'Demi keselamatan bersama, mohon pilih perlengkapan alat pelindung diri yang Anda kenakan. Jika tidak membawa, silakan pilih Tidak Memakai APD.'],
-  ['perlu',           'Mohon jelaskan secara singkat keperluan kunjungan kerja Anda hari ini.'],
-  ['ktp',             'Silakan masukkan enam belas digit nomor induk kependudukan KTP, atau nomor SIM maupun paspor Anda.'],
   ['kend',            'Mohon cantumkan jenis kendaraan beserta nomor polisi yang Anda gunakan.'],
   ['tag',             'Silakan masukkan nomor kartu tanda pengenal tamu yang telah diberikan oleh petugas keamanan di pos.'],
   ['jml',             'Silakan tentukan total jumlah tamu yang hadir dalam kunjungan Anda.'],
@@ -80,7 +84,7 @@ const FAQ = [
   ],
   [
     /halo|hai|selamat|pagi|siang|sore|malam/,
-    'Selamat datang di PT PLN (Persero) Pusharlis. Saya PLN ners, asisten virtual Anda. Apakah ada yang dapat saya bantu terkait pendaftaran kunjungan Bapak dan Ibu?'
+    'Selamat datang di PT PLN (Persero) Pusharlis. Saya E.V.A, asisten virtual Anda. Apakah ada yang dapat saya bantu terkait pendaftaran kunjungan Bapak dan Ibu?'
   ],
   [
     /mulai|panduan|bimbingan|bantu/,
@@ -220,7 +224,7 @@ function addMsg(text, cls) {
   if (cls === 'b') {
     d.innerHTML = `
       <div class="msg-sender">
-        <span class="msg-bot-name">PLN ners</span>
+        <span class="msg-bot-name">E.V.A</span>
       </div>
       <div class="msg-content">${esc(text)}</div>
     `;
@@ -249,7 +253,7 @@ function showBubble(text) {
   if (!b) return;
   b.innerHTML = `
     <div class="bub-brand">
-      <span>PLN ners • PLN Pusharlis</span>
+      <span>E.V.A • PLN Pusharlis</span>
     </div>
     <div class="bub-text">${esc(text)}</div>
     <div class="bub-hint">💬 Ketuk balon untuk buka Chat AI</div>
@@ -267,9 +271,9 @@ function botHello(page, force = false) {
   greeted[key] = true;
 
   if (page === 'registrasi') {
-    say('Selamat datang di PT PLN (Persero) Pusharlis. Saya PLN ners, asisten virtual Anda. Dengan senang hati, saya siap memandu Bapak dan Ibu dalam proses pengisian formulir registrasi kunjungan. Silakan tekan tombol Mulai Panduan untuk bimbingan langkah demi langkah.');
+    say('Selamat datang di PT PLN (Persero) Pusharlis. Saya E.V.A, asisten virtual Anda. Dengan senang hati, saya siap memandu Bapak dan Ibu dalam proses pengisian formulir registrasi kunjungan. Silakan tekan tombol Mulai Panduan untuk bimbingan langkah demi langkah.');
   } else {
-    say('Selamat datang, Bapak dan Ibu Petugas. Saya PLN ners. Anda dapat memantau data tamu, melakukan check in dan check out, serta mengunduh laporan ke Excel.');
+    say('Selamat datang, Bapak dan Ibu Petugas. Saya E.V.A. Anda dapat memantau data tamu, melakukan check in dan check out, serta mengunduh laporan ke Excel.');
   }
 }
 

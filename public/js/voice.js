@@ -15,7 +15,7 @@ let audioUnlocked  = false;
 let pendingSpeech  = null;
 const activeUtterances = [];
 
-/* Web Audio API Chime untuk PLN ners */
+/* Web Audio API Chime untuk E.V.A */
 let buddyAudioCtx = null;
 function getBuddyAudioContext() {
   try {
@@ -228,7 +228,7 @@ function initVoice() {
   if (btnTestOnline) {
     btnTestOnline.onclick = () => {
       stopAllAudio();
-      speakWithGadisTTS('Selamat datang di PT PLN (Persero) Pusharlis. Saya PLN ners, asisten virtual Anda.');
+      speakWithGadisTTS('Selamat datang di PT PLN (Persero) Pusharlis. Saya E.V.A, asisten virtual Anda.');
     };
   }
 
@@ -240,7 +240,7 @@ function initVoice() {
       voiceMode = 'easyvoice';
       store.set('vms-voice-mode', voiceMode);
       updateVoiceTabs();
-      say('Mode suara EasyVoice AI diaktifkan.');
+      say('Mode suara EasyVoice AI Bahasa Inggris diaktifkan.');
     };
   }
 
@@ -301,10 +301,10 @@ function initVoice() {
         statusEl.style.color = 'var(--acc)';
       }
 
-      speakWithEasyVoice('Halo! API Key EasyVoice berhasil disimpan. PLN ners siap menyambut tamu dengan suara AI yang ramah.').then((ok) => {
+      speakWithEasyVoice('Hello! EasyVoice API Key saved successfully. E.V.A is ready to assist visitors in English.').then((ok) => {
         if (statusEl) {
           if (ok) {
-            statusEl.textContent = '✅ Berhasil terhubung! Suara AI EasyVoice (Kokoro-82m) aktif.';
+            statusEl.textContent = '✅ Berhasil terhubung! Suara AI EasyVoice (Kokoro-82m English) aktif.';
             statusEl.style.color = '#2ecc71';
           } else {
             statusEl.textContent = '⚠️ Gagal terhubung ke API EasyVoice. Sistem beralih ke suara default.';
@@ -320,14 +320,14 @@ function initVoice() {
     btnTestEasy.onclick = () => {
       const statusEl = $('#ev-status');
       if (statusEl) {
-        statusEl.textContent = '⏳ Menguji pemutaran audio EasyVoice...';
+        statusEl.textContent = '⏳ Menguji pemutaran audio EasyVoice English...';
         statusEl.style.color = 'var(--acc)';
       }
       stopAllAudio();
-      speakWithEasyVoice('Selamat datang di PT PLN (Persero) Pusharlis. Saya PLN ners, asisten virtual Anda.').then((ok) => {
+      speakWithEasyVoice('Welcome to PT PLN Pusharlis. I am E.V.A, your virtual assistant. How may I assist your visit today?').then((ok) => {
         if (statusEl) {
           if (ok) {
-            statusEl.textContent = '✅ Suara EasyVoice AI berhasil diputar.';
+            statusEl.textContent = '✅ Suara EasyVoice AI (English) berhasil diputar.';
             statusEl.style.color = '#2ecc71';
           } else {
             statusEl.textContent = '⚠️ Gagal memutar EasyVoice. Menggunakan suara cadangan.';
@@ -478,6 +478,8 @@ function loadVoices() {
 function cleanSpeechText(text) {
   if (!text) return '';
   return text
+    .replace(/\bE\.V\.A\b/gi, 'Eva')
+    .replace(/\bEVA\b/g, 'Eva')
     .replace(/\bPT\b/g, 'P T')
     .replace(/\(Persero\)/gi, 'Persero')
     .replace(/\bPLN\b/g, 'P L N')
@@ -556,7 +558,7 @@ function populateVoiceSelect() {
   const tipEl = $('#voice-tip');
   if (tipEl) {
     if (hasFemaleId) {
-      tipEl.innerHTML = '✅ <b>Suara Wanita Indonesia Natural aktif!</b> PLN ners siap menyambut tamu dengan ramah.';
+      tipEl.innerHTML = '✅ <b>Suara Wanita Indonesia Natural aktif!</b> E.V.A siap menyambut tamu dengan ramah.';
       tipEl.style.background = 'rgba(46, 204, 113, 0.15)';
       tipEl.style.color = 'var(--text)';
     } else {
@@ -592,7 +594,7 @@ function updateVoiceTabs() {
       badge.textContent = 'Aktif: 🔊 Browser WebSpeech';
       badge.style.background = '#2980b9';
     } else if (isEasy) {
-      badge.textContent = 'Aktif: 🤖 EasyVoice AI';
+      badge.textContent = 'Aktif: 🤖 EasyVoice AI (English Voice)';
       badge.style.background = '#e67e22';
     } else if (isEleven) {
       badge.textContent = 'Aktif: ⚡ ElevenLabs AI';
@@ -751,9 +753,205 @@ async function speakWithGadisTTS(text) {
   return speakWithGoogleTTS(text);
 }
 
-/* SINTESIS SUARA EASYVOICE AI (KOKORO-82M) */
+/* =====================================================================
+   TERJEMAHAN SUARA BAHASA INGGRIS (EASYVOICE AI KOKORO-82M)
+   Mengonversi teks panduan E.V.A ke bahasa Inggris alami & fasih
+   ===================================================================== */
+const EN_SPEECH_MAP = {
+  // 1. Panduan Langkah Formulir (Guide Steps)
+  'Silakan tekan tombol Ambil Foto, arahkan pandangan wajah ke kamera, kemudian tekan Ambil Foto kembali untuk menyimpan potret.':
+    'Please click the Take Photo button, look directly at the camera, then click Capture to save your photo.',
+  'Mohon ketikkan nama lengkap Anda sesuai dengan kartu identitas resmi.':
+    'Please enter your full name as shown on your official identification.',
+  'Silakan masukkan enam belas digit nomor induk kependudukan KTP, atau nomor SIM maupun paspor Anda.':
+    'Please enter your sixteen-digit National ID number, driver license, or passport number.',
+  'Silakan masukkan nama instansi atau perusahaan yang Anda wakili.':
+    'Please enter the company or institution you represent.',
+  'Mohon isi alamat lengkap kantor atau domisili instansi Anda.':
+    'Please provide the full address of your company or institution.',
+  'Silakan masukkan nomor telepon atau WhatsApp aktif yang dapat dihubungi.':
+    'Please enter an active phone or WhatsApp number where you can be reached.',
+  'Silakan cantumkan alamat email Anda jika ada, atau lewati jika tidak memiliki email.':
+    'Please enter your email address if available, or skip if you do not have one.',
+  'Silakan tuliskan nama pejabat atau pegawai PLN yang hendak Anda temui.':
+    'Please enter the name of the PLN personnel or division you wish to visit.',
+  'Mohon pilih atau ketikkan tujuan kedatangan Anda, seperti rapat, kunjungan kerja, atau pengiriman barang.':
+    'Please select or enter the purpose of your visit, such as a meeting, official visit, or delivery.',
+  'Demi keselamatan bersama, mohon pilih perlengkapan alat pelindung diri yang Anda kenakan. Jika tidak membawa, silakan pilih Tidak Memakai APD.':
+    'For safety compliance, please select the Personal Protective Equipment you are wearing. If none, select No PPE.',
+  'Mohon cantumkan jenis kendaraan beserta nomor polisi yang Anda gunakan.':
+    'Please specify your vehicle type and license plate number.',
+  'Silakan masukkan nomor kartu tanda pengenal tamu yang telah diberikan oleh petugas keamanan di pos.':
+    'Please enter the visitor badge number provided by security.',
+  'Silakan tentukan total jumlah tamu yang hadir dalam kunjungan Anda.':
+    'Please select the total number of visitors in your party.',
+  'Mohon cermati peraturan Keselamatan dan Keamanan Kerja pada poster di atas, kemudian beri tanda centang persetujuan sebagai komitmen keselamatan bersama.':
+    'Please review the workplace Safety and Security Induction above and check the agreement box.',
+  'Seluruh data registrasi telah lengkap. Silakan tekan tombol Kirim Registrasi untuk menyelesaikan pendaftaran kunjungan Anda.':
+    'All details have been completed. Please click Submit Registration to finish your visitor registration.',
+
+  // 2. Sambutan Asisten & FAQ
+  'Selamat datang di PT PLN (Persero) Pusharlis. Saya E.V.A, asisten virtual Anda. Apakah ada yang dapat saya bantu terkait pendaftaran kunjungan Bapak dan Ibu?':
+    'Welcome to PT PLN Pusharlis. I am E.V.A, your virtual assistant. How may I assist your visit registration today?',
+  'Selamat datang di PT PLN (Persero) Pusharlis. Saya E.V.A, asisten virtual Anda. Dengan senang hati, saya siap memandu Bapak dan Ibu dalam proses pengisian formulir registrasi kunjungan. Silakan tekan tombol Mulai Panduan untuk bimbingan langkah demi langkah.':
+    'Welcome to PT PLN Pusharlis. I am E.V.A, your virtual assistant. I am delighted to guide you through the registration process. Please click Start Guide for step-by-step assistance.',
+  'Selamat datang, Bapak dan Ibu Petugas. Saya E.V.A. Anda dapat memantau data tamu, melakukan check in dan check out, serta mengunduh laporan ke Excel.':
+    'Welcome, officers. I am E.V.A. You can monitor visitor logs, check in and check out guests, and download reports to Excel.',
+  'Apakah Bapak dan Ibu membutuhkan bantuan dalam pengisian formulir? Silakan ketuk saya untuk panduan langkah demi langkah.':
+    'Do you need assistance filling out the form? Tap on me for step-by-step guidance.',
+  'Sama-sama! Dengan senang hati saya siap melayani Bapak dan Ibu.':
+    'You are very welcome! It is my pleasure to assist you.',
+
+  // 3. Foto & Kamera
+  'Hadapkan wajah Anda ke arah kamera dengan jelas, lalu tekan tombol Ambil Foto.':
+    'Please position your face clearly in front of the camera, then click the Take Photo button.',
+  'Foto berhasil diambil. Silakan lanjutkan mengisi nama tamu.':
+    'Photo captured successfully. Please proceed with entering your full name.',
+  'Foto belum diambil. Anda dapat mencobanya kembali kapan saja.':
+    'Photo was not captured. You may try again anytime.',
+  'Foto belum dipilih. Anda dapat mencobanya kembali kapan saja.':
+    'No photo selected. You can take or choose a photo anytime.',
+  'Berkas yang dipilih bukan gambar. Mohon pilih foto.':
+    'The selected file is not an image. Please choose a valid photo.',
+  'Foto gagal dimuat. Mohon pilih foto lain.':
+    'Failed to load photo. Please choose another image.',
+  'Kamera tidak tersedia di perangkat ini. Silakan pilih foto dari galeri.':
+    'Camera is not available on this device. Please select a photo from your gallery.',
+  'Kamera tidak dapat diakses. Pastikan izin kamera aktif, atau pilih foto dari berkas galeri.':
+    'Cannot access camera. Please allow camera permissions, or upload from your gallery.',
+  'Kamera belum siap, mohon tunggu sebentar.':
+    'Camera is still initializing, please wait a moment.',
+
+  // 4. APD & Safety Induction
+  'APD lengkap, sangat bagus! Terima kasih telah mengutamakan keselamatan kerja.':
+    'All safety equipment checked, excellent! Thank you for prioritizing workplace safety.',
+  'Anda tidak memakai APD. Demi keselamatan kerja, silakan ambil dan kenakan APD di pos petugas keamanan.':
+    'You are not wearing safety equipment. For your safety, please collect and wear PPE at the security checkpoint.',
+  'Terima kasih telah membaca dan menyetujui Safety and Security Induction PLN Pusharlis.':
+    'Thank you for reading and accepting the Safety and Security Induction of PLN Pusharlis.',
+
+  // 5. Konfirmasi & Submit
+  'Mohon periksa kembali kelengkapan data Anda. Jika sudah sesuai, tekan Konfirmasi.':
+    'Please verify your registration details. If correct, press Confirm.',
+  'Silakan periksa dan perbaiki data Anda jika diperlukan.':
+    'Please review and adjust your information if needed.',
+  'Mohon pilih APD yang Anda kenakan, atau centang Tidak memakai APD.':
+    'Please select the PPE you are wearing, or check No PPE.',
+  'Mohon baca dan centang persetujuan Safety and Security Induction terlebih dahulu.':
+    'Please read and check the Safety and Security Induction agreement before submitting.',
+  'Terima kasih. Semoga kunjungan Anda lancar. Jika ada tamu berikutnya, tekan tombol Isi Formulir Lagi.':
+    'Thank you! We hope you have a productive visit. For the next visitor, please click Fill Form Again.',
+  'Silakan isi formulir untuk tamu berikutnya. Tekan Mulai panduan jika membutuhkan arahan.':
+    'Please fill out the form for the next visitor. Click Start Guide if you need directions.',
+
+  // 6. Admin & Bantuan
+  'Di menu Dashboard, tekan tombol Check In saat tamu tiba di lokasi. Saat tamu hendak pulang, tekan tombol Check Out pada baris tamu tersebut.':
+    'In the Dashboard, click Check In when guests arrive. When guests depart, click Check Out on their row.',
+  'Tekan tombol Export to Excel. File Excel akan langsung terunduh otomatis ke komputer Anda, dan nomor KTP sudah rapi dalam format teks 16 digit.':
+    'Click Export to Excel. The spreadsheet file will automatically download with formatted ID numbers.',
+  'Gunakan filter Tanggal Awal dan Tanggal Akhir untuk menentukan rentang waktu, atau ketik nama tamu pada kolom pencarian.':
+    'Use the start and end date filters to set the time period, or type visitor names in the search box.',
+  'File Excel berhasil diunduh. Silakan buka file tersebut untuk melihat data tamu.':
+    'Excel file downloaded successfully. Please open the file to view visitor records.',
+  'File Excel berhasil diunduh. Silakan buka file tersebut untuk melihat data.':
+    'Excel file downloaded successfully. Please open the file to view records.',
+  'Login berhasil. Selamat datang, Administrator PLN.':
+    'Login successful. Welcome, PLN Administrator.',
+  'Maaf, username atau password yang Anda masukkan salah.':
+    'Sorry, the username or password entered is incorrect.',
+  'Admin telah keluar. Mode formulir pendaftaran tamu kembali aktif.':
+    'Administrator logged out. Visitor registration form is active.'
+};
+
+function translateToEnglish(text) {
+  if (!text) return '';
+  const trimmed = text.trim();
+  if (EN_SPEECH_MAP[trimmed]) return EN_SPEECH_MAP[trimmed];
+
+  // Format langkah panduan
+  const mStep = trimmed.match(/^Langkah (pertama|kedua|ketiga|keempat|kelima|keenam|ketujuh|kedelapan|kesembilan|kesepuluh|kesebelas|kedua belas|ketiga belas|keempat belas|terakhir)\.\s*(.*)$/i);
+  if (mStep) {
+    const stepWords = {
+      'pertama': 'Step one.', 'kedua': 'Step two.', 'ketiga': 'Step three.', 'keempat': 'Step four.',
+      'kelima': 'Step five.', 'keenam': 'Step six.', 'ketujuh': 'Step seven.', 'kedelapan': 'Step eight.',
+      'kesembilan': 'Step nine.', 'kesepuluh': 'Step ten.', 'kesebelas': 'Step eleven.',
+      'kedua belas': 'Step twelve.', 'ketiga belas': 'Step thirteen.', 'keempat belas': 'Step fourteen.',
+      'terakhir': 'Final step.'
+    };
+    const enPrefix = stepWords[mStep[1].toLowerCase()] || 'Next step.';
+    const subText = mStep[2].trim();
+    const enSub = EN_SPEECH_MAP[subText] || translateToEnglish(subText);
+    return `${enPrefix} ${enSub}`;
+  }
+
+  // Notifikasi registrasi berhasil
+  const mReg = trimmed.match(/Registrasi berhasil\. Terima kasih,?\s*([^.]+)\.\s*Silakan menuju petugas keamanan untuk mengambil kartu name tag(.*)/i);
+  if (mReg) {
+    const name = mReg[1].trim();
+    return `Registration successful. Thank you, ${name}. Please proceed to the security post to pick up your visitor badge.`;
+  }
+
+  // Kolom belum lengkap
+  const mEmpty = trimmed.match(/Mohon lengkapi kolom (.+?) terlebih dahulu\./i);
+  if (mEmpty) {
+    return `Please complete the ${mEmpty[1].trim()} field first.`;
+  }
+
+  // Status check in / check out
+  const mIn = trimmed.match(/(.+) berhasil check in\. Silakan masuk\./i);
+  if (mIn) {
+    return `${mIn[1].trim()} has successfully checked in. Welcome!`;
+  }
+  const mOut = trimmed.match(/(.+) sudah check out\. Terima kasih atas kunjungannya\./i);
+  if (mOut) {
+    return `${mOut[1].trim()} has checked out. Thank you for your visit.`;
+  }
+
+  // Validasi digit KTP
+  const mKtpLess = trimmed.match(/Nomor KTP kurang (\d+) digit\./i);
+  if (mKtpLess) {
+    return `National ID number is missing ${mKtpLess[1]} digits. A valid Indonesian ID must have 16 digits.`;
+  }
+  const mKtpMore = trimmed.match(/Nomor KTP kelebihan (\d+) digit\./i);
+  if (mKtpMore) {
+    return `National ID number has ${mKtpMore[1]} extra digits. A valid Indonesian ID must have 16 digits.`;
+  }
+
+  // Mode pengaktifan EasyVoice
+  if (trimmed.includes('Mode suara EasyVoice AI')) {
+    return 'EasyVoice AI English voice mode is now active. I am E.V.A, ready to assist international visitors in English.';
+  }
+
+  // Fallback salam bila menyapa
+  if (/selamat datang/i.test(trimmed) && /pusharlis/i.test(trimmed)) {
+    return 'Welcome to PT PLN Pusharlis. I am E.V.A, your virtual assistant. How may I assist your visit today?';
+  }
+
+  return trimmed;
+}
+
+function cleanEnglishSpeechText(text) {
+  if (!text) return '';
+  return text
+    .replace(/\bPT\b/g, 'P T')
+    .replace(/\bPLN\b/g, 'P L N')
+    .replace(/\bPUSHARLIS\b/gi, 'Pusharlis')
+    .replace(/\bUP2WVI\b/gi, 'U P 2 W six')
+    .replace(/\bK3LH\b/gi, 'Occupational Safety')
+    .replace(/\bK3\b/gi, 'Safety')
+    .replace(/\bAPD\b/g, 'P P E')
+    .replace(/\bKTP\b/g, 'National I D')
+    .replace(/\bSIM\b/g, 'Driver License')
+    .replace(/\bNIK\b/g, 'I D Number')
+    .replace(/\bE\.V\.A\b/gi, 'Eva')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/* SINTESIS SUARA EASYVOICE AI (KOKORO-82M ENGLISH VOICE) */
 async function speakWithEasyVoice(text) {
-  const clean = cleanSpeechText(text);
+  const enText = translateToEnglish(text);
+  const clean = cleanEnglishSpeechText(enText);
   if (!clean) return false;
 
   if (!easyVoiceKey || easyVoiceKey.length < 60 || (easyVoiceKey.startsWith('ev_a8dd782c') && easyVoiceKey.length < 67)) {
@@ -765,7 +963,7 @@ async function speakWithEasyVoice(text) {
   const mySeq = ++speechSequence;
   playBuddyChime();
 
-  const cacheKey = 'ev_' + (easyVoiceVoice || 'af_heart') + '_' + clean;
+  const cacheKey = 'ev_en_' + (easyVoiceVoice || 'af_heart') + '_' + clean;
   if (audioCache.has(cacheKey)) {
     if (mySeq === speechSequence) {
       playCachedAudio(audioCache.get(cacheKey));

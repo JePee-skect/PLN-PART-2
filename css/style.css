@@ -147,6 +147,9 @@ label {
 
 input[type=text],
 input[type=date],
+input[type=tel],
+input[type=email],
+input[type=password],
 select {
   width: 100%;
   padding: 12px 14px;
@@ -170,10 +173,109 @@ select option {
 
 input[type=text]:focus,
 input[type=date]:focus,
+input[type=tel]:focus,
+input[type=email]:focus,
+input[type=password]:focus,
 select:focus {
   border-color: var(--acc);
   outline: none;
   box-shadow: 0 0 0 3px rgba(27, 99, 120, 0.15);
+}
+
+/* Bilingual Form Sections & Labels */
+.form-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 32px 0 16px;
+  padding: 11px 16px;
+  background: linear-gradient(135deg, rgba(27, 99, 120, 0.12), rgba(41, 150, 180, 0.04));
+  border-left: 4px solid var(--acc);
+  border-radius: 8px;
+}
+.form-section-header:first-of-type {
+  margin-top: 14px;
+}
+.section-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--acc);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(27, 99, 120, 0.35);
+}
+.section-text {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.section-id {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--pri);
+}
+.section-sep {
+  color: var(--muted);
+  font-weight: 400;
+}
+.section-en {
+  font-size: 13.5px;
+  font-weight: 500;
+  font-style: italic;
+  color: var(--muted);
+}
+.lbl-en {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 0.9em;
+}
+.req {
+  color: #e5483b;
+  margin-left: 2px;
+  font-weight: 700;
+}
+
+/* Purpose Quick Chips */
+.purpose-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 12px;
+}
+.purpose-chip {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.purpose-chip:hover {
+  background: rgba(27, 99, 120, 0.16);
+  border-color: var(--acc);
+  transform: translateY(-1px);
+}
+.purpose-chip.active {
+  background: var(--acc);
+  color: #fff;
+  border-color: var(--acc);
+  box-shadow: 0 2px 8px rgba(27, 99, 120, 0.4);
+}
+.purpose-chip em {
+  font-style: italic;
+  opacity: 0.85;
 }
 
 .bad {

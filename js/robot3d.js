@@ -1,7 +1,7 @@
 /* =====================================================================
    VISITOR MANAGEMENT SYSTEM - PT PLN (PERSERO) PUSHARLIS
-   Virtual Concierge 3D Three.js: Asisten Virtual "PLN ners"
-   Desain Representasi Manusia Nyata Berhijab Putih, Ramah & Profesional
+   Virtual Concierge 3D Three.js: Asisten Virtual "E.V.A"
+   Desain Representasi Manusia Nyata, Ramah & Profesional
    Dilengkapi Animasi Kedipan Alami, Gerakan Bicara, dan Interaksi Kursor 3D
    ===================================================================== */
 
@@ -10,7 +10,7 @@ let wasDragged = false;
 let mouseTargetX = 0;
 let mouseTargetY = 0;
 
-/* State & Variasi Gerakan 3D PLN ners */
+/* State & Variasi Gerakan 3D E.V.A */
 let wasSpeaking = false;
 let speechStartTime = 0;
 let currentMood = 0; // 0: fokus ramah, 1: miringkan kepala manis, 2: melirik ke formulir
@@ -109,7 +109,7 @@ function enableDrag() {
   let moved   = false;
   let down    = false;
 
-  fab.title = 'Geser untuk memindahkan posisi PLN ners';
+  fab.title = 'Geser untuk memindahkan posisi E.V.A';
 
   function place(x, y) {
     const w = bot.offsetWidth;
@@ -209,7 +209,7 @@ function createPedestalBadgeTexture(T) {
 
   ctx.fillStyle = '#ffe600';
   ctx.font = '900 32px "Poppins", Arial, sans-serif';
-  ctx.fillText('PLN ners • ASISTEN VIRTUAL', 256, 88);
+  ctx.fillText('E.V.A • ASISTEN VIRTUAL', 256, 88);
 
   const canvasTex = new T.CanvasTexture(canvas);
   canvasTex.generateMipmaps = true;
@@ -220,7 +220,7 @@ function createPedestalBadgeTexture(T) {
 }
 
 /**
- * Pembuatan Avatar Manusia Interaktif 3D "PLN ners"
+ * Pembuatan Avatar Manusia Interaktif 3D "E.V.A"
  * Menggunakan foto asli berhijab putih dengan kurvatur 3D dan animasi hidup
  */
 function createHumanAvatar(T) {

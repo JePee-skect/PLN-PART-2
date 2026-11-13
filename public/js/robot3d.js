@@ -255,13 +255,13 @@ function createHumanAvatar(T) {
     return tex;
   }
 
-  const CACHE_V = '?v=20261113h';
+  const CACHE_V = '?v=20261113i';
   const texIdle       = loadAvatarTex('img/human-avatar.png' + CACHE_V);
   const texBlink      = loadAvatarTex('img/human-avatar-blink.png' + CACHE_V);
   const texTalk       = loadAvatarTex('img/human-avatar-talk.png' + CACHE_V);
   const texTalkBlink  = loadAvatarTex('img/human-avatar-talk-blink.png' + CACHE_V);
 
-  // Bidang 3D bervolume kurvatur halus (Cylindrical depth mapping)
+  // Bidang 3D bervolume kurvatur halus (Cylindrical depth mapping + Chest depth)
   // Ukuran proporsional & rapi, pas di dalam kanvas (tidak membesar)
   const meshW = 2.45;
   const meshH = 3.30;
@@ -271,8 +271,13 @@ function createHumanAvatar(T) {
   for (let i = 0; i < posAttr.count; i++) {
     const vx = posAttr.getX(i);
     const vy = posAttr.getY(i);
-    // Lengkungan silindris lembut pada bahu dan sisi kepala
-    const depth = -(vx * vx) * 0.08 - (vy < -0.8 ? 0.05 : 0);
+    // Lengkungan silindris lembut pada bahu dan sisi tubuh
+    let depth = -(vx * vx) * 0.08 - (vy < -0.8 ? 0.05 : 0);
+    // Penonjolan lembut bervolume 3D pada area dada (y antara -0.25 dan +0.35)
+    if (vy > -0.25 && vy < 0.35 && Math.abs(vx) < 0.65) {
+      const chestBump = Math.cos(vx * 2.4) * Math.sin((vy + 0.25) / 0.60 * Math.PI) * 0.050;
+      depth += Math.max(0, chestBump);
+    }
     posAttr.setZ(i, depth);
   }
   geom.computeVertexNormals();
@@ -468,11 +473,7 @@ function animate(ms) {
     R.ring1.material.emissiveIntensity = isSpeaking ? 1.6 : (avatarHovered ? 1.5 : 1.3);
   }
 
-  // 11. Animasi Lencana Sambutan & Bayangan Lantai
-  if (R.badgeMesh) {
-    R.badgeMesh.position.y = -1.52 + breathY * 0.50;
-  }
-
+  // 11. Animasi Bayangan Lantai
   if (R.shadow) {
     const sScale = Math.max(0.85, 1.0 - breathY * 1.6);
     R.shadow.scale.set(sScale, sScale, 1.0);

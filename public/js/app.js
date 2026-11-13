@@ -146,7 +146,8 @@ function initApp() {
 
       setRole('user');
       location.hash = '#registrasi';
-      say('Admin telah keluar. Mode formulir pendaftaran tamu kembali aktif.');
+      const isEn = (typeof currentLang !== 'undefined' && currentLang === 'en') || (typeof voiceMode !== 'undefined' && voiceMode === 'easyvoice');
+      say(isEn ? 'Administrator logged out. Visitor registration form is active.' : 'Admin telah keluar. Mode formulir pendaftaran tamu kembali aktif.');
     };
   }
 

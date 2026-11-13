@@ -219,6 +219,12 @@ function initVoice() {
       stopAllAudio();
       voiceMode = 'online';
       store.set('vms-voice-mode', voiceMode);
+      if (typeof setAppLanguage === 'function') {
+        setAppLanguage('id', false);
+      } else {
+        if (typeof store !== 'undefined') store.set('vms-lang', 'id');
+        if (typeof currentLang !== 'undefined') currentLang = 'id';
+      }
       updateVoiceTabs();
       say('Mode suara wanita Indonesia Gadis Neural aktif.');
     };
@@ -239,8 +245,14 @@ function initVoice() {
       stopAllAudio();
       voiceMode = 'easyvoice';
       store.set('vms-voice-mode', voiceMode);
+      if (typeof setAppLanguage === 'function') {
+        setAppLanguage('en', false);
+      } else {
+        if (typeof store !== 'undefined') store.set('vms-lang', 'en');
+        if (typeof currentLang !== 'undefined') currentLang = 'en';
+      }
       updateVoiceTabs();
-      say('Mode suara EasyVoice AI Bahasa Inggris diaktifkan.');
+      say('EasyVoice AI English voice mode activated. I am E.V.A, ready to guide visitors in English.');
     };
   }
 

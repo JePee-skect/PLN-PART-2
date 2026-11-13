@@ -185,7 +185,11 @@ let idleNotified = false;
 let bubbleTimer  = null;
 const greeted    = {};
 
-let currentLang = (typeof store !== 'undefined' ? store.get('vms-lang', 'id') : 'id');
+let savedVoiceMode = (typeof store !== 'undefined' ? store.get('vms-voice-mode', 'online') : 'online');
+let currentLang = (typeof store !== 'undefined' ? store.get('vms-lang', (savedVoiceMode === 'easyvoice' ? 'en' : 'id')) : 'id');
+if (savedVoiceMode === 'easyvoice') {
+  currentLang = 'en';
+}
 
 function setAppLanguage(lang, announce = true) {
   currentLang = (lang === 'en') ? 'en' : 'id';
@@ -195,8 +199,10 @@ function setAppLanguage(lang, announce = true) {
     voiceMode = 'easyvoice';
     if (typeof store !== 'undefined') store.set('vms-voice-mode', 'easyvoice');
   } else {
-    voiceMode = 'online';
-    if (typeof store !== 'undefined') store.set('vms-voice-mode', 'online');
+    if (voiceMode === 'easyvoice') {
+      voiceMode = 'online';
+      if (typeof store !== 'undefined') store.set('vms-voice-mode', 'online');
+    }
   }
   if (typeof updateVoiceTabs === 'function') updateVoiceTabs();
 

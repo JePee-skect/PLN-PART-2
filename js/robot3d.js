@@ -255,7 +255,7 @@ function createHumanAvatar(T) {
     return tex;
   }
 
-  const CACHE_V = '?v=20261113i';
+  const CACHE_V = '?v=20261113k';
   const texIdle       = loadAvatarTex('img/human-avatar.png' + CACHE_V);
   const texBlink      = loadAvatarTex('img/human-avatar-blink.png' + CACHE_V);
   const texTalk       = loadAvatarTex('img/human-avatar-talk.png' + CACHE_V);
@@ -290,7 +290,7 @@ function createHumanAvatar(T) {
   });
 
   const avatarMesh = new T.Mesh(geom, avatarMat);
-  avatarMesh.position.set(0.27, 0.14, 0);
+  avatarMesh.position.set(-0.02, 0.14, 0);
   g.add(avatarMesh);
 
   // Dudukan Levitasi Holografik Futuristik PLN di Bawah
@@ -428,8 +428,8 @@ function animate(ms) {
   R.avatarMesh.rotation.x += (targetRotX - R.avatarMesh.rotation.x) * lerpSpeed;
   R.avatarMesh.rotation.z += (targetRotZ - R.avatarMesh.rotation.z) * lerpSpeed;
 
-  // X offset +0.27 menyelaraskan tubuh & kepala E.V.A tepat di tengah lingkaran pedestal hologram
-  R.avatarMesh.position.x += (0.27 + swayX * 0.4 - R.avatarMesh.position.x) * 0.08;
+  // Posisi E.V.A tepat di tengah sumbu lingkaran pedestal hologram
+  R.avatarMesh.position.x += (-0.02 + swayX * 0.4 - R.avatarMesh.position.x) * 0.08;
   R.avatarMesh.position.y += (0.14 + breathY + hoverLiftY + bowDipY - R.avatarMesh.position.y) * 0.08;
   R.avatarMesh.position.z += (speechLeanZ - R.avatarMesh.position.z) * 0.08;
 

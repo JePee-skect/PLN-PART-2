@@ -255,7 +255,7 @@ function createHumanAvatar(T) {
     return tex;
   }
 
-  const CACHE_V = '?v=20261113k';
+  const CACHE_V = '?v=20261113m';
   const texIdle       = loadAvatarTex('img/human-avatar.png' + CACHE_V);
   const texBlink      = loadAvatarTex('img/human-avatar-blink.png' + CACHE_V);
   const texTalk       = loadAvatarTex('img/human-avatar-talk.png' + CACHE_V);
@@ -290,7 +290,7 @@ function createHumanAvatar(T) {
   });
 
   const avatarMesh = new T.Mesh(geom, avatarMat);
-  avatarMesh.position.set(-0.02, 0.14, 0);
+  avatarMesh.position.set(-0.02, 0.04, 0);
   g.add(avatarMesh);
 
   // Dudukan Levitasi Holografik Futuristik PLN di Bawah
@@ -430,7 +430,7 @@ function animate(ms) {
 
   // Posisi E.V.A tepat di tengah sumbu lingkaran pedestal hologram
   R.avatarMesh.position.x += (-0.02 + swayX * 0.4 - R.avatarMesh.position.x) * 0.08;
-  R.avatarMesh.position.y += (0.14 + breathY + hoverLiftY + bowDipY - R.avatarMesh.position.y) * 0.08;
+  R.avatarMesh.position.y += (0.04 + breathY + hoverLiftY + bowDipY - R.avatarMesh.position.y) * 0.08;
   R.avatarMesh.position.z += (speechLeanZ - R.avatarMesh.position.z) * 0.08;
 
   // 7. Kedipan Mata Alami (Kombinasi Kedipan Tunggal & Ganda Alami)

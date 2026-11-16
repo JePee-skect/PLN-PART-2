@@ -3,8 +3,8 @@
    Formulir Tamu: Kamera Wajah, APD, KTP, Safety Induction & Validasi
    ===================================================================== */
 
-const FIELDS = ['nama', 'usaha', 'alamat', 'telp', 'email', 'pegawai', 'perlu', 'ktp', 'kend', 'tag', 'jml'];
-const REQUIRED_FIELDS = ['nama', 'usaha', 'alamat', 'telp', 'pegawai', 'perlu', 'ktp', 'kend', 'tag', 'jml'];
+const FIELDS = ['nama', 'usaha', 'alamat', 'pegawai', 'perlu', 'ktp', 'kend', 'tag', 'jml'];
+const REQUIRED_FIELDS = ['nama', 'usaha', 'alamat', 'pegawai', 'perlu', 'ktp', 'kend', 'tag', 'jml'];
 
 let camStream = null;
 let ktpTimer = null;
@@ -55,31 +55,6 @@ function initForm() {
       };
       img.src = url;
     };
-  }
-
-  // Purpose quick chips listeners
-  $$('.purpose-chip').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      $$('.purpose-chip').forEach((c) => c.classList.remove('active'));
-      btn.classList.add('active');
-      const val = btn.dataset.val;
-      const perluInput = $('#perlu');
-      if (perluInput) {
-        perluInput.value = val;
-        perluInput.dispatchEvent(new Event('input', { bubbles: true }));
-        perluInput.dispatchEvent(new Event('change', { bubbles: true }));
-      }
-    });
-  });
-
-  const perluInput = $('#perlu');
-  if (perluInput) {
-    perluInput.addEventListener('input', () => {
-      const v = perluInput.value.trim().toLowerCase();
-      $$('.purpose-chip').forEach((c) => {
-        c.classList.toggle('active', c.dataset.val.toLowerCase() === v);
-      });
-    });
   }
 
   // APD Listeners
@@ -412,7 +387,6 @@ function handleSubmit() {
     $('#ktp').classList.remove('bad');
     if ($('#agree-induction')) $('#agree-induction').checked = false;
     if ($('#agree-e')) $('#agree-e').style.display = 'none';
-    $$('.purpose-chip').forEach(c => c.classList.remove('active'));
 
     const lacking = APD_LIST.filter((x) => !apd.includes(x));
     const apdNote = lacking.length
@@ -438,17 +412,15 @@ function openDialog(title, bodyHtml, actionsHtml) {
 function showConfirm(apd, noApd, onOk) {
   const isEn = (typeof currentLang !== 'undefined' && currentLang === 'en');
   const labels = {
-    nama:    'Nama Lengkap / Full Name',
-    usaha:   'Nama Perusahaan / Company / Institution',
-    alamat:  'Alamat Perusahaan Tamu / Company Address',
-    telp:    'Nomor Telepon/WA / Phone/WhatsApp Number',
-    email:   'Alamat Email / Email Address',
-    pegawai: 'Nama Pegawai Dituju / Person to Visit',
-    perlu:   'Keperluan Kunjungan / Purpose of Visit',
-    ktp:     'No. KTP atau Identitas / ID Number',
-    kend:    'Kendaraan (Jenis / No. Pol) / Vehicle',
-    tag:     'Nomor Name Tag Tamu / Visitor Badge Number',
-    jml:     'Jumlah Tamu / Number of Visitors'
+    nama:    'Nama Tamu',
+    usaha:   'Nama Perusahaan',
+    alamat:  'Alamat Perusahaan Tamu',
+    pegawai: 'Nama Pegawai Yang Dituju',
+    perlu:   'Keperluan Kunjungan',
+    ktp:     'No. KTP atau Identitas Lainnya',
+    kend:    'Kendaraan (Jenis / No.Pol)',
+    tag:     'No Name Tag Tamu',
+    jml:     'Jumlah Tamu'
   };
 
   const rows = Object.keys(labels)
@@ -457,7 +429,7 @@ function showConfirm(apd, noApd, onOk) {
     .join('');
 
   const confirmTitle = isEn ? 'Confirm Registration Details' : 'Konfirmasi Data Registrasi';
-  const apdLabel = isEn ? 'Personal Protective Equipment (PPE)' : 'Pemakaian APD / PPE';
+  const apdLabel = isEn ? 'Personal Protective Equipment (PPE)' : 'Pemakaian APD';
   const apdText = noApd
     ? (isEn ? 'No PPE' : 'Tidak memakai APD')
     : apd.join(', ');
@@ -518,7 +490,6 @@ function restartForm() {
   $('#v-registrasi').classList.remove('hide');
   if ($('#agree-induction')) $('#agree-induction').checked = false;
   if ($('#agree-e')) $('#agree-e').style.display = 'none';
-  $$('.purpose-chip').forEach(c => c.classList.remove('active'));
   if (typeof guideIdx !== 'undefined') guideIdx = -1;
   if (typeof lastHint !== 'undefined') lastHint = '';
   scrollTo({ top: 0, behavior: 'smooth' });

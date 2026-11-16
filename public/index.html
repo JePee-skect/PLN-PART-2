@@ -12,8 +12,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- Stylesheets Terpisah & Rapi -->
-  <link rel="stylesheet" href="css/style.css?v=20261113m">
-  <link rel="stylesheet" href="css/assistant.css?v=20261113m">
+  <link rel="stylesheet" href="css/style.css?v=20261116a">
+  <link rel="stylesheet" href="css/assistant.css?v=20261116a">
 </head>
 <body>
 
@@ -223,7 +223,7 @@
   <!-- ========== HALAMAN: REGISTRASI TAMU ========== -->
   <section class="card hide" id="v-registrasi">
     <div style="text-align:center;margin-bottom:18px;">
-      <h1 style="margin:0 0 6px;">Formulir Tamu / <span style="font-style:italic;font-weight:600;color:var(--muted);font-size:0.92em;">Visitor Form</span></h1>
+      <h1 style="margin:0 0 6px;">Formulir Tamu</h1>
       <p style="margin:0 0 10px;font-size:13px;color:var(--muted);font-weight:500;">PT PLN (Persero) PUSHARLIS UP2WVI</p>
       
       <!-- Pemilih Bahasa Cepat (Bilingual Language Switcher) -->
@@ -241,28 +241,19 @@
         <input type="file" id="pf" accept="image/*" class="hide">
       </div>
 
-      <!-- Isian Data Tamu Sesuai Urutan Asli + Tambahan No. Telp/WA & Email -->
-      <label for="nama">Nama Lengkap / <span class="lbl-en">Full Name</span><span class="req">*</span></label>
-      <input type="text" id="nama" required placeholder="Masukkan nama lengkap / Enter your full name">
+      <label for="nama">Nama Tamu*</label>
+      <input type="text" id="nama" required placeholder="Masukkan nama lengkap">
 
-      <label for="usaha">Nama Perusahaan / <span class="lbl-en">Company / Institution</span><span class="req">*</span></label>
-      <input type="text" id="usaha" required placeholder="Nama instansi atau perusahaan asal / Company name">
+      <label for="usaha">Nama Perusahaan*</label>
+      <input type="text" id="usaha" required placeholder="Instansi / perusahaan asal">
 
-      <label for="alamat">Alamat Perusahaan Tamu / <span class="lbl-en">Company Address</span><span class="req">*</span></label>
-      <input type="text" id="alamat" required placeholder="Alamat lengkap instansi atau perusahaan / Office address">
+      <label for="alamat">Alamat Perusahaan Tamu*</label>
+      <input type="text" id="alamat" required placeholder="Alamat lengkap perusahaan">
 
-      <!-- Kolom Tambahan Sesuai Gambar Referensi -->
-      <label for="telp">Nomor Telepon / WhatsApp / <span class="lbl-en">Phone / WhatsApp Number</span><span class="req">*</span></label>
-      <input type="tel" id="telp" required placeholder="Contoh: 08123456789 / +62812...">
+      <label for="pegawai">Nama Pegawai Yang Dituju*</label>
+      <input type="text" id="pegawai" required placeholder="Nama pegawai PLN tujuan">
 
-      <label for="email">Alamat Email / <span class="lbl-en">Email Address</span></label>
-      <input type="email" id="email" placeholder="Contoh: nama@perusahaan.com (Opsional / Optional)">
-
-      <label for="pegawai">Nama Pegawai Yang Dituju / <span class="lbl-en">Person / Division to Visit</span><span class="req">*</span></label>
-      <input type="text" id="pegawai" required placeholder="Nama pegawai PLN atau bagian/divisi yang dituju">
-
-      <!-- Pilihan APD Standar K3LH -->
-      <label id="apdl">Pemakaian APD / <span class="lbl-en">Personal Protective Equipment (PPE)</span><span class="req">*</span></label>
+      <label id="apdl">Pemakaian APD*</label>
       <div class="apd" id="apd">
         <label class="chk">
           <input type="checkbox" value="Safety Helmet">
@@ -273,62 +264,50 @@
           <span>Safety Shoes</span>
         </label>
         <label class="chk">
-          <input type="checkbox" value="Rompi Reflektif">
-          <span>Rompi Reflektif / Reflective Vest</span>
-        </label>
-        <label class="chk">
           <input type="checkbox" value="Seragam Kerja">
-          <span>Seragam Kerja / Work Uniform</span>
+          <span>Seragam Kerja</span>
         </label>
         <label class="chk">
           <input type="checkbox" id="apdall">
-          <span>Pilih semua / Select all</span>
+          <span>Pilih semua</span>
         </label>
         <label class="chk none">
           <input type="checkbox" id="apdnone">
-          <span>Tidak memakai APD / No PPE</span>
+          <span>Tidak memakai APD</span>
         </label>
       </div>
 
-      <label for="perlu">Keperluan Kunjungan / <span class="lbl-en">Purpose of Visit</span><span class="req">*</span></label>
-      <div class="purpose-chips" id="purpose-chips">
-        <button type="button" class="purpose-chip" data-val="Rapat / Meeting">💼 Rapat / <em>Meeting</em></button>
-        <button type="button" class="purpose-chip" data-val="Kunjungan Kerja / Official Visit">🏢 Kunjungan Kerja / <em>Official Visit</em></button>
-        <button type="button" class="purpose-chip" data-val="Koordinasi Proyek / Project Coordination">⚡ Koordinasi Proyek / <em>Project Coordination</em></button>
-        <button type="button" class="purpose-chip" data-val="Pengiriman Barang / Delivery">📦 Pengiriman / <em>Delivery</em></button>
-        <button type="button" class="purpose-chip" data-val="Pemeliharaan / Maintenance">🛠️ Pemeliharaan / <em>Maintenance</em></button>
-        <button type="button" class="purpose-chip" data-val="Konsultasi / Consultation">💬 Konsultasi / <em>Consultation</em></button>
-      </div>
-      <input type="text" id="perlu" required placeholder="Pilih opsi di atas atau ketik tujuan kedatangan Anda">
+      <label for="perlu">Keperluan Kunjungan*</label>
+      <input type="text" id="perlu" required placeholder="Tujuan berkunjung">
 
-      <label for="ktp">No. KTP atau Identitas Lainnya / <span class="lbl-en">ID Number (National ID/Passport)</span><span class="req">*</span></label>
-      <input type="text" id="ktp" required autocomplete="off" maxlength="20" placeholder="16 digit NIK KTP / Passport number">
+      <label for="ktp">No. KTP atau Identitas Lainnya*</label>
+      <input type="text" id="ktp" required autocomplete="off" maxlength="20" placeholder="16 digit NIK KTP atau identitas lain">
       <div class="err" id="ktp-e"></div>
 
-      <label for="kend">Kendaraan (Jenis / No. Pol) / <span class="lbl-en">Vehicle (Type / Plate Number)</span><span class="req">*</span></label>
-      <input type="text" id="kend" required placeholder="Contoh: Avanza B 1234 CD / Motor / Pejalan Kaki">
+      <label for="kend">Kendaraan (Jenis / No.Pol)*</label>
+      <input type="text" id="kend" required placeholder="Contoh: Avanza B 1234 CD">
 
-      <label for="tag">Nomor Name Tag Tamu / <span class="lbl-en">Visitor Badge Number</span><span class="req">*</span></label>
-      <input type="text" id="tag" required placeholder="Nomor pada kartu name tag fisik dari pos satpam">
+      <label for="tag">No Name Tag Tamu*</label>
+      <input type="text" id="tag" required placeholder="Nomor pada kartu tamu">
 
-      <label for="jml">Jumlah Tamu / <span class="lbl-en">Number of Visitors</span><span class="req">*</span></label>
+      <label for="jml">Jumlah Tamu*</label>
       <select id="jml" required></select>
 
       <!-- ========== SAFETY AND SECURITY INDUCTION (PLN PUSHARLIS) ========== -->
       <div class="induction-container" id="induction-container">
         <div class="induction-header-text">
-          Selama Anda Berada di Area PT PLN (Persero) Pusharlis : Peraturan dan Tata Tertib Selama Anda Berada di Area PT PLN (Persero) Pusharlis / Safety &amp; Security Regulations:
+          Selama Anda Berada di Area PT PLN (Persero) Pusharlis : Peraturan dan Tata Tertib Selama Anda Berada di Area PT PLN (Persero) Pusharlis
         </div>
 
         <div class="induction-poster-wrapper" id="induction-poster-wrapper">
           <img src="img/safety-induction.jpg" alt="Safety and Security Induction PT PLN (Persero) Pusharlis" class="induction-poster-img" id="img-induction" title="Klik untuk memperbesar poster">
-          <div class="induction-zoom-hint">🔍 Klik gambar untuk memperbesar / Click to enlarge</div>
+          <div class="induction-zoom-hint">🔍 Klik gambar untuk memperbesar</div>
         </div>
 
         <div class="induction-agree-box">
           <label class="induction-agree-label" for="agree-induction">
             <input type="checkbox" id="agree-induction" required>
-            <span>Saya telah membaca dan memahami Safety and Security Induction di atas / <em style="font-weight:normal;opacity:0.9;">I have read and understood the Safety and Security Induction</em><span style="color:#e5483b">*</span></span>
+            <span>Saya telah membaca dan memahami Safety and Security Induction di atas<span style="color:#e5483b">*</span></span>
           </label>
           <div class="err" id="agree-e" style="display:none;margin-top:8px;font-size:13px;color:#e5483b;font-weight:600;">
             ⚠️ Harap baca dan centang persetujuan Safety and Security Induction sebelum mengirim formulir.
@@ -337,7 +316,7 @@
       </div>
 
       <div style="margin-top:28px;text-align:center;">
-        <button class="btn btn-submit" id="sub" type="button" style="padding:14px 36px;font-size:16px;">Kirim Registrasi / Submit Registration</button>
+        <button class="btn btn-submit" id="sub" type="button" style="padding:14px 36px;font-size:16px;">Kirim Registrasi</button>
       </div>
     </form>
   </section>
@@ -438,13 +417,13 @@
 
 <!-- Skrip Terpisah & Modular -->
 <script src="js/xlsx.full.min.js"></script>
-<script src="js/config.js?v=20261113m"></script>
-<script src="js/voice.js?v=20261113m"></script>
-<script src="js/robot3d.js?v=20261113m"></script>
-<script src="js/form.js?v=20261113m"></script>
-<script src="js/dashboard.js?v=20261113m"></script>
-<script src="js/assistant.js?v=20261113m"></script>
-<script src="js/app.js?v=20261113m"></script>
+<script src="js/config.js?v=20261116a"></script>
+<script src="js/voice.js?v=20261116a"></script>
+<script src="js/robot3d.js?v=20261116a"></script>
+<script src="js/form.js?v=20261116a"></script>
+<script src="js/dashboard.js?v=20261116a"></script>
+<script src="js/assistant.js?v=20261116a"></script>
+<script src="js/app.js?v=20261116a"></script>
 
 </body>
 </html>

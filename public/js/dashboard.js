@@ -97,8 +97,6 @@ function exportToExcel() {
     'No. KTP / Identitas',
     'Nama Perusahaan',
     'Alamat Perusahaan',
-    'No. Telepon / WA',
-    'Alamat Email',
     'Pegawai Yang Dituju',
     'Pemakaian APD',
     'Keperluan Kunjungan',
@@ -116,8 +114,6 @@ function exportToExcel() {
     String(r.ktp || ''), // Memastikan string murni agar tidak menjadi format ilmiah 1.26E+15
     r.usaha || '',
     r.alamat || '',
-    String(r.telp || ''),
-    r.email || '',
     r.pegawai || '',
     Array.isArray(r.apd) ? r.apd.join(', ') : (r.apd || ''),
     r.perlu || '',
@@ -132,10 +128,10 @@ function exportToExcel() {
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
 
-    // Format kolom No. KTP (c:3), Telp (c:6) dan Name Tag (c:12)
+    // Format kolom No. KTP (c:3) dan Name Tag (c:10)
     const range = XLSX.utils.decode_range(ws['!ref']);
     for (let R = range.s.r + 1; R <= range.e.r; ++R) {
-      [3, 6, 12].forEach((cIdx) => {
+      [3, 10].forEach((cIdx) => {
         const cellRef = XLSX.utils.encode_cell({ r: R, c: cIdx });
         if (ws[cellRef]) {
           ws[cellRef].t = 's'; // Tipe data teks (String)
@@ -152,8 +148,6 @@ function exportToExcel() {
       { wch: 24 }, // No KTP
       { wch: 26 }, // Perusahaan
       { wch: 30 }, // Alamat
-      { wch: 18 }, // No Telp / WA
-      { wch: 24 }, // Email
       { wch: 24 }, // Pegawai Dituju
       { wch: 30 }, // APD
       { wch: 32 }, // Keperluan
@@ -221,9 +215,9 @@ function downloadExcelXmlFallback(headers, rows, fileName) {
   rows.forEach((row) => {
     xml += '<Row>\n';
     row.forEach((val, colIdx) => {
-      const isNum = (colIdx === 0 || colIdx === 10) && !isNaN(val) && val !== '';
+      const isNum = (colIdx === 0 || colIdx === 11) && !isNaN(val) && val !== '';
       const type = isNum ? 'Number' : 'String';
-      const styleAttr = (colIdx === 7 || colIdx === 9) ? ' ss:StyleID="TextFormat"' : '';
+      const styleAttr = (colIdx === 3 || colIdx === 10) ? ' ss:StyleID="TextFormat"' : '';
       xml += ` <Cell${styleAttr}><Data ss:Type="${type}">${esc(String(val))}</Data></Cell>\n`;
     });
     xml += '</Row>\n';
@@ -279,8 +273,6 @@ function showVisitorDetail(id) {
           <div style="font-size:13px;line-height:1.65;">
             <div>🏢 <b>Nama Perusahaan:</b> ${esc(r.usaha || '—')}</div>
             <div>📍 <b>Alamat Perusahaan:</b> ${esc(r.alamat || '—')}</div>
-            <div>📞 <b>No. Telepon / WA:</b> ${esc(r.telp || '—')}</div>
-            <div>✉️ <b>Alamat Email:</b> ${esc(r.email || '—')}</div>
             <div>👤 <b>Pegawai PLN Tujuan:</b> ${esc(r.pegawai || '—')}</div>
             <div>🎯 <b>Keperluan:</b> ${esc(r.perlu || '—')}</div>
           </div>

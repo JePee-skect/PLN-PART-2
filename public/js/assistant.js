@@ -16,8 +16,6 @@ const STEP_LABELS = [
   'Langkah kesepuluh.',
   'Langkah kesebelas.',
   'Langkah kedua belas.',
-  'Langkah ketiga belas.',
-  'Langkah keempat belas.',
   'Langkah terakhir.'
 ];
 
@@ -34,8 +32,6 @@ const STEP_LABELS_EN = [
   'Step ten.',
   'Step eleven.',
   'Step twelve.',
-  'Step thirteen.',
-  'Step fourteen.',
   'Final step.'
 ];
 
@@ -44,11 +40,9 @@ const GUIDE = [
   ['nama',            'Mohon ketikkan nama lengkap Anda sesuai dengan kartu identitas resmi.'],
   ['usaha',           'Silakan masukkan nama instansi atau perusahaan yang Anda wakili.'],
   ['alamat',          'Mohon isi alamat lengkap kantor atau domisili instansi Anda.'],
-  ['telp',            'Silakan masukkan nomor telepon atau WhatsApp aktif yang dapat dihubungi.'],
-  ['email',           'Silakan cantumkan alamat email Anda jika ada, atau lewati jika tidak memiliki email.'],
   ['pegawai',         'Silakan tuliskan nama pejabat atau pegawai PLN yang hendak Anda temui.'],
   ['apd',             'Demi keselamatan bersama, mohon pilih perlengkapan alat pelindung diri yang Anda kenakan. Jika tidak membawa, silakan pilih Tidak Memakai APD.'],
-  ['perlu',           'Mohon jelaskan secara singkat keperluan kunjungan kerja Anda, atau pilih opsi cepat yang tersedia.'],
+  ['perlu',           'Mohon jelaskan secara singkat keperluan kunjungan kerja Anda hari ini.'],
   ['ktp',             'Silakan masukkan enam belas digit nomor induk kependudukan KTP, atau nomor SIM maupun paspor Anda.'],
   ['kend',            'Mohon cantumkan jenis kendaraan beserta nomor polisi yang Anda gunakan.'],
   ['tag',             'Silakan masukkan nomor kartu tanda pengenal tamu yang telah diberikan oleh petugas keamanan di pos.'],
@@ -62,11 +56,9 @@ const GUIDE_EN = [
   ['nama',            'Please enter your full name as shown on your official identification.'],
   ['usaha',           'Please enter the company or institution you represent.'],
   ['alamat',          'Please provide the full address of your company or institution.'],
-  ['telp',            'Please enter an active phone or WhatsApp number where you can be reached.'],
-  ['email',           'Please enter your email address if available, or skip if you do not have one.'],
   ['pegawai',         'Please enter the name of the PLN personnel or division you wish to visit.'],
   ['apd',             'For safety compliance, please select the Personal Protective Equipment you are wearing. If none, select No PPE.'],
-  ['perlu',           'Please describe the purpose of your visit, or select one of the quick options.'],
+  ['perlu',           'Please briefly describe the purpose of your visit today.'],
   ['ktp',             'Please enter your sixteen-digit National ID number, driver license, or passport number.'],
   ['kend',            'Please specify your vehicle type and license plate number.'],
   ['tag',             'Please enter the visitor badge number provided by security.'],

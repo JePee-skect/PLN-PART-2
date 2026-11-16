@@ -19,6 +19,8 @@ function setRole(newRole) {
   if (navDashboard)    navDashboard.classList.toggle('hide', !isAdmin);
 
   if (typeof renderChips === 'function') renderChips();
+  if (typeof updateVoiceTabs === 'function') updateVoiceTabs();
+  if (typeof setAppLanguage === 'function') setAppLanguage(currentLang, false);
   route();
 }
 

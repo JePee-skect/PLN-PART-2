@@ -12,8 +12,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- Stylesheets Terpisah & Rapi -->
-  <link rel="stylesheet" href="css/style.css?v=20261116a">
-  <link rel="stylesheet" href="css/assistant.css?v=20261116a">
+  <link rel="stylesheet" href="css/style.css?v=20261116b">
+  <link rel="stylesheet" href="css/assistant.css?v=20261116b">
 </head>
 <body>
 
@@ -223,7 +223,7 @@
   <!-- ========== HALAMAN: REGISTRASI TAMU ========== -->
   <section class="card hide" id="v-registrasi">
     <div style="text-align:center;margin-bottom:18px;">
-      <h1 style="margin:0 0 6px;">Formulir Tamu</h1>
+      <h1 style="margin:0 0 6px;">Formulir Tamu / <span style="font-style:italic;font-weight:600;color:var(--muted);font-size:0.92em;">Visitor Form</span></h1>
       <p style="margin:0 0 10px;font-size:13px;color:var(--muted);font-weight:500;">PT PLN (Persero) PUSHARLIS UP2WVI</p>
       
       <!-- Pemilih Bahasa Cepat (Bilingual Language Switcher) -->
@@ -237,23 +237,23 @@
       <!-- Pengambilan Foto Wajah Tamu -->
       <div class="photo">
         <img class="ph" id="pv" alt="Foto tamu" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 168 233'%3E%3Crect width='168' height='233' fill='%23bdbdbd'/%3E%3Ccircle cx='84' cy='70' r='34' fill='%238a8a8a'/%3E%3Cpath d='M20 170c0-45 30-60 64-60s64 15 64 60z' fill='%238a8a8a'/%3E%3Ctext x='84' y='195' font-size='22' fill='%23f2f2f2' text-anchor='middle' font-family='sans-serif'%3ENo Image%3C/text%3E%3Ctext x='84' y='220' font-size='22' fill='%23f2f2f2' text-anchor='middle' font-family='sans-serif'%3EAvailable%3C/text%3E%3C/svg%3E">
-        <button type="button" class="btn" id="pb" style="padding:16px 30px">Ambil Foto</button>
+        <button type="button" class="btn" id="pb" style="padding:16px 30px">Ambil Foto / Take Photo</button>
         <input type="file" id="pf" accept="image/*" class="hide">
       </div>
 
-      <label for="nama">Nama Tamu*</label>
-      <input type="text" id="nama" required placeholder="Masukkan nama lengkap">
+      <label for="nama">Nama Tamu / <span class="lbl-en">Full Name</span><span class="req">*</span></label>
+      <input type="text" id="nama" required placeholder="Masukkan nama lengkap / Enter your full name">
 
-      <label for="usaha">Nama Perusahaan*</label>
-      <input type="text" id="usaha" required placeholder="Instansi / perusahaan asal">
+      <label for="usaha">Nama Perusahaan / <span class="lbl-en">Company / Institution</span><span class="req">*</span></label>
+      <input type="text" id="usaha" required placeholder="Instansi atau perusahaan asal / Company name">
 
-      <label for="alamat">Alamat Perusahaan Tamu*</label>
-      <input type="text" id="alamat" required placeholder="Alamat lengkap perusahaan">
+      <label for="alamat">Alamat Perusahaan Tamu / <span class="lbl-en">Company Address</span><span class="req">*</span></label>
+      <input type="text" id="alamat" required placeholder="Alamat lengkap perusahaan / Office address">
 
-      <label for="pegawai">Nama Pegawai Yang Dituju*</label>
-      <input type="text" id="pegawai" required placeholder="Nama pegawai PLN tujuan">
+      <label for="pegawai">Nama Pegawai Yang Dituju / <span class="lbl-en">Person / Division to Visit</span><span class="req">*</span></label>
+      <input type="text" id="pegawai" required placeholder="Nama pegawai PLN tujuan / Person or division to visit">
 
-      <label id="apdl">Pemakaian APD*</label>
+      <label id="apdl">Pemakaian APD / <span class="lbl-en">Personal Protective Equipment (PPE)</span><span class="req">*</span></label>
       <div class="apd" id="apd">
         <label class="chk">
           <input type="checkbox" value="Safety Helmet">
@@ -265,58 +265,58 @@
         </label>
         <label class="chk">
           <input type="checkbox" value="Seragam Kerja">
-          <span>Seragam Kerja</span>
+          <span>Seragam Kerja / <span class="lbl-en">Work Uniform</span></span>
         </label>
         <label class="chk">
           <input type="checkbox" id="apdall">
-          <span>Pilih semua</span>
+          <span>Pilih semua / <span class="lbl-en">Select all</span></span>
         </label>
         <label class="chk none">
           <input type="checkbox" id="apdnone">
-          <span>Tidak memakai APD</span>
+          <span>Tidak memakai APD / <span class="lbl-en">No PPE</span></span>
         </label>
       </div>
 
-      <label for="perlu">Keperluan Kunjungan*</label>
-      <input type="text" id="perlu" required placeholder="Tujuan berkunjung">
+      <label for="perlu">Keperluan Kunjungan / <span class="lbl-en">Purpose of Visit</span><span class="req">*</span></label>
+      <input type="text" id="perlu" required placeholder="Tujuan berkunjung / Purpose of visit">
 
-      <label for="ktp">No. KTP atau Identitas Lainnya*</label>
-      <input type="text" id="ktp" required autocomplete="off" maxlength="20" placeholder="16 digit NIK KTP atau identitas lain">
+      <label for="ktp">No. KTP atau Identitas Lainnya / <span class="lbl-en">ID Number (National ID/Passport)</span><span class="req">*</span></label>
+      <input type="text" id="ktp" required autocomplete="off" maxlength="20" placeholder="16 digit NIK KTP atau identitas lain / Passport number">
       <div class="err" id="ktp-e"></div>
 
-      <label for="kend">Kendaraan (Jenis / No.Pol)*</label>
-      <input type="text" id="kend" required placeholder="Contoh: Avanza B 1234 CD">
+      <label for="kend">Kendaraan (Jenis / No.Pol) / <span class="lbl-en">Vehicle (Type / Plate Number)</span><span class="req">*</span></label>
+      <input type="text" id="kend" required placeholder="Contoh: Avanza B 1234 CD / Vehicle type and plate">
 
-      <label for="tag">No Name Tag Tamu*</label>
-      <input type="text" id="tag" required placeholder="Nomor pada kartu tamu">
+      <label for="tag">No Name Tag Tamu / <span class="lbl-en">Visitor Badge Number</span><span class="req">*</span></label>
+      <input type="text" id="tag" required placeholder="Nomor pada kartu tamu / Badge number">
 
-      <label for="jml">Jumlah Tamu*</label>
+      <label for="jml">Jumlah Tamu / <span class="lbl-en">Number of Visitors</span><span class="req">*</span></label>
       <select id="jml" required></select>
 
       <!-- ========== SAFETY AND SECURITY INDUCTION (PLN PUSHARLIS) ========== -->
       <div class="induction-container" id="induction-container">
         <div class="induction-header-text">
-          Selama Anda Berada di Area PT PLN (Persero) Pusharlis : Peraturan dan Tata Tertib Selama Anda Berada di Area PT PLN (Persero) Pusharlis
+          Selama Anda Berada di Area PT PLN (Persero) Pusharlis : Peraturan dan Tata Tertib Selama Anda Berada di Area PT PLN (Persero) Pusharlis / Safety &amp; Security Regulations:
         </div>
 
         <div class="induction-poster-wrapper" id="induction-poster-wrapper">
           <img src="img/safety-induction.jpg" alt="Safety and Security Induction PT PLN (Persero) Pusharlis" class="induction-poster-img" id="img-induction" title="Klik untuk memperbesar poster">
-          <div class="induction-zoom-hint">🔍 Klik gambar untuk memperbesar</div>
+          <div class="induction-zoom-hint">🔍 Klik gambar untuk memperbesar / Click to enlarge</div>
         </div>
 
         <div class="induction-agree-box">
           <label class="induction-agree-label" for="agree-induction">
             <input type="checkbox" id="agree-induction" required>
-            <span>Saya telah membaca dan memahami Safety and Security Induction di atas<span style="color:#e5483b">*</span></span>
+            <span>Saya telah membaca dan memahami Safety and Security Induction di atas / <em class="lbl-en">I have read and understood the Safety and Security Induction</em><span style="color:#e5483b">*</span></span>
           </label>
           <div class="err" id="agree-e" style="display:none;margin-top:8px;font-size:13px;color:#e5483b;font-weight:600;">
-            ⚠️ Harap baca dan centang persetujuan Safety and Security Induction sebelum mengirim formulir.
+            ⚠️ Harap baca dan centang persetujuan Safety and Security Induction sebelum mengirim formulir. / Please review and accept the Safety and Security Induction.
           </div>
         </div>
       </div>
 
       <div style="margin-top:28px;text-align:center;">
-        <button class="btn btn-submit" id="sub" type="button" style="padding:14px 36px;font-size:16px;">Kirim Registrasi</button>
+        <button class="btn btn-submit" id="sub" type="button" style="padding:14px 36px;font-size:16px;">Kirim Registrasi / Submit Registration</button>
       </div>
     </form>
   </section>
@@ -324,10 +324,10 @@
   <!-- ========== HALAMAN: TERIMA KASIH ========== -->
   <section class="card thanks hide" id="v-terima">
     <div class="tick">✓</div>
-    <h1 id="thanks-title">Terima Kasih</h1>
+    <h1 id="thanks-title">Terima Kasih / Thank You</h1>
     <p id="thanks-text"></p>
-    <p>Silakan menuju petugas keamanan untuk mengambil name tag.</p>
-    <button class="btn" id="again">Isi Formulir Lagi</button>
+    <p>Silakan menuju petugas keamanan untuk mengambil name tag / Please proceed to the security post to pick up your badge.</p>
+    <button class="btn" id="again">Isi Formulir Lagi / Fill Form Again</button>
   </section>
 </main>
 
@@ -417,13 +417,13 @@
 
 <!-- Skrip Terpisah & Modular -->
 <script src="js/xlsx.full.min.js"></script>
-<script src="js/config.js?v=20261116a"></script>
-<script src="js/voice.js?v=20261116a"></script>
-<script src="js/robot3d.js?v=20261116a"></script>
-<script src="js/form.js?v=20261116a"></script>
-<script src="js/dashboard.js?v=20261116a"></script>
-<script src="js/assistant.js?v=20261116a"></script>
-<script src="js/app.js?v=20261116a"></script>
+<script src="js/config.js?v=20261116b"></script>
+<script src="js/voice.js?v=20261116b"></script>
+<script src="js/robot3d.js?v=20261116b"></script>
+<script src="js/form.js?v=20261116b"></script>
+<script src="js/dashboard.js?v=20261116b"></script>
+<script src="js/assistant.js?v=20261116b"></script>
+<script src="js/app.js?v=20261116b"></script>
 
 </body>
 </html>

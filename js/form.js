@@ -16,7 +16,7 @@ function initForm() {
   const jmlSelect = $('#jml');
   if (jmlSelect) {
     jmlSelect.innerHTML =
-      '<option value="">Pilih jumlah (1–99)</option>' +
+      '<option value="">Pilih jumlah (1–99) / Select number (1–99)</option>' +
       Array.from({ length: 99 }, (_, i) => `<option>${i + 1}</option>`).join('');
   }
 
@@ -412,15 +412,15 @@ function openDialog(title, bodyHtml, actionsHtml) {
 function showConfirm(apd, noApd, onOk) {
   const isEn = (typeof currentLang !== 'undefined' && currentLang === 'en');
   const labels = {
-    nama:    'Nama Tamu',
-    usaha:   'Nama Perusahaan',
-    alamat:  'Alamat Perusahaan Tamu',
-    pegawai: 'Nama Pegawai Yang Dituju',
-    perlu:   'Keperluan Kunjungan',
-    ktp:     'No. KTP atau Identitas Lainnya',
-    kend:    'Kendaraan (Jenis / No.Pol)',
-    tag:     'No Name Tag Tamu',
-    jml:     'Jumlah Tamu'
+    nama:    'Nama Tamu / Full Name',
+    usaha:   'Nama Perusahaan / Company Name',
+    alamat:  'Alamat Perusahaan Tamu / Company Address',
+    pegawai: 'Nama Pegawai Yang Dituju / Person to Visit',
+    perlu:   'Keperluan Kunjungan / Purpose of Visit',
+    ktp:     'No. KTP atau Identitas Lainnya / ID Number',
+    kend:    'Kendaraan (Jenis / No.Pol) / Vehicle',
+    tag:     'No Name Tag Tamu / Visitor Badge Number',
+    jml:     'Jumlah Tamu / Number of Visitors'
   };
 
   const rows = Object.keys(labels)
@@ -428,8 +428,8 @@ function showConfirm(apd, noApd, onOk) {
     .map((k) => `<dt>${labels[k]}</dt><dd>${esc($('#' + k).value.trim())}</dd>`)
     .join('');
 
-  const confirmTitle = isEn ? 'Confirm Registration Details' : 'Konfirmasi Data Registrasi';
-  const apdLabel = isEn ? 'Personal Protective Equipment (PPE)' : 'Pemakaian APD';
+  const confirmTitle = isEn ? 'Confirm Registration Details' : 'Konfirmasi Data Registrasi / Confirm Details';
+  const apdLabel = isEn ? 'Personal Protective Equipment (PPE)' : 'Pemakaian APD / PPE';
   const apdText = noApd
     ? (isEn ? 'No PPE' : 'Tidak memakai APD')
     : apd.join(', ');

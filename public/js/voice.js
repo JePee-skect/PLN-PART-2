@@ -798,6 +798,10 @@ const EN_SPEECH_MAP = {
     'Please enter your email address if available, or skip if you do not have one.',
   'Silakan tuliskan nama pejabat atau pegawai PLN yang hendak Anda temui.':
     'Please enter the name of the PLN personnel or division you wish to visit.',
+  'Mohon jelaskan secara singkat keperluan kunjungan kerja Anda hari ini.':
+    'Please briefly describe the purpose of your visit today.',
+  'Mohon jelaskan secara singkat keperluan kunjungan kerja Anda, atau pilih opsi cepat yang tersedia.':
+    'Please briefly describe the purpose of your visit today.',
   'Mohon pilih atau ketikkan tujuan kedatangan Anda, seperti rapat, kunjungan kerja, atau pengiriman barang.':
     'Please select or enter the purpose of your visit, such as a meeting, official visit, or delivery.',
   'Demi keselamatan bersama, mohon pilih perlengkapan alat pelindung diri yang Anda kenakan. Jika tidak membawa, silakan pilih Tidak Memakai APD.':
@@ -818,6 +822,8 @@ const EN_SPEECH_MAP = {
     'Welcome to PT PLN Pusharlis. I am E.V.A, your virtual assistant. How may I assist your visit registration today?',
   'Selamat datang di PT PLN (Persero) Pusharlis. Saya E.V.A, asisten virtual Anda. Dengan senang hati, saya siap memandu Bapak dan Ibu dalam proses pengisian formulir registrasi kunjungan. Silakan tekan tombol Mulai Panduan untuk bimbingan langkah demi langkah.':
     'Welcome to PT PLN Pusharlis. I am E.V.A, your virtual assistant. I am delighted to guide you through the registration process. Please click Start Guide for step-by-step assistance.',
+  'Selamat datang di PT PLN (Persero) Pusharlis. Saya E.V.A, asisten virtual Anda. Ada yang dapat saya bantu?':
+    'Welcome to PT PLN Pusharlis. I am E.V.A, your virtual assistant. How may I assist your visit today?',
   'Selamat datang, Bapak dan Ibu Petugas. Saya E.V.A. Anda dapat memantau data tamu, melakukan check in dan check out, serta mengunduh laporan ke Excel.':
     'Welcome, officers. I am E.V.A. You can monitor visitor logs, check in and check out guests, and download reports to Excel.',
   'Apakah Bapak dan Ibu membutuhkan bantuan dalam pengisian formulir? Silakan ketuk saya untuk panduan langkah demi langkah.':

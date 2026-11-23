@@ -67,6 +67,10 @@ function playBuddyChime() {
 /* Mode Suara: 'online' (default wanita ID), 'browser', 'easyvoice', atau 'elevenlabs' */
 const OFFICIAL_EASYVOICE_KEY = 'ev_a8dd782ce24e59571a03d3cbda4039cd73c68d9a0013647a9d295a6e7cc87e16';
 let voiceMode      = store.get('vms-voice-mode', 'online');
+if (voiceMode === 'easyvoice') {
+  voiceMode = 'online';
+  store.set('vms-voice-mode', 'online');
+}
 let easyVoiceKey   = store.get('vms-ev-key', OFFICIAL_EASYVOICE_KEY);
 if (!easyVoiceKey || easyVoiceKey.length < 60 || (easyVoiceKey.startsWith('ev_a8dd782c') && easyVoiceKey.length < 67)) {
   easyVoiceKey = OFFICIAL_EASYVOICE_KEY;

@@ -12,8 +12,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- Stylesheets Terpisah & Rapi -->
-  <link rel="stylesheet" href="css/style.css?v=20261123a">
-  <link rel="stylesheet" href="css/assistant.css?v=20261123a">
+  <link rel="stylesheet" href="css/style.css?v=20261123b">
+  <link rel="stylesheet" href="css/assistant.css?v=20261123b">
 </head>
 <body>
 
@@ -88,7 +88,6 @@
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
         <button type="button" id="tab-vonline" class="btn sm" style="padding:8px 14px;font-size:12px;">🌟 Gadis Neural (Default Resmi PLN)</button>
         <button type="button" id="tab-vbrowser" class="btn sm ghost" style="padding:8px 14px;font-size:12px;">🔊 Browser Edge / Chrome</button>
-        <button type="button" id="tab-veasyvoice" class="btn sm ghost" style="padding:8px 14px;font-size:12px;">✨ EasyVoice AI (English Voice)</button>
         <button type="button" id="tab-veleven" class="btn sm ghost" style="padding:8px 14px;font-size:12px;">🎙️ ElevenLabs AI</button>
       </div>
 
@@ -101,34 +100,6 @@
         <button type="button" class="btn sm" id="btn-test-online" style="padding:9px 18px;font-size:12px;background:#27ae60;">
           ▶️ Uji Coba Suara Gadis Neural
         </button>
-      </div>
-
-      <!-- Mode 2: EasyVoice AI Studio -->
-      <div id="sec-veasyvoice" class="hide" style="background:rgba(230,126,34,0.08);border:1px solid rgba(230,126,34,0.25);border-radius:8px;padding:14px;">
-        <div style="background:rgba(230,126,34,0.12);padding:8px 10px;border-radius:6px;margin-bottom:12px;font-size:11.5px;line-height:1.45;">
-          ℹ️ <b>EasyVoice AI Studio (Kokoro-82m English Voice):</b> E.V.A berbicara dalam <b>Bahasa Inggris (English)</b> menggunakan model studio AI Kokoro-82m yang jernih, alami, dan fasih untuk memandu tamu internasional maupun kunjungan bilingual.
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px;margin-bottom:12px;">
-          <div>
-            <label for="ev-api-key" style="margin:0 0 4px;font-size:11.5px;font-weight:600;display:block;">EasyVoice API Key:</label>
-            <input type="text" id="ev-api-key" placeholder="ev_..." value="ev_a8dd782ce24e59571a03d3cbda4039cd73c68d9a0013647a9d295a6e7cc87e16" style="padding:8px 10px;font-size:12px;border-radius:6px;font-family:monospace;width:100%;">
-          </div>
-          <div>
-            <label for="ev-voice-select" style="margin:0 0 4px;font-size:11.5px;font-weight:600;display:block;">Karakter Suara (Kokoro AI):</label>
-            <select id="ev-voice-select" style="width:100%;padding:8px 10px;font-size:12px;border-radius:6px;">
-              <option value="af_heart">💖 Heart (Ramah &amp; Hangat - Rekomendasi)</option>
-              <option value="af_bella">🌸 Bella (Lembut &amp; Ceria)</option>
-              <option value="af_sarah">✨ Sarah (Profesional &amp; Jelas)</option>
-              <option value="af_nicole">💫 Nicole (Natural &amp; Elegan)</option>
-              <option value="af_sky">🌟 Sky (Energik &amp; Terang)</option>
-            </select>
-          </div>
-        </div>
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-          <button type="button" class="btn sm" id="btn-save-easyvoice" style="padding:8px 16px;font-size:12px;">💾 Simpan API Key</button>
-          <button type="button" class="btn sm ghost" id="btn-test-easyvoice" style="padding:8px 16px;font-size:12px;">▶️ Tes Suara</button>
-          <div id="ev-status" style="font-size:12px;font-weight:600;color:#2ecc71;">✅ API Key tersimpan.</div>
-        </div>
       </div>
 
       <!-- Mode 3: Browser TTS -->
@@ -224,13 +195,7 @@
   <section class="card hide" id="v-registrasi">
     <div style="text-align:center;margin-bottom:18px;">
       <h1 style="margin:0 0 6px;">Formulir Tamu / <span style="font-style:italic;font-weight:600;color:var(--muted);font-size:0.92em;">Visitor Form</span></h1>
-      <p style="margin:0 0 10px;font-size:13px;color:var(--muted);font-weight:500;">PT PLN (Persero) PUSHARLIS UP2WVI</p>
-      
-      <!-- Pemilih Bahasa Cepat (Bilingual Language Switcher) -->
-      <div class="lang-switch-bar">
-        <button type="button" class="btn-lang on" id="btn-lang-id" data-lang="id">🇮🇩 Bahasa Indonesia</button>
-        <button type="button" class="btn-lang" id="btn-lang-en" data-lang="en">🇬🇧 English (EasyVoice AI)</button>
-      </div>
+      <p style="margin:0 0 14px;font-size:13px;color:var(--muted);font-weight:500;">PT PLN (Persero) PUSHARLIS UP2WVI</p>
     </div>
     
     <form id="f">
@@ -376,12 +341,12 @@
 
 <!-- ================= 4. SCRIPTS MODULAR ================= -->
 <script src="js/xlsx.full.min.js"></script>
-<script src="js/config.js?v=20261123a"></script>
-<script src="js/voice.js?v=20261123a"></script>
-<script src="js/form.js?v=20261123a"></script>
-<script src="js/dashboard.js?v=20261123a"></script>
-<script src="js/assistant.js?v=20261123a"></script>
-<script src="js/app.js?v=20261123a"></script>
+<script src="js/config.js?v=20261123b"></script>
+<script src="js/voice.js?v=20261123b"></script>
+<script src="js/form.js?v=20261123b"></script>
+<script src="js/dashboard.js?v=20261123b"></script>
+<script src="js/assistant.js?v=20261123b"></script>
+<script src="js/app.js?v=20261123b"></script>
 
 </body>
 </html>

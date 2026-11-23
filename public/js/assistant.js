@@ -32,7 +32,7 @@ const STEP_LABELS_EN = [
   'Step ten.',
   'Step eleven.',
   'Step twelve.',
-  'Final step.'
+  'Step final.'
 ];
 
 const GUIDE = [
@@ -178,24 +178,17 @@ let bubbleTimer  = null;
 const greeted    = {};
 
 let savedVoiceMode = (typeof store !== 'undefined' ? store.get('vms-voice-mode', 'online') : 'online');
-let currentLang = (typeof store !== 'undefined' ? store.get('vms-lang', (savedVoiceMode === 'easyvoice' ? 'en' : 'id')) : 'id');
 if (savedVoiceMode === 'easyvoice') {
-  currentLang = 'en';
+  savedVoiceMode = 'online';
+  if (typeof store !== 'undefined') store.set('vms-voice-mode', 'online');
 }
+let currentLang = 'id';
+if (typeof store !== 'undefined') store.set('vms-lang', 'id');
 
 function setAppLanguage(lang, announce = false) {
   currentLang = (lang === 'en') ? 'en' : 'id';
   if (typeof store !== 'undefined') store.set('vms-lang', currentLang);
 
-  if (currentLang === 'en') {
-    voiceMode = 'easyvoice';
-    if (typeof store !== 'undefined') store.set('vms-voice-mode', 'easyvoice');
-  } else {
-    if (voiceMode === 'easyvoice') {
-      voiceMode = 'online';
-      if (typeof store !== 'undefined') store.set('vms-voice-mode', 'online');
-    }
-  }
   if (typeof updateVoiceTabs === 'function') updateVoiceTabs();
 
   const isEn = (currentLang === 'en');
@@ -203,27 +196,23 @@ function setAppLanguage(lang, announce = false) {
   if ($('#btn-lang-en'))  $('#btn-lang-en').classList.toggle('on', isEn);
 
   if ($('#pb') && typeof camStream !== 'undefined' && !camStream) {
-    $('#pb').textContent = isEn ? 'Take Photo' : 'Ambil Foto / Take Photo';
+    $('#pb').textContent = 'Ambil Foto / Take Photo';
   }
   if ($('#sub')) {
-    $('#sub').textContent = isEn ? 'Submit Registration' : 'Kirim Registrasi / Submit Registration';
+    $('#sub').textContent = 'Kirim Registrasi / Submit Registration';
   }
   if ($('#again')) {
-    $('#again').textContent = isEn ? 'Fill Form Again' : 'Isi Formulir Lagi / Fill Form Again';
+    $('#again').textContent = 'Isi Formulir Lagi / Fill Form Again';
   }
 }
 window.setAppLanguage = setAppLanguage;
 
 function initAssistant() {
-  ['btn-lang-id'].forEach(id => {
-    const el = $('#' + id);
-    if (el) el.onclick = () => setAppLanguage('id', false);
-  });
-  ['btn-lang-en'].forEach(id => {
-    const el = $('#' + id);
-    if (el) el.onclick = () => setAppLanguage('en', false);
-  });
-  setAppLanguage(currentLang, false);
+  const btnId = $('#btn-lang-id');
+  if (btnId) btnId.onclick = () => setAppLanguage('id', false);
+  const btnEn = $('#btn-lang-en');
+  if (btnEn) btnEn.onclick = () => setAppLanguage('en', false);
+  setAppLanguage('id', false);
 }
 
 // Chatbot dinonaktifkan sepenuhnya agar tidak mengganggu pengisian formulir

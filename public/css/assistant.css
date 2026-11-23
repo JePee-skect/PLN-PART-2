@@ -4,14 +4,13 @@
    ============================================================= */
 
 /* =============================================================
-   1. ASISTEN ROBOT (WIDGET, KANVAS & BALON SUARA)
+   1. ASISTEN ROBOT (WIDGET, KANVAS & BALON SUARA) - NONAKTIF (DIHILANGKAN)
    ============================================================= */
-#bot {
-  position: fixed;
-  z-index: 40;
-  right: max(18px, env(safe-area-inset-right, 0px));
-  bottom: max(18px, env(safe-area-inset-bottom, 0px));
-  font-size: 14px;
+#bot,
+#fab,
+#panel,
+#bub {
+  display: none !important;
 }
 
 #fab {

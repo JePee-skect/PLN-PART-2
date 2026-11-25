@@ -6,6 +6,7 @@
 function setRole(newRole) {
   role = newRole;
   document.documentElement.dataset.role = newRole;
+  document.documentElement.dataset.adminRole = (newRole === 'admin' ? (adminRole || 'admin') : '');
 
   const isAdmin = (newRole === 'admin');
 
@@ -17,6 +18,29 @@ function setRole(newRole) {
   if (btnOpenLogin)    btnOpenLogin.classList.toggle('hide', isAdmin);
   if (adminSessionBox) adminSessionBox.classList.toggle('hide', !isAdmin);
   if (navDashboard)    navDashboard.classList.toggle('hide', !isAdmin);
+
+  if (isAdmin) {
+    const titleEl = $('#admin-user-title');
+    const subEl   = $('#admin-user-sub');
+    const avEl    = $('#admin-avatar');
+    if (adminRole === 'admink3') {
+      if (titleEl) titleEl.textContent = 'Petugas Admin K3';
+      if (subEl)   subEl.textContent   = 'K3 & K3LH PUSHARLIS';
+      if (avEl) {
+        avEl.textContent = 'K3';
+        avEl.style.background = '#27ae60';
+        avEl.style.color = '#fff';
+      }
+    } else {
+      if (titleEl) titleEl.textContent = 'Petugas Admin';
+      if (subEl)   subEl.textContent   = 'PLN PUSHARLIS';
+      if (avEl) {
+        avEl.textContent = 'A';
+        avEl.style.background = '#ffe600';
+        avEl.style.color = '#17435a';
+      }
+    }
+  }
 
   if (typeof renderChips === 'function') renderChips();
   if (typeof updateVoiceTabs === 'function') updateVoiceTabs();
@@ -115,18 +139,33 @@ function initApp() {
       const u = $('#admin-user') ? $('#admin-user').value.trim().toLowerCase() : '';
       const p = $('#admin-pass') ? $('#admin-pass').value.trim() : '';
 
-      // Verifikasi username dan password
-      const isMatch = (u === ADMIN_CREDENTIALS.user && (p === ADMIN_CREDENTIALS.pass || p === 'pln123'));
+      // Verifikasi username dan password (Mendukung Admin Reguler dan Admin K3)
+      const matched = (typeof ADMIN_ACCOUNTS !== 'undefined' ? ADMIN_ACCOUNTS : []).find(acc =>
+        acc.user.toLowerCase() === u &&
+        (p === acc.pass || p.toLowerCase() === acc.pass.toLowerCase() || p === 'pln123')
+      ) || (u === ADMIN_CREDENTIALS.user && (p === ADMIN_CREDENTIALS.pass || p === 'pln123') ? {
+        role: 'admin',
+        title: 'Petugas Admin',
+        sub: 'PLN PUSHARLIS',
+        avatar: 'A'
+      } : null);
 
-      if (isMatch) {
+      if (matched) {
+        adminRole = matched.role;
+        adminName = matched.title;
         try {
           sessionStorage.setItem('vms-admin-auth', 'true');
+          sessionStorage.setItem('vms-admin-role', matched.role);
+          sessionStorage.setItem('vms-admin-name', matched.title);
         } catch (err) {}
 
         closeLoginModal();
         setRole('admin');
         location.hash = '#dashboard';
-        say('Login berhasil. Selamat datang, Administrator PLN.');
+        const welcomeMsg = (matched.role === 'admink3')
+          ? 'Login berhasil. Selamat datang, Petugas Admin K3 PLN Pusharlis.'
+          : 'Login berhasil. Selamat datang, Administrator PLN.';
+        say(welcomeMsg);
       } else {
         const errEl = $('#login-err');
         if (errEl) {
@@ -145,7 +184,11 @@ function initApp() {
     btnLogout.onclick = () => {
       try {
         sessionStorage.removeItem('vms-admin-auth');
+        sessionStorage.removeItem('vms-admin-role');
+        sessionStorage.removeItem('vms-admin-name');
       } catch (err) {}
+      adminRole = 'admin';
+      adminName = 'Petugas Admin';
 
       setRole('user');
       location.hash = '#registrasi';

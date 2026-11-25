@@ -61,11 +61,34 @@ const ROLE_PAGES = ['dashboard', 'registrasi'];
 const APD_LIST = ['Safety Helmet', 'Safety Shoes', 'Seragam Kerja'];
 const PHOTO_PLACEHOLDER = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 168 233\'%3E%3Crect width=\'168\' height=\'233\' fill=\'%23bdbdbd\'/%3E%3Ccircle cx=\'84\' cy=\'70\' r=\'34\' fill=\'%238a8a8a\'/%3E%3Cpath d=\'M20 170c0-45 30-60 64-60s64 15 64 60z\' fill=\'%238a8a8a\'/%3E%3Ctext x=\'84\' y=\'195\' font-size=\'22\' fill=\'%23f2f2f2\' text-anchor=\'middle\' font-family=\'sans-serif\'%3ENo Image%3C/text%3E%3Ctext x=\'84\' y=\'220\' font-size=\'22\' fill=\'%23f2f2f2\' text-anchor=\'middle\' font-family=\'sans-serif\'%3EAvailable%3C/text%3E%3C/svg%3E';
 
-// Kredensial Resmi Admin (Tersimpan aman di logika internal)
+// Kredensial Resmi Petugas Admin PLN Pusharlis (Mendukung Multi-Akun & Admin K3)
+const ADMIN_ACCOUNTS = [
+  {
+    user: 'admin',
+    pass: 'admin123',
+    role: 'admin',
+    title: 'Petugas Admin',
+    sub: 'PLN PUSHARLIS',
+    avatar: 'A'
+  },
+  {
+    user: 'ADMINK3',
+    pass: 'ADMIN123',
+    role: 'admink3',
+    title: 'Petugas Admin K3',
+    sub: 'K3 & K3LH PUSHARLIS',
+    avatar: 'K3'
+  }
+];
+
+// Fallback kredensial lama untuk kompatibilitas
 const ADMIN_CREDENTIALS = {
   user: 'admin',
   pass: 'admin123'
 };
+
+let adminRole = (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('vms-admin-role') : null) || 'admin';
+let adminName = (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('vms-admin-name') : null) || 'Petugas Admin';
 
 // Konfigurasi Suara AI EasyVoice (Key Resmi Pengguna)
 const DEFAULT_EASYVOICE_KEY = 'ev_a8dd782ce24e59571a03d3cbda4039cd73c68d9a0013647a9d295a6e7cc87e16';

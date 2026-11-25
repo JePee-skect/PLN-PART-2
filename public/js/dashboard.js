@@ -69,6 +69,33 @@ function initDashboard() {
         return;
       }
 
+      if (action === 'toggle-briefing') {
+        const isK3 = (typeof adminRole !== 'undefined' && adminRole === 'admink3');
+        if (!isK3) {
+          if (typeof say === 'function') {
+            say('Hanya Admin K3 yang memiliki wewenang untuk mengubah status briefing.');
+          }
+          alert('Perhatian: Fitur status briefing ini hanya dapat diubah oleh Petugas Admin K3 (ADMINK3).');
+          return;
+        }
+
+        const r = data.find((x) => String(x.id) === String(id));
+        if (!r) return;
+
+        const currentBriefed = (r.briefed === true || r.briefed === 'true' || r.briefed === 1);
+        r.briefed = !currentBriefed;
+
+        store.set('vms-data', data);
+        if (typeof syncDataToServer === 'function') syncDataToServer(r);
+        renderTable();
+
+        const msg = r.briefed
+          ? `Tamu ${r.nama} telah selesai diberikan safety briefing K3.`
+          : `Status safety briefing untuk ${r.nama} diubah menjadi belum briefing.`;
+        if (typeof say === 'function') say(msg);
+        return;
+      }
+
       const r = data.find((x) => String(x.id) === String(id));
       if (!r) return;
 
@@ -132,7 +159,8 @@ function exportToExcel() {
     'Kendaraan (Jenis / No.Pol)',
     'No Name Tag Tamu',
     'Jumlah Tamu',
-    'Status Kunjungan'
+    'Status Kunjungan',
+    'Status Briefing K3'
   ];
 
   // Susun data dengan nomor KTP dan Name Tag sebagai STRING murni
@@ -149,7 +177,8 @@ function exportToExcel() {
     r.kend || '',
     String(r.tag || ''),
     Number(r.jml) || 1,
-    r.status || ''
+    r.status || '',
+    (r.briefed === true || r.briefed === 'true' || r.briefed === 1) ? 'Sudah Briefing' : 'Belum Briefing'
   ]);
 
   // JIKA LIBRARY XLSX (SheetJS) TERSEDIA
@@ -183,7 +212,8 @@ function exportToExcel() {
       { wch: 22 }, // Kendaraan
       { wch: 18 }, // Name Tag
       { wch: 12 }, // Jumlah
-      { wch: 16 }  // Status
+      { wch: 16 }, // Status
+      { wch: 20 }  // Status Briefing
     ];
 
     XLSX.utils.book_append_sheet(wb, ws, 'Data Tamu');
@@ -316,6 +346,7 @@ function showVisitorDetail(id) {
         <div><b>📅 Tanggal Masuk:</b><br>${esc(r.tgl || '—')}</div>
         <div><b>⏱️ Waktu Check In:</b><br>${esc(r.inAt || '—')}</div>
         <div><b>🕒 Waktu Check Out:</b><br>${esc(r.outAt || '—')}</div>
+        <div><b>🛡️ Safety Briefing K3:</b><br>${(r.briefed === true || r.briefed === 'true' || r.briefed === 1) ? '<span style="color:#27ae60;font-weight:700;">✅ Sudah Dibriefing</span>' : '<span style="color:#e5483b;font-weight:700;">❌ Belum Dibriefing</span>'}</div>
       </div>
 
       <div>
@@ -325,8 +356,17 @@ function showVisitorDetail(id) {
     </div>
   `;
 
+  const isBriefed = (r.briefed === true || r.briefed === 'true' || r.briefed === 1);
+  const isK3 = (typeof adminRole !== 'undefined' && adminRole === 'admink3');
+
   let actionBtns = `<button class="btn ghost" onclick="$('#ov').classList.add('hide')">Tutup</button>`;
   actionBtns += `<button class="btn ghost" style="color:#e5483b;border-color:rgba(229,72,59,0.5);" onclick="deleteVisitor('${r.id}')" title="Hapus data tamu ini">🗑️ Hapus</button>`;
+
+  if (isK3) {
+    const briefActionLabel = isBriefed ? '❌ Batal Briefing' : '✅ Selesai Briefing';
+    actionBtns += `<button class="btn ghost" style="border-color:${isBriefed ? '#e5483b' : '#27ae60'};color:${isBriefed ? '#e5483b' : '#27ae60'};" onclick="toggleVisitorBriefing('${r.id}')" title="Ubah status safety briefing (Khusus Admin K3)">${briefActionLabel}</button>`;
+  }
+
   if (r.status === 'Menunggu') {
     actionBtns += `<button class="btn" onclick="updateVisitorStatus('${r.id}', 'Check In')">Check In Sekarang</button>`;
   } else if (r.status === 'Check In') {
@@ -336,6 +376,26 @@ function showVisitorDetail(id) {
   if (typeof openDialog === 'function') {
     openDialog('Rincian Lengkap Data Tamu PLN', detailHtml, actionBtns);
   }
+}
+
+function toggleVisitorBriefing(id) {
+  const isK3 = (typeof adminRole !== 'undefined' && adminRole === 'admink3');
+  if (!isK3) {
+    alert('Perhatian: Fitur status briefing ini hanya dapat diubah oleh Petugas Admin K3 (ADMINK3).');
+    return;
+  }
+  const r = data.find((x) => String(x.id) === String(id));
+  if (!r) return;
+  const currentBriefed = (r.briefed === true || r.briefed === 'true' || r.briefed === 1);
+  r.briefed = !currentBriefed;
+  store.set('vms-data', data);
+  if (typeof syncDataToServer === 'function') syncDataToServer(r);
+  renderTable();
+  showVisitorDetail(id);
+  const msg = r.briefed
+    ? `Tamu ${r.nama} telah selesai diberikan safety briefing K3.`
+    : `Status safety briefing untuk ${r.nama} diubah menjadi belum briefing.`;
+  if (typeof say === 'function') say(msg);
 }
 
 function deleteVisitor(id) {
@@ -376,6 +436,7 @@ function updateVisitorStatus(id, newStatus) {
 window.showVisitorDetail = showVisitorDetail;
 window.updateVisitorStatus = updateVisitorStatus;
 window.deleteVisitor = deleteVisitor;
+window.toggleVisitorBriefing = toggleVisitorBriefing;
 
 function updateDbStatus(isConnected, count = (data || []).length) {}
 window.updateDbStatus = updateDbStatus;
@@ -426,6 +487,25 @@ function renderTable() {
     `;
   };
 
+  const getBriefingBtn = (r) => {
+    const isBriefed = (r.briefed === true || r.briefed === 'true' || r.briefed === 1);
+    const isK3 = (typeof adminRole !== 'undefined' && adminRole === 'admink3');
+
+    if (isBriefed) {
+      if (isK3) {
+        return `<button class="btn sm" data-action="toggle-briefing" data-id="${r.id}" style="background:#27ae60;border-color:#219150;color:#fff;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;cursor:pointer;padding:5px 10px;font-size:12px;font-weight:600;" title="Klik untuk membatalkan status briefing (Khusus Admin K3)"><span>✅</span><span>Sudah</span></button>`;
+      } else {
+        return `<button class="btn sm" data-action="toggle-briefing" data-id="${r.id}" disabled style="background:#27ae60;border-color:#219150;color:#fff;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;opacity:0.75;cursor:not-allowed;padding:5px 10px;font-size:12px;font-weight:600;" title="Sudah briefing K3 (Hanya Admin K3 yang dapat mengubah)"><span>✅</span><span>Sudah</span></button>`;
+      }
+    } else {
+      if (isK3) {
+        return `<button class="btn sm ghost" data-action="toggle-briefing" data-id="${r.id}" style="color:#e5483b;border-color:rgba(229,72,59,0.6);background:rgba(229,72,59,0.06);white-space:nowrap;display:inline-flex;align-items:center;gap:4px;cursor:pointer;padding:5px 10px;font-size:12px;font-weight:600;" title="Klik untuk menandai sudah briefing K3 (Khusus Admin K3)"><span>❌</span><span>Belum</span></button>`;
+      } else {
+        return `<button class="btn sm ghost" data-action="toggle-briefing" data-id="${r.id}" disabled style="color:#e5483b;border-color:rgba(229,72,59,0.6);background:rgba(229,72,59,0.06);white-space:nowrap;display:inline-flex;align-items:center;gap:4px;opacity:0.75;cursor:not-allowed;padding:5px 10px;font-size:12px;font-weight:600;" title="Belum briefing K3 (Hanya Admin K3 yang dapat mengubah)"><span>❌</span><span>Belum</span></button>`;
+      }
+    }
+  };
+
   if (rows.length > 0) {
     tb.innerHTML = rows.map((r, i) => `
       <tr>
@@ -444,10 +524,11 @@ function renderTable() {
         <td style="text-align:center;"><span class="tag-badge">${esc(r.tag || '—')}</span></td>
         <td style="text-align:center;">${esc(r.jml || '1')} Orang</td>
         <td style="text-align:center;">${formatStatusBadge(r.status)}</td>
+        <td style="text-align:center;">${getBriefingBtn(r)}</td>
         <td>${getActionBtn(r)}</td>
       </tr>
     `).join('');
   } else {
-    tb.innerHTML = '<tr><td colspan="14" class="e">Tidak ada data tamu.</td></tr>';
+    tb.innerHTML = '<tr><td colspan="15" class="e">Tidak ada data tamu.</td></tr>';
   }
 }

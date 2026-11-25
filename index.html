@@ -43,10 +43,10 @@
     <!-- Info akun saat login sebagai Admin -->
     <div id="admin-session-box" class="hide" style="display:flex;flex-direction:column;gap:10px;">
       <div style="display:flex;align-items:center;gap:10px;">
-        <span class="av" style="width:34px;height:34px;border-radius:8px;background:#ffe600;color:#17435a;font-weight:700;display:grid;place-items:center;flex-shrink:0;">A</span>
+        <span class="av" id="admin-avatar" style="width:34px;height:34px;border-radius:8px;background:#ffe600;color:#17435a;font-weight:700;display:grid;place-items:center;flex-shrink:0;">A</span>
         <div style="line-height:1.25;min-width:0;">
-          <div style="font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Petugas Admin</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.7);">PLN PUSHARLIS</div>
+          <div id="admin-user-title" style="font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Petugas Admin</div>
+          <div id="admin-user-sub" style="font-size:11px;color:rgba(255,255,255,0.7);">PLN PUSHARLIS</div>
         </div>
       </div>
       <button id="btn-logout" style="width:100%;padding:8px 12px;border:0;border-radius:6px;background:rgba(226,35,26,0.85);color:#fff;font:inherit;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background 0.2s;">
@@ -224,6 +224,7 @@
             <th>No Name Tag</th>
             <th>Jumlah</th>
             <th>Status</th>
+            <th>Briefing</th>
             <th>Aksi</th>
           </tr>
         </thead>

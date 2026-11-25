@@ -105,14 +105,24 @@ async function upsertSupabaseVisitors(records) {
       apd: r.apd || null,
       foto: r.foto || null,
       status: r.status || 'Menunggu',
+      briefed: (r.briefed === true || r.briefed === 'true' || r.briefed === 1),
       inAt: r.inAt || null,
       outAt: r.outAt || null,
       createdAt: r.createdAt || new Date().toISOString()
     }));
 
-    const res = await supabaseRequest('POST', '/rest/v1/visitors', rows, {
+    let res = await supabaseRequest('POST', '/rest/v1/visitors', rows, {
       'Prefer': 'resolution=merge-duplicates,return=representation'
     });
+
+    // Fallback otomatis jika kolom 'briefed' belum dibuat di tabel Supabase
+    if (res.status === 400 && res.raw && res.raw.includes('briefed')) {
+      const rowsWithoutBriefed = rows.map(({ briefed, ...rest }) => rest);
+      res = await supabaseRequest('POST', '/rest/v1/visitors', rowsWithoutBriefed, {
+        'Prefer': 'resolution=merge-duplicates,return=representation'
+      });
+    }
+
     return (res.status === 200 || res.status === 201);
   } catch (err) {
     console.warn('[Supabase Upsert Warn]:', err.message);

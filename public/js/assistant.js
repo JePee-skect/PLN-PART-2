@@ -73,6 +73,12 @@ const ADMIN_HELP = {
   fil: 'Gunakan filter Tanggal Awal dan Tanggal Akhir untuk menentukan rentang waktu, atau ketik nama tamu pada kolom pencarian.'
 };
 
+const ADMIN_HELP_EN = {
+  how: 'On the Dashboard, click Check In when a guest arrives at the facility. When they are ready to depart, click Check Out on their row.',
+  exp: 'Click the Export to Excel button. The spreadsheet file will automatically download to your device with clean 16-digit ID numbers.',
+  fil: 'Use the Start Date and End Date filters to choose a date range, or type the visitor\'s name in the search box.'
+};
+
 const FAQ = [
   [
     /induksi|induction|safety induction|poster|tata tertib|aturan/,
@@ -204,6 +210,20 @@ function setAppLanguage(lang, announce = true) {
   if ($('#chat-lang-id')) $('#chat-lang-id').classList.toggle('on', !isEn);
   if ($('#chat-lang-en')) $('#chat-lang-en').classList.toggle('on', isEn);
 
+  if ($('#ci')) $('#ci').placeholder = isEn ? 'Ask assistant...' : 'Tanya asisten...';
+  if ($('#cs')) $('#cs').textContent = isEn ? 'Send' : 'Kirim';
+  if ($('#pclose')) $('#pclose').title = isEn ? 'Close Chat' : 'Tutup Chat';
+
+  if ($('#pb') && typeof camStream !== 'undefined' && !camStream) {
+    $('#pb').textContent = isEn ? 'Take Photo' : 'Ambil Foto / Take Photo';
+  }
+  if ($('#sub')) {
+    $('#sub').textContent = isEn ? 'Submit Registration' : 'Kirim Registrasi / Submit Registration';
+  }
+  if ($('#again')) {
+    $('#again').textContent = isEn ? 'Fill Form Again' : 'Isi Formulir Lagi / Fill Form Again';
+  }
+
   renderChips();
 
   if (announce) {
@@ -245,9 +265,12 @@ function initAssistant() {
       const c = e.target.dataset.c;
       if (!c) return;
 
+      const isEn = (currentLang === 'en' || (typeof voiceMode !== 'undefined' && voiceMode === 'easyvoice'));
+      const activeAdminHelp = isEn ? ADMIN_HELP_EN : ADMIN_HELP;
+
       if (c === 'sum')  return say(todaySummary());
-      if (c === 'how')  return say(ADMIN_HELP.how);
-      if (c === 'exp')  return say(ADMIN_HELP.exp);
+      if (c === 'how')  return say(activeAdminHelp.how);
+      if (c === 'exp')  return say(activeAdminHelp.exp);
 
       openForm();
       if (c === 'start') goStep(0);
@@ -456,12 +479,16 @@ function openForm() {
 }
 
 function todaySummary() {
+  const isEn    = (currentLang === 'en' || (typeof voiceMode !== 'undefined' && voiceMode === 'easyvoice'));
   const t       = ymd();
   const today   = data.filter((r) => r.tgl === t);
   const waiting = today.filter((r) => r.status === 'Menunggu').length;
   const inside  = today.filter((r) => r.status === 'Check In').length;
   const out     = data.filter((r) => r.outAt === t).length;
 
+  if (isEn) {
+    return `Today, ${today.length} visitor(s) are recorded: ${waiting} waiting, ${inside} currently on-site, and ${out} checked out.`;
+  }
   return `Hari ini tercatat ${today.length} tamu: ${waiting} sedang menunggu, ${inside} sedang berada di lokasi, dan ${out} telah check out.`;
 }
 
@@ -477,10 +504,11 @@ function answer(q) {
   }
 
   if (role === 'admin') {
+    const activeAdminHelp = isEn ? ADMIN_HELP_EN : ADMIN_HELP;
     if (/ringkas|rekap|hari ini|berapa|summary|today/i.test(q)) return say(todaySummary());
-    if (/check|masuk|keluar/i.test(q))                         return say(ADMIN_HELP.how);
-    if (/export|excel|unduh|salin|download/i.test(q))           return say(ADMIN_HELP.exp);
-    if (/cari|filter|tanggal|search|filter/i.test(q))           return say(ADMIN_HELP.fil);
+    if (/check|masuk|keluar/i.test(q))                         return say(activeAdminHelp.how);
+    if (/export|excel|unduh|salin|download/i.test(q))           return say(activeAdminHelp.exp);
+    if (/cari|filter|tanggal|search|filter/i.test(q))           return say(activeAdminHelp.fil);
   }
 
   const activeFaq = isEn ? FAQ_EN : FAQ;

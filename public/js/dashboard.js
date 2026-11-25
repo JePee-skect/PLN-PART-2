@@ -4,52 +4,8 @@
    ===================================================================== */
 
 function initDashboard() {
-  // Secara default biarkan d1 & d2 kosong agar seluruh data tamu langsung tampil
-  if ($('#d1')) $('#d1').value = '';
-  if ($('#d2')) $('#d2').value = '';
-
-  // Tombol Filter Cepat
-  const btnAll = $('#btn-filter-all');
-  if (btnAll) {
-    btnAll.onclick = () => {
-      if ($('#d1')) $('#d1').value = '';
-      if ($('#d2')) $('#d2').value = '';
-      renderTable();
-    };
-  }
-
-  const btnToday = $('#btn-filter-today');
-  if (btnToday) {
-    btnToday.onclick = () => {
-      const today = ymd();
-      if ($('#d1')) $('#d1').value = today;
-      if ($('#d2')) $('#d2').value = today;
-      renderTable();
-    };
-  }
-
-  const btnWeek = $('#btn-filter-week');
-  if (btnWeek) {
-    btnWeek.onclick = () => {
-      const d = new Date();
-      d.setDate(d.getDate() - 7);
-      if ($('#d1')) $('#d1').value = ymd(d);
-      if ($('#d2')) $('#d2').value = ymd();
-      renderTable();
-    };
-  }
-
-  const btnRef = $('#btn-refresh-data');
-  if (btnRef) {
-    btnRef.onclick = async () => {
-      btnRef.disabled = true;
-      btnRef.textContent = '⏳ Memuat...';
-      if (typeof fetchVisitorsFromServer === 'function') {
-        await fetchVisitorsFromServer();
-      }
-      btnRef.disabled = false;
-      btnRef.textContent = '🔄 Refresh';
-    };
+  if ($('#d1') && $('#d2')) {
+    $('#d1').value = $('#d2').value = ymd();
   }
 
   // Sinkronisasi data awal & polling otomatis per 5 detik untuk admin dashboard
@@ -57,7 +13,7 @@ function initDashboard() {
     fetchVisitorsFromServer();
     if (!window._vmsDashPoll) {
       window._vmsDashPoll = setInterval(() => {
-        const dash = $('#v-dashboard');
+        const dash = $('#v-dashboard') || $('#dashboard');
         if (dash && !dash.classList.contains('hide')) {
           fetchVisitorsFromServer();
         }
@@ -392,24 +348,7 @@ window.showVisitorDetail = showVisitorDetail;
 window.updateVisitorStatus = updateVisitorStatus;
 window.deleteVisitor = deleteVisitor;
 
-function updateDbStatus(isConnected, count = (data || []).length) {
-  const badge = $('#db-status-badge');
-  const countEl = $('#db-count-badge');
-  if (countEl) countEl.textContent = count;
-  if (badge) {
-    if (isConnected) {
-      badge.style.background = 'rgba(46,204,113,0.12)';
-      badge.style.borderColor = 'rgba(46,204,113,0.3)';
-      badge.style.color = '#27ae60';
-      badge.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:#27ae60;display:inline-block;box-shadow:0 0 8px #2ecc71;"></span><span>Database Cloud: <b>${count}</b> Tamu Tersimpan</span>`;
-    } else {
-      badge.style.background = 'rgba(230,126,34,0.12)';
-      badge.style.borderColor = 'rgba(230,126,34,0.3)';
-      badge.style.color = '#e67e22';
-      badge.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:#e67e22;display:inline-block;"></span><span>Offline / Cache Lokal: <b>${count}</b> Tamu</span>`;
-    }
-  }
-}
+function updateDbStatus(isConnected, count = (data || []).length) {}
 window.updateDbStatus = updateDbStatus;
 
 function renderTable() {
@@ -421,44 +360,13 @@ function renderTable() {
   const to    = $('#d2') ? $('#d2').value : '';
   const query = $('#q') ? $('#q').value.trim().toLowerCase() : '';
 
-  // Update tombol filter status visual
-  if ($('#btn-filter-all')) {
-    const isAll = !from && !to;
-    $('#btn-filter-all').className = isAll ? 'btn sm' : 'btn sm ghost';
-  }
-  if ($('#btn-filter-today')) {
-    const isToday = (from === today && to === today);
-    $('#btn-filter-today').className = isToday ? 'btn sm' : 'btn sm ghost';
-  }
-
-  // 1. Total Seluruh Tamu di Database
-  if ($('#s0')) $('#s0').textContent = data.length;
-
-  // 2. Tamu Hari Ini (pengunjung yang beraktivitas hari ini: registrasi, in, atau out)
-  const tamuHariIni = data.filter((r) => r.tgl === today || r.inAt === today || r.outAt === today).length;
-  if ($('#s1')) $('#s1').textContent = tamuHariIni;
-
-  // 3. Sedang Di Area (Check In aktif / belum keluar)
-  const sedangDiArea = data.filter((r) => r.status === 'Check In').length;
-  if ($('#s2')) $('#s2').textContent = sedangDiArea;
-
-  // 4. Check Out Hari Ini (selesai & keluar hari ini)
-  const checkoutHariIni = data.filter((r) => r.outAt === today).length;
-  if ($('#s3')) $('#s3').textContent = checkoutHariIni;
-
-  // Perbarui status database cloud badge
-  updateDbStatus(true, data.length);
+  if ($('#s1')) $('#s1').textContent = data.filter((r) => r.tgl === today).length;
+  if ($('#s2')) $('#s2').textContent = data.filter((r) => r.inAt === today).length;
+  if ($('#s3')) $('#s3').textContent = data.filter((r) => r.outAt === today).length;
 
   const rows = data.filter((r) => {
     const matchDate  = (!from || r.tgl >= from) && (!to || r.tgl <= to);
-    const matchQuery = !query ||
-      (r.nama && r.nama.toLowerCase().includes(query)) ||
-      (r.usaha && r.usaha.toLowerCase().includes(query)) ||
-      (r.pegawai && r.pegawai.toLowerCase().includes(query)) ||
-      (r.ktp && String(r.ktp).includes(query)) ||
-      (r.tag && String(r.tag).toLowerCase().includes(query)) ||
-      (r.kend && r.kend.toLowerCase().includes(query)) ||
-      (r.perlu && r.perlu.toLowerCase().includes(query));
+    const matchQuery = !query || (r.nama && r.nama.toLowerCase().includes(query)) || (r.usaha && r.usaha.toLowerCase().includes(query));
     return matchDate && matchQuery;
   });
 

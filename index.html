@@ -194,7 +194,17 @@
         <label for="q">Cari Nama Tamu:</label>
         <input type="text" id="q" placeholder="Ketik nama tamu...">
       </div>
-      <button class="btn sm" id="xl">Export to Excel</button>
+      <div style="display:flex;gap:8px;margin-left:auto;align-items:center;flex-wrap:wrap;">
+        <button type="button" class="btn sm ghost" id="btn-show-all" style="display:flex;align-items:center;gap:6px;padding:8px 14px;font-size:13px;" title="Tampilkan seluruh data tamu yang hadir dari awal hingga sekarang">
+          <span>👥</span><span>Semua Tamu</span>
+        </button>
+        <button type="button" class="btn sm ghost on" id="btn-show-today" style="display:flex;align-items:center;gap:6px;padding:8px 14px;font-size:13px;" title="Tampilkan tamu hari ini saja">
+          <span>📅</span><span>Hari Ini</span>
+        </button>
+        <button type="button" class="btn sm" id="xl" style="display:flex;align-items:center;gap:6px;padding:8px 14px;font-size:13px;" title="Unduh data tabel ke file Excel">
+          <span>📊</span><span>Export to Excel</span>
+        </button>
+      </div>
     </div>
 
     <div class="tw">

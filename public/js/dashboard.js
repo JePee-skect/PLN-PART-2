@@ -7,6 +7,35 @@ function initDashboard() {
   if ($('#d1') && $('#d2')) {
     $('#d1').value = $('#d2').value = ymd();
   }
+  updateFilterButtons();
+
+  const btnShowAll = $('#btn-show-all');
+  if (btnShowAll) {
+    btnShowAll.onclick = () => {
+      if ($('#d1')) $('#d1').value = '';
+      if ($('#d2')) $('#d2').value = '';
+      updateFilterButtons();
+      renderTable();
+      if (typeof say === 'function') {
+        say(`Menampilkan seluruh data tamu yang hadir, total ${data.length} pengunjung.`);
+      }
+    };
+  }
+
+  const btnShowToday = $('#btn-show-today');
+  if (btnShowToday) {
+    btnShowToday.onclick = () => {
+      const today = ymd();
+      if ($('#d1')) $('#d1').value = today;
+      if ($('#d2')) $('#d2').value = today;
+      updateFilterButtons();
+      renderTable();
+      if (typeof say === 'function') {
+        const count = data.filter((r) => r.tgl === today).length;
+        say(`Menampilkan data tamu hari ini, total ${count} pengunjung.`);
+      }
+    };
+  }
 
   // Sinkronisasi data awal & polling otomatis per 5 detik untuk admin dashboard
   if (typeof fetchVisitorsFromServer === 'function') {
@@ -351,9 +380,23 @@ window.deleteVisitor = deleteVisitor;
 function updateDbStatus(isConnected, count = (data || []).length) {}
 window.updateDbStatus = updateDbStatus;
 
+function updateFilterButtons() {
+  const d1Val = $('#d1') ? $('#d1').value : '';
+  const d2Val = $('#d2') ? $('#d2').value : '';
+  const today = ymd();
+
+  const isToday = (d1Val === today && d2Val === today);
+  const isAll = (!d1Val && !d2Val);
+
+  if ($('#btn-show-today')) $('#btn-show-today').classList.toggle('on', isToday);
+  if ($('#btn-show-all')) $('#btn-show-all').classList.toggle('on', isAll);
+}
+window.updateFilterButtons = updateFilterButtons;
+
 function renderTable() {
   const tb = $('#tb');
   if (!tb) return;
+  updateFilterButtons();
 
   const today = ymd();
   const from  = $('#d1') ? $('#d1').value : '';

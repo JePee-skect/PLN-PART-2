@@ -382,6 +382,11 @@ select:focus {
   color: var(--acc);
 }
 
+.btn.ghost.on {
+  background: var(--acc);
+  color: #fff;
+}
+
 .photo {
   text-align: center;
 }

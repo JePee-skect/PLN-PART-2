@@ -12,8 +12,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- Stylesheets Terpisah & Rapi -->
-  <link rel="stylesheet" href="css/style.css?v=20261125a">
-  <link rel="stylesheet" href="css/assistant.css?v=20261125a">
+  <link rel="stylesheet" href="css/style.css?v=20261125b">
+  <link rel="stylesheet" href="css/assistant.css?v=20261125b">
 </head>
 <body>
 
@@ -69,6 +69,117 @@
       <div class="stat"><b id="s3">0</b>Check Out Hari Ini</div>
     </div>
 
+    <!-- KONTROL EKSKLUSIF ADMIN: PENGATURAN MESIN SUARA ASISTEN (AI VOICE ENGINE) -->
+    <div class="card" id="admin-voice-card" style="margin-bottom:20px;padding:20px;border-radius:12px;border:1.5px solid var(--acc);background:linear-gradient(135deg, rgba(0,162,185,0.06), rgba(15,39,53,0.04));">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;border-bottom:1px solid var(--line);padding-bottom:10px;">
+        <div>
+          <h2 style="margin:0;font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;">
+            <span>🎙️</span>
+            <span>Pengaturan Mesin Suara Asisten (AI Voice Engine)</span>
+          </h2>
+          <p style="margin:3px 0 0;font-size:12px;color:var(--muted);">Konfigurasi eksklusif Administrator untuk seluruh sistem VMS PLN Pusharlis</p>
+        </div>
+        <span class="badge" id="admin-voice-badge" style="background:#27ae60;color:#fff;font-size:11.5px;padding:5px 12px;border-radius:20px;font-weight:700;">
+          Aktif: 🌟 Gadis Neural (Studio 96kbps)
+        </span>
+      </div>
+
+      <!-- Tab Pilihan Engine Suara -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+        <button type="button" id="tab-vonline" class="btn sm" style="padding:8px 14px;font-size:12px;">🌟 Gadis Neural (Default Resmi PLN)</button>
+        <button type="button" id="tab-vbrowser" class="btn sm ghost" style="padding:8px 14px;font-size:12px;">🔊 Browser Edge / Chrome</button>
+        <button type="button" id="tab-veasyvoice" class="btn sm ghost" style="padding:8px 14px;font-size:12px;">✨ EasyVoice AI (English Voice)</button>
+        <button type="button" id="tab-veleven" class="btn sm ghost" style="padding:8px 14px;font-size:12px;">🎙️ ElevenLabs AI</button>
+      </div>
+
+      <!-- Mode 1: Gadis Neural -->
+      <div id="sec-vonline" style="background:rgba(46,204,113,0.10);border:1px solid rgba(46,204,113,0.3);padding:14px;border-radius:8px;">
+        <div style="font-size:12.5px;line-height:1.5;margin-bottom:12px;color:var(--text);">
+          <b style="color:#27ae60;">✅ Suara Standar Pelayanan Resmi PLN Pusharlis (Studio 96kbps):</b><br>
+          Artikulasi vokal wanita Indonesia asli yang santun, jernih, alami, dan bebas logat asing. Dikonfigurasi dengan pitch dan tempo natural agar setiap instruksi terdengar sangat jelas bagi tamu.
+        </div>
+        <button type="button" class="btn sm" id="btn-test-online" style="padding:9px 18px;font-size:12px;background:#27ae60;">
+          ▶️ Uji Coba Suara Gadis Neural
+        </button>
+      </div>
+
+      <!-- Mode 2: EasyVoice AI Studio -->
+      <div id="sec-veasyvoice" class="hide" style="background:rgba(230,126,34,0.08);border:1px solid rgba(230,126,34,0.25);border-radius:8px;padding:14px;">
+        <div style="background:rgba(230,126,34,0.12);padding:8px 10px;border-radius:6px;margin-bottom:12px;font-size:11.5px;line-height:1.45;">
+          ℹ️ <b>EasyVoice AI Studio (Kokoro-82m English Voice):</b> E.V.A berbicara dalam <b>Bahasa Inggris (English)</b> menggunakan model studio AI Kokoro-82m yang jernih, alami, dan fasih untuk memandu tamu internasional maupun kunjungan bilingual.
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px;margin-bottom:12px;">
+          <div>
+            <label for="ev-api-key" style="margin:0 0 4px;font-size:11.5px;font-weight:600;display:block;">EasyVoice API Key:</label>
+            <input type="text" id="ev-api-key" placeholder="ev_..." value="ev_a8dd782ce24e59571a03d3cbda4039cd73c68d9a0013647a9d295a6e7cc87e16" style="padding:8px 10px;font-size:12px;border-radius:6px;font-family:monospace;width:100%;">
+          </div>
+          <div>
+            <label for="ev-voice-select" style="margin:0 0 4px;font-size:11.5px;font-weight:600;display:block;">Karakter Suara (Kokoro AI):</label>
+            <select id="ev-voice-select" style="width:100%;padding:8px 10px;font-size:12px;border-radius:6px;">
+              <option value="af_heart">💖 Heart (Ramah & Hangat)</option>
+              <option value="af_bella">🌸 Bella (Anggun & Lembut)</option>
+              <option value="af_nicole">✨ Nicole (Bisnis & Jelas)</option>
+              <option value="af_sarah">🌟 Sarah (Natural & Kasual)</option>
+              <option value="af_sky">☀️ Sky (Ceria & Dinamis)</option>
+              <option value="bf_emma">💫 Emma (British Ramah)</option>
+              <option value="bf_isabella">💎 Isabella (British Elegan)</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <button type="button" class="btn sm" id="btn-save-easyvoice" style="padding:8px 16px;font-size:12px;background:#e67e22;">💾 Simpan & Aktifkan EasyVoice</button>
+          <button type="button" class="btn sm ghost" id="btn-test-easyvoice" style="padding:8px 16px;font-size:12px;">▶️ Tes Bicara AI</button>
+          <div id="ev-status" style="font-size:12px;font-weight:600;"></div>
+        </div>
+      </div>
+
+      <!-- Mode 3: Browser Built-in TTS -->
+      <div id="sec-vbrowser" class="hide" style="background:rgba(52,152,219,0.08);border:1px solid rgba(52,152,219,0.25);border-radius:8px;padding:14px;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px;margin-bottom:12px;">
+          <div>
+            <label for="vs" style="margin:0 0 4px;font-size:11.5px;font-weight:600;display:block;">Pilih Suara Browser:</label>
+            <select id="vs" style="width:100%;padding:8px 10px;font-size:12px;border-radius:6px;"></select>
+          </div>
+          <div>
+            <label for="v-speed" style="margin:0 0 4px;font-size:11.5px;font-weight:600;display:block;">Kecepatan Bicara (Speed):</label>
+            <input type="range" id="v-speed" min="0.7" max="1.3" step="0.05" value="1.0" style="width:100%;">
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <button type="button" class="btn sm" id="btn-save-browser" style="padding:8px 16px;font-size:12px;">💾 Simpan & Aktifkan</button>
+          <button type="button" class="btn sm ghost" id="btn-test-browser" style="padding:8px 16px;font-size:12px;">▶️ Uji Suara</button>
+        </div>
+      </div>
+
+      <!-- Mode 4: ElevenLabs Custom -->
+      <div id="sec-veleven" class="hide" style="background:rgba(155,89,182,0.08);border:1px solid rgba(155,89,182,0.25);border-radius:8px;padding:14px;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px;margin-bottom:12px;">
+          <div>
+            <label for="el-key" style="margin:0 0 4px;font-size:11.5px;font-weight:600;display:block;">ElevenLabs API Key:</label>
+            <input type="password" id="el-key" placeholder="xi-api-key..." style="padding:8px 10px;font-size:12px;border-radius:6px;width:100%;">
+          </div>
+          <div>
+            <label for="el-vid" style="margin:0 0 4px;font-size:11.5px;font-weight:600;display:block;">Voice ID:</label>
+            <input type="text" id="el-vid" placeholder="Contoh: 21m00Tcm4TlvDq8ikWAM" style="padding:8px 10px;font-size:12px;border-radius:6px;width:100%;">
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <button type="button" class="btn sm" id="btn-save-eleven" style="padding:8px 16px;font-size:12px;">💾 Simpan & Aktifkan</button>
+          <button type="button" class="btn sm ghost" id="btn-test-eleven" style="padding:8px 16px;font-size:12px;">▶️ Tes Bicara</button>
+          <div id="el-status" style="font-size:12px;font-weight:600;"></div>
+        </div>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line);">
+          <div style="font-weight:600;font-size:12px;margin-bottom:4px;">Atau putar rekaman lokal:</div>
+          <p style="margin:0 0 8px;font-size:11px;color:var(--muted);">
+            Memutar file <code>audio/my-voice.mp3</code> langsung tanpa kuota API.
+          </p>
+          <button type="button" class="btn sm" id="btn-play-mp3" style="padding:8px 16px;font-size:12px;background:#27ae60;">
+            ▶️ Putar File Rekaman Suara Saya
+          </button>
+        </div>
+      </div>
+    </div>
+
     <h2 style="margin:20px 0 10px; font-size:16px;">Data Tamu</h2>
     <div class="filters">
       <div>
@@ -115,7 +226,13 @@
   <section class="card hide" id="v-registrasi">
     <div style="text-align:center;margin-bottom:18px;">
       <h1 style="margin:0 0 6px;">Formulir Tamu / <span style="font-style:italic;font-weight:600;color:var(--muted);font-size:0.92em;">Visitor Form</span></h1>
-      <p style="margin:0 0 14px;font-size:13px;color:var(--muted);font-weight:500;">PT PLN (Persero) PUSHARLIS UP2WVI</p>
+      <p style="margin:0 0 10px;font-size:13px;color:var(--muted);font-weight:500;">PT PLN (Persero) PUSHARLIS UP2WVI</p>
+      
+      <!-- Pemilih Bahasa Cepat (Bilingual Language Switcher) -->
+      <div class="lang-switch-bar">
+        <button type="button" class="btn-lang on" id="btn-lang-id" data-lang="id">🇮🇩 Bahasa Indonesia</button>
+        <button type="button" class="btn-lang" id="btn-lang-en" data-lang="en">🇬🇧 English (EasyVoice AI)</button>
+      </div>
     </div>
     
     <form id="f">
@@ -259,14 +376,56 @@
   </div>
 </div>
 
-<!-- ================= 4. SCRIPTS MODULAR ================= -->
+<!-- ================= 4. ASISTEN ROBOT 3D & WIDGET ================= -->
+<div id="bot">
+  <div id="bub" class="hide"></div>
+  <div id="panel" class="hide">
+    <div id="stage">
+      <div class="stage-brand">
+        <img src="img/pln-logo.png" alt="Logo PT PLN (Persero)" class="stage-logo">
+        <div style="line-height:1.2;">
+          <div class="stage-title">E.V.A</div>
+          <div class="stage-subtitle">PLN PUSHARLIS UP2WVI</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div class="chat-lang-toggle">
+          <button type="button" id="chat-lang-id" class="lang-pill on" title="Bahasa Indonesia">ID</button>
+          <button type="button" id="chat-lang-en" class="lang-pill" title="English (EasyVoice AI)">EN</button>
+        </div>
+        <button id="spk" title="Nyalakan / Matikan Suara">🔊 Aktif</button>
+        <button id="pclose" title="Tutup Chat" style="background:none;border:0;color:#fff;font-size:18px;cursor:pointer;padding:2px 8px;margin-left:2px;line-height:1;opacity:0.85;">✕</button>
+      </div>
+    </div>
+
+    <!-- Chat Messages, Quick Chips & Input -->
+    <div id="msgs"></div>
+    <div id="chips"></div>
+    <div id="cf">
+      <input type="text" id="ci" placeholder="Tanya asisten...">
+      <button class="btn sm" id="cs">Kirim</button>
+    </div>
+  </div>
+
+  <!-- Tombol Pemicu Kanvas 3D Robot -->
+  <button id="fab" aria-label="Buka asisten">
+    <canvas id="fabc" width="260" height="380" style="width:100%!important;height:100%!important;display:block;"></canvas>
+  </button>
+</div>
+
+<!-- ================= 5. SCRIPTS MODULAR ================= -->
+<!-- Library Eksternal Three.js untuk Model 3D -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<!-- Skrip Terpisah & Modular -->
 <script src="js/xlsx.full.min.js"></script>
-<script src="js/config.js?v=20261125a"></script>
-<script src="js/voice.js?v=20261125a"></script>
-<script src="js/form.js?v=20261125a"></script>
-<script src="js/dashboard.js?v=20261125a"></script>
-<script src="js/assistant.js?v=20261125a"></script>
-<script src="js/app.js?v=20261125a"></script>
+<script src="js/config.js?v=20261125b"></script>
+<script src="js/voice.js?v=20261125b"></script>
+<script src="js/robot3d.js?v=20261125b"></script>
+<script src="js/form.js?v=20261125b"></script>
+<script src="js/dashboard.js?v=20261125b"></script>
+<script src="js/assistant.js?v=20261125b"></script>
+<script src="js/app.js?v=20261125b"></script>
 
 </body>
 </html>

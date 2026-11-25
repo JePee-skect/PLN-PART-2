@@ -28,44 +28,45 @@ if (!fs.existsSync(DATA_DIR)) {
   try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) {}
 }
 
-// Konfigurasi Database Cloud Real-time (GitHub Gist Engine)
-const GIST_ID = process.env.VMS_GIST_ID || '61449fb334f90efbf588c95ac5198668';
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN || process.env.VMS_CLOUD_TOKEN || [103,104,111,95,48,101,102,103,80,83,108,113,112,78,71,98,105,76,120,113,74,72,108,108,108,103,67,122,113,111,87,86,115,119,48,100,70,99,76,122].map(c => String.fromCharCode(c)).join('');
+// Konfigurasi Database Supabase PostgreSQL
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://ngvvyvsyjucykuiqbsrr.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ndnZ5dnN5anVjeWt1aXFic3JyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1NTE3MjksImV4cCI6MjExMTEyNzcyOX0._Dz3au1jE0bYqkBve5-j2VKldfiFeIqbWBRBfy5FMGg';
 
-function githubRequest(method, pathname, data = null) {
+function supabaseRequest(method, endpoint, body = null, extraHeaders = {}) {
   return new Promise((resolve, reject) => {
-    const payload = data ? JSON.stringify(data) : null;
+    const payload = body ? JSON.stringify(body) : null;
+    const url = new URL(SUPABASE_URL + endpoint);
     const req = https.request({
-      hostname: 'api.github.com',
+      hostname: url.hostname,
       port: 443,
-      path: pathname,
+      path: url.pathname + url.search,
       method: method,
       headers: {
-        'User-Agent': 'PLN-Pusharlis-VMS',
-        'Authorization': `Bearer ${GITHUB_TOKEN}`,
-        'Accept': 'application/vnd.github+json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        ...extraHeaders,
         ...(payload ? { 'Content-Length': Buffer.byteLength(payload) } : {})
       },
-      timeout: 7000
+      timeout: 8000
     }, (res) => {
-      let body = '';
-      res.on('data', chunk => body += chunk);
+      let data = '';
+      res.on('data', chunk => data += chunk);
       res.on('end', () => {
         try {
-          const parsed = JSON.parse(body || '{}');
-          resolve({ status: res.statusCode, data: parsed, raw: body });
+          const parsed = JSON.parse(data || '{}');
+          resolve({ status: res.statusCode, data: parsed, raw: data });
         } catch (e) {
-          resolve({ status: res.statusCode, error: e.message, raw: body });
+          resolve({ status: res.statusCode, raw: data, error: e.message });
         }
       });
     });
 
     req.on('timeout', () => {
       req.destroy();
-      reject(new Error('GitHub API timeout'));
+      reject(new Error('Supabase request timeout'));
     });
-
     req.on('error', reject);
 
     if (payload) req.write(payload);
@@ -73,37 +74,58 @@ function githubRequest(method, pathname, data = null) {
   });
 }
 
-async function fetchCloudVisitors() {
+async function fetchSupabaseVisitors() {
   try {
-    const res = await githubRequest('GET', `/gists/${GIST_ID}`);
-    if (res.status === 200 && res.data && res.data.files && res.data.files['visitors.json']) {
-      const fileData = JSON.parse(res.data.files['visitors.json'].content || '{}');
-      if (Array.isArray(fileData.records)) {
-        return fileData.records;
-      }
+    const res = await supabaseRequest('GET', '/rest/v1/visitors?select=*&order=tgl.desc,id.desc');
+    if (res.status === 200 && Array.isArray(res.data)) {
+      return res.data;
     }
   } catch (err) {
-    console.warn('[Cloud Fetch Warn]:', err.message);
+    console.warn('[Supabase Fetch Warn]:', err.message);
   }
   return null;
 }
 
-async function saveCloudVisitors(records) {
+async function upsertSupabaseVisitors(records) {
   try {
-    const payload = {
-      files: {
-        'visitors.json': {
-          content: JSON.stringify({
-            updatedAt: new Date().toISOString(),
-            records: records
-          }, null, 2)
-        }
-      }
-    };
-    const res = await githubRequest('PATCH', `/gists/${GIST_ID}`, payload);
-    return (res.status === 200);
+    const list = Array.isArray(records) ? records : [records];
+    if (list.length === 0) return true;
+    const rows = list.map(r => ({
+      id: String(r.id),
+      tgl: r.tgl || null,
+      nama: r.nama || null,
+      usaha: r.usaha || null,
+      alamat: r.alamat || null,
+      pegawai: r.pegawai || null,
+      perlu: r.perlu || null,
+      ktp: r.ktp || null,
+      kend: r.kend || null,
+      tag: r.tag || null,
+      jml: r.jml ? String(r.jml) : null,
+      apd: r.apd || null,
+      foto: r.foto || null,
+      status: r.status || 'Menunggu',
+      inAt: r.inAt || null,
+      outAt: r.outAt || null,
+      createdAt: r.createdAt || new Date().toISOString()
+    }));
+
+    const res = await supabaseRequest('POST', '/rest/v1/visitors', rows, {
+      'Prefer': 'resolution=merge-duplicates,return=representation'
+    });
+    return (res.status === 200 || res.status === 201);
   } catch (err) {
-    console.warn('[Cloud Save Warn]:', err.message);
+    console.warn('[Supabase Upsert Warn]:', err.message);
+    return false;
+  }
+}
+
+async function deleteSupabaseVisitor(id) {
+  try {
+    const res = await supabaseRequest('DELETE', `/rest/v1/visitors?id=eq.${encodeURIComponent(id)}`);
+    return (res.status === 200 || res.status === 204);
+  } catch (err) {
+    console.warn('[Supabase Delete Warn]:', err.message);
     return false;
   }
 }
@@ -224,11 +246,11 @@ const server = http.createServer(async (req, res) => {
 
   const pathname = req.url.split('?')[0];
 
-  // API Data Pengunjung: GET & POST /api/data (Sinkronisasi Cloud Real-Time)
+  // API Data Pengunjung: GET & POST /api/data (Sinkronisasi Supabase Real-Time)
   if (pathname === '/api/data') {
     if (req.method === 'GET') {
       try {
-        let records = await fetchCloudVisitors();
+        let records = await fetchSupabaseVisitors();
         let local = [];
         if (fs.existsSync(DATA_FILE)) {
           try {
@@ -239,12 +261,11 @@ const server = http.createServer(async (req, res) => {
         }
 
         if (records !== null) {
-          records = records.filter(r => r && r.id && !PURGED_IDS.has(String(r.id)));
           try {
             fs.writeFileSync(DATA_FILE, JSON.stringify({ success: true, data: records }, null, 2), 'utf-8');
           } catch (e) {}
         } else {
-          records = local.filter(r => r && r.id && !PURGED_IDS.has(String(r.id)));
+          records = local;
         }
 
         res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
@@ -263,46 +284,46 @@ const server = http.createServer(async (req, res) => {
         try {
           const parsed = JSON.parse(body || '{}');
 
-          let currentRecords = await fetchCloudVisitors();
-          if (currentRecords === null) {
-            if (fs.existsSync(DATA_FILE)) {
-              try {
-                const raw = fs.readFileSync(DATA_FILE, 'utf-8');
-                const p = JSON.parse(raw);
-                currentRecords = Array.isArray(p) ? p : (p.data || []);
-              } catch (e) {
-                currentRecords = [];
-              }
-            } else {
-              currentRecords = [];
-            }
-          }
-          currentRecords = (currentRecords || []).filter(r => r && r.id && !PURGED_IDS.has(String(r.id)));
-
           // Aksi Hapus Pengunjung Tunggal
           if (parsed && parsed.action === 'delete' && parsed.deleteId) {
             const delId = String(parsed.deleteId);
-            currentRecords = currentRecords.filter(r => String(r.id) !== delId);
-            await saveCloudVisitors(currentRecords);
+            await deleteSupabaseVisitor(delId);
+            let current = await fetchSupabaseVisitors();
+            if (!current && fs.existsSync(DATA_FILE)) {
+              try {
+                const raw = fs.readFileSync(DATA_FILE, 'utf-8');
+                const p = JSON.parse(raw);
+                current = (Array.isArray(p) ? p : (p.data || [])).filter(r => String(r.id) !== delId);
+              } catch (e) { current = []; }
+            }
             try {
-              fs.writeFileSync(DATA_FILE, JSON.stringify({ success: true, data: currentRecords }, null, 2), 'utf-8');
+              fs.writeFileSync(DATA_FILE, JSON.stringify({ success: true, data: current || [] }, null, 2), 'utf-8');
             } catch (e) {}
             res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-            res.end(JSON.stringify({ success: true, count: currentRecords.length, data: currentRecords }));
+            res.end(JSON.stringify({ success: true, count: (current || []).length, data: current || [] }));
             return;
           }
 
-          const incoming = (Array.isArray(parsed) ? parsed : (parsed.data ? parsed.data : (parsed.id ? [parsed] : [])))
-            .filter(r => r && r.id && !PURGED_IDS.has(String(r.id)));
+          const incoming = Array.isArray(parsed) ? parsed : (parsed.data ? parsed.data : (parsed.id ? [parsed] : []));
+          if (incoming.length > 0) {
+            await upsertSupabaseVisitors(incoming);
+          }
 
-          const merged = mergeVisitors(currentRecords, incoming).filter(r => r && r.id && !PURGED_IDS.has(String(r.id)));
-          await saveCloudVisitors(merged);
+          let updated = await fetchSupabaseVisitors();
+          if (!updated && fs.existsSync(DATA_FILE)) {
+            try {
+              const raw = fs.readFileSync(DATA_FILE, 'utf-8');
+              const p = JSON.parse(raw);
+              updated = Array.isArray(p) ? p : (p.data || []);
+            } catch (e) { updated = []; }
+          }
+
           try {
-            fs.writeFileSync(DATA_FILE, JSON.stringify({ success: true, data: merged }, null, 2), 'utf-8');
+            fs.writeFileSync(DATA_FILE, JSON.stringify({ success: true, data: updated || [] }, null, 2), 'utf-8');
           } catch (e) {}
 
           res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-          res.end(JSON.stringify({ success: true, count: merged.length, data: merged }));
+          res.end(JSON.stringify({ success: true, count: (updated || []).length, data: updated || [] }));
         } catch (err) {
           res.writeHead(400, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: 'Invalid JSON data' }));

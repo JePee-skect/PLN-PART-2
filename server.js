@@ -198,6 +198,18 @@ async function getEdgeTts() {
   }
 }
 
+const PURGED_IDS = new Set([
+  '1794798197275-ouvpwz',
+  '1794795914255-rhpiwj',
+  '1794681120848-ncgvkq',
+  '1794399629857-kzdtcg',
+  '1794399110702-83dw83',
+  '1794384138323',
+  '1794380051648-b3eqd2',
+  '1794374977824-lly8tf',
+  '1794374802339-jvugjs'
+]);
+
 const server = http.createServer(async (req, res) => {
   // CORS Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -227,12 +239,12 @@ const server = http.createServer(async (req, res) => {
         }
 
         if (records !== null) {
-          records = mergeVisitors(records, local);
+          records = records.filter(r => r && r.id && !PURGED_IDS.has(String(r.id)));
           try {
             fs.writeFileSync(DATA_FILE, JSON.stringify({ success: true, data: records }, null, 2), 'utf-8');
           } catch (e) {}
         } else {
-          records = local;
+          records = local.filter(r => r && r.id && !PURGED_IDS.has(String(r.id)));
         }
 
         res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
@@ -250,7 +262,6 @@ const server = http.createServer(async (req, res) => {
       req.on('end', async () => {
         try {
           const parsed = JSON.parse(body || '{}');
-          const incoming = Array.isArray(parsed) ? parsed : (parsed.data ? parsed.data : (parsed.id ? [parsed] : []));
 
           let currentRecords = await fetchCloudVisitors();
           if (currentRecords === null) {
@@ -266,8 +277,25 @@ const server = http.createServer(async (req, res) => {
               currentRecords = [];
             }
           }
+          currentRecords = (currentRecords || []).filter(r => r && r.id && !PURGED_IDS.has(String(r.id)));
 
-          const merged = mergeVisitors(currentRecords, incoming);
+          // Aksi Hapus Pengunjung Tunggal
+          if (parsed && parsed.action === 'delete' && parsed.deleteId) {
+            const delId = String(parsed.deleteId);
+            currentRecords = currentRecords.filter(r => String(r.id) !== delId);
+            await saveCloudVisitors(currentRecords);
+            try {
+              fs.writeFileSync(DATA_FILE, JSON.stringify({ success: true, data: currentRecords }, null, 2), 'utf-8');
+            } catch (e) {}
+            res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+            res.end(JSON.stringify({ success: true, count: currentRecords.length, data: currentRecords }));
+            return;
+          }
+
+          const incoming = (Array.isArray(parsed) ? parsed : (parsed.data ? parsed.data : (parsed.id ? [parsed] : [])))
+            .filter(r => r && r.id && !PURGED_IDS.has(String(r.id)));
+
+          const merged = mergeVisitors(currentRecords, incoming).filter(r => r && r.id && !PURGED_IDS.has(String(r.id)));
           await saveCloudVisitors(merged);
           try {
             fs.writeFileSync(DATA_FILE, JSON.stringify({ success: true, data: merged }, null, 2), 'utf-8');

@@ -18,6 +18,7 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
+    "@supabase/supabase-js": "^2.0.0",
     "msedge-tts": "^2.1.1"
   }
 }

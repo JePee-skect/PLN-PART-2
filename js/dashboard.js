@@ -378,10 +378,12 @@ function showVisitorDetail(id) {
   const isK3 = (typeof adminRole !== 'undefined' && adminRole === 'admink3');
 
   let actionBtns = `<button class="btn ghost" onclick="$('#ov').classList.add('hide')">Tutup</button>`;
-  actionBtns += `<button class="btn ghost" style="color:#e5483b;border-color:rgba(229,72,59,0.5);" onclick="deleteVisitor('${r.id}')" title="Hapus data tamu ini">🗑️ Hapus</button>`;
+  actionBtns += `<button class="btn ghost" style="color:#e5483b;border-color:rgba(229,72,59,0.5);" onclick="deleteVisitor('${r.id}')" title="Hapus data tamu ini"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:4px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>Hapus</button>`;
 
   if (isK3) {
-    const briefActionLabel = isBriefed ? '❌ Batal Briefing' : '✅ Selesai Briefing';
+    const briefActionLabel = isBriefed
+      ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:4px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>Batal Briefing'
+      : '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:4px;"><polyline points="20 6 9 17 4 12"></polyline></svg>Selesai Briefing';
     actionBtns += `<button class="btn ghost" style="border-color:${isBriefed ? '#e5483b' : '#27ae60'};color:${isBriefed ? '#e5483b' : '#27ae60'};" onclick="toggleVisitorBriefing('${r.id}')" title="Ubah status safety briefing (Khusus Admin K3)">${briefActionLabel}</button>`;
   }
 
@@ -508,13 +510,13 @@ function renderTable() {
 
   const getActionBtn = (r) => {
     if (r.status === 'Selesai') {
-      return `<button class="btn sm ghost" data-action="detail" data-id="${r.id}" title="Lihat detail lengkap">🔍 Detail</button>`;
+      return `<button class="btn sm ghost" data-action="detail" data-id="${r.id}" title="Lihat detail lengkap" style="display:inline-flex;align-items:center;gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg><span>Detail</span></button>`;
     }
     const label = r.status === 'Menunggu' ? 'Check In' : 'Check Out';
     return `
       <div style="display:flex;gap:6px;align-items:center;">
         <button class="btn sm" data-action="status" data-id="${r.id}">${label}</button>
-        <button class="btn sm ghost" data-action="detail" data-id="${r.id}" title="Lihat detail lengkap">🔍 Detail</button>
+        <button class="btn sm ghost" data-action="detail" data-id="${r.id}" title="Lihat detail lengkap" style="display:inline-flex;align-items:center;gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg><span>Detail</span></button>
       </div>
     `;
   };
@@ -523,17 +525,20 @@ function renderTable() {
     const isBriefed = (r.briefed === true || r.briefed === 'true' || r.briefed === 1 || String(r.apd || '').includes('[K3_BRIEFED]'));
     const isK3 = (typeof adminRole !== 'undefined' && adminRole === 'admink3');
 
+    const checkIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+    const crossIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+
     if (isBriefed) {
       if (isK3) {
-        return `<button class="btn sm" data-action="toggle-briefing" data-id="${r.id}" style="background:#27ae60;border-color:#219150;color:#fff;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;cursor:pointer;padding:5px 10px;font-size:12px;font-weight:600;" title="Klik untuk membatalkan status briefing (Khusus Admin K3)"><span>✅</span><span>Sudah</span></button>`;
+        return `<button class="btn sm" data-action="toggle-briefing" data-id="${r.id}" style="background:#27ae60;border-color:#219150;color:#fff;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;cursor:pointer;padding:5px 11px;font-size:12px;font-weight:600;" title="Klik untuk membatalkan status briefing (Khusus Admin K3)">${checkIcon}<span>Sudah</span></button>`;
       } else {
-        return `<button class="btn sm" data-action="toggle-briefing" data-id="${r.id}" disabled style="background:#27ae60;border-color:#219150;color:#fff;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;opacity:0.75;cursor:not-allowed;padding:5px 10px;font-size:12px;font-weight:600;" title="Sudah briefing K3 (Hanya Admin K3 yang dapat mengubah)"><span>✅</span><span>Sudah</span></button>`;
+        return `<button class="btn sm" data-action="toggle-briefing" data-id="${r.id}" disabled style="background:#27ae60;border-color:#219150;color:#fff;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;opacity:0.75;cursor:not-allowed;padding:5px 11px;font-size:12px;font-weight:600;" title="Sudah briefing K3 (Hanya Admin K3 yang dapat mengubah)">${checkIcon}<span>Sudah</span></button>`;
       }
     } else {
       if (isK3) {
-        return `<button class="btn sm ghost" data-action="toggle-briefing" data-id="${r.id}" style="color:#e5483b;border-color:rgba(229,72,59,0.6);background:rgba(229,72,59,0.06);white-space:nowrap;display:inline-flex;align-items:center;gap:4px;cursor:pointer;padding:5px 10px;font-size:12px;font-weight:600;" title="Klik untuk menandai sudah briefing K3 (Khusus Admin K3)"><span>❌</span><span>Belum</span></button>`;
+        return `<button class="btn sm ghost" data-action="toggle-briefing" data-id="${r.id}" style="color:#e5483b;border-color:rgba(229,72,59,0.6);background:rgba(229,72,59,0.06);white-space:nowrap;display:inline-flex;align-items:center;gap:5px;cursor:pointer;padding:5px 11px;font-size:12px;font-weight:600;" title="Klik untuk menandai sudah briefing K3 (Khusus Admin K3)">${crossIcon}<span>Belum</span></button>`;
       } else {
-        return `<button class="btn sm ghost" data-action="toggle-briefing" data-id="${r.id}" disabled style="color:#e5483b;border-color:rgba(229,72,59,0.6);background:rgba(229,72,59,0.06);white-space:nowrap;display:inline-flex;align-items:center;gap:4px;opacity:0.75;cursor:not-allowed;padding:5px 10px;font-size:12px;font-weight:600;" title="Belum briefing K3 (Hanya Admin K3 yang dapat mengubah)"><span>❌</span><span>Belum</span></button>`;
+        return `<button class="btn sm ghost" data-action="toggle-briefing" data-id="${r.id}" disabled style="color:#e5483b;border-color:rgba(229,72,59,0.6);background:rgba(229,72,59,0.06);white-space:nowrap;display:inline-flex;align-items:center;gap:5px;opacity:0.75;cursor:not-allowed;padding:5px 11px;font-size:12px;font-weight:600;" title="Belum briefing K3 (Hanya Admin K3 yang dapat mengubah)">${crossIcon}<span>Belum</span></button>`;
       }
     }
   };

@@ -89,10 +89,11 @@ async function fetchVisitorsFromServer() {
         return tB - tA;
       });
       store.set('vms-data', data);
+      if (typeof updateDbStatus === 'function') updateDbStatus(true, data.length);
       if (typeof renderTable === 'function') renderTable();
     }
   } catch (e) {
-    // Abaikan error koneksi
+    if (typeof updateDbStatus === 'function') updateDbStatus(false, (data || []).length);
   }
 }
 

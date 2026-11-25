@@ -48,8 +48,9 @@ function route() {
   const vTerima = $('#v-terima');
   if (vTerima) vTerima.classList.add('hide');
 
-  if (page === 'dashboard' && typeof renderTable === 'function') {
-    renderTable();
+  if (page === 'dashboard') {
+    if (typeof fetchVisitorsFromServer === 'function') fetchVisitorsFromServer();
+    if (typeof renderTable === 'function') renderTable();
   }
 
   if (typeof botHello === 'function') {

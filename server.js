@@ -78,7 +78,13 @@ async function fetchSupabaseVisitors() {
   try {
     const res = await supabaseRequest('GET', '/rest/v1/visitors?select=*&order=tgl.desc,id.desc');
     if (res.status === 200 && Array.isArray(res.data)) {
-      return res.data;
+      return res.data.map(r => {
+        const isBriefed = (r.briefed === true || r.briefed === 'true' || r.briefed === 1 || String(r.apd || '').includes('[K3_BRIEFED]'));
+        return {
+          ...r,
+          briefed: isBriefed
+        };
+      });
     }
   } catch (err) {
     console.warn('[Supabase Fetch Warn]:', err.message);
@@ -90,26 +96,37 @@ async function upsertSupabaseVisitors(records) {
   try {
     const list = Array.isArray(records) ? records : [records];
     if (list.length === 0) return true;
-    const rows = list.map(r => ({
-      id: String(r.id),
-      tgl: r.tgl || null,
-      nama: r.nama || null,
-      usaha: r.usaha || null,
-      alamat: r.alamat || null,
-      pegawai: r.pegawai || null,
-      perlu: r.perlu || null,
-      ktp: r.ktp || null,
-      kend: r.kend || null,
-      tag: r.tag || null,
-      jml: r.jml ? String(r.jml) : null,
-      apd: r.apd || null,
-      foto: r.foto || null,
-      status: r.status || 'Menunggu',
-      briefed: (r.briefed === true || r.briefed === 'true' || r.briefed === 1),
-      inAt: r.inAt || null,
-      outAt: r.outAt || null,
-      createdAt: r.createdAt || new Date().toISOString()
-    }));
+    const rows = list.map(r => {
+      const isBriefed = (r.briefed === true || r.briefed === 'true' || r.briefed === 1 || String(r.apd || '').includes('[K3_BRIEFED]'));
+
+      // Sinkronkan tag [K3_BRIEFED] ke kolom apd sebagai jaminan cloud persistence
+      let apdStr = Array.isArray(r.apd) ? r.apd.join(', ') : String(r.apd || '');
+      apdStr = apdStr.replace(/\|?\s*\[K3_BRIEFED\]/gi, '').trim();
+      if (isBriefed) {
+        apdStr = apdStr ? `${apdStr} | [K3_BRIEFED]` : '[K3_BRIEFED]';
+      }
+
+      return {
+        id: String(r.id),
+        tgl: r.tgl || null,
+        nama: r.nama || null,
+        usaha: r.usaha || null,
+        alamat: r.alamat || null,
+        pegawai: r.pegawai || null,
+        perlu: r.perlu || null,
+        ktp: r.ktp || null,
+        kend: r.kend || null,
+        tag: r.tag || null,
+        jml: r.jml ? String(r.jml) : null,
+        apd: apdStr || null,
+        foto: r.foto || null,
+        status: r.status || 'Menunggu',
+        briefed: isBriefed,
+        inAt: r.inAt || null,
+        outAt: r.outAt || null,
+        createdAt: r.createdAt || new Date().toISOString()
+      };
+    });
 
     let res = await supabaseRequest('POST', '/rest/v1/visitors', rows, {
       'Prefer': 'resolution=merge-duplicates,return=representation'

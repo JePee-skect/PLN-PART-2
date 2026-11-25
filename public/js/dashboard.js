@@ -82,12 +82,27 @@ function initDashboard() {
         const r = data.find((x) => String(x.id) === String(id));
         if (!r) return;
 
-        const currentBriefed = (r.briefed === true || r.briefed === 'true' || r.briefed === 1);
+        const currentBriefed = (r.briefed === true || r.briefed === 'true' || r.briefed === 1 || String(r.apd || '').includes('[K3_BRIEFED]'));
         r.briefed = !currentBriefed;
 
-        store.set('vms-data', data);
-        if (typeof syncDataToServer === 'function') syncDataToServer(r);
+        // Update tag APD untuk redundansi cloud database
+        let apdStr = Array.isArray(r.apd) ? r.apd.join(', ') : String(r.apd || '');
+        apdStr = apdStr.replace(/\|?\s*\[K3_BRIEFED\]/gi, '').trim();
+        if (r.briefed) {
+          apdStr = apdStr ? `${apdStr} | [K3_BRIEFED]` : '[K3_BRIEFED]';
+        }
+        r.apd = apdStr;
+
+        // Simpan langsung ke cache lokal & storage persistent
+        const briefedMap = (typeof store !== 'undefined' ? store.get('vms-briefed-ids', {}) : {}) || {};
+        briefedMap[String(r.id)] = r.briefed;
+        if (typeof store !== 'undefined') {
+          store.set('vms-briefed-ids', briefedMap);
+          store.set('vms-data', data);
+        }
+
         renderTable();
+        if (typeof syncDataToServer === 'function') syncDataToServer(r);
 
         const msg = r.briefed
           ? `Tamu ${r.nama} telah selesai diberikan safety briefing K3.`
@@ -172,7 +187,7 @@ function exportToExcel() {
     r.usaha || '',
     r.alamat || '',
     r.pegawai || '',
-    Array.isArray(r.apd) ? r.apd.join(', ') : (r.apd || ''),
+    Array.isArray(r.apd) ? r.apd.join(', ') : String(r.apd || '').replace(/\|?\s*\[K3_BRIEFED\]/gi, '').trim(),
     r.perlu || '',
     r.kend || '',
     String(r.tag || ''),
@@ -293,10 +308,13 @@ function downloadExcelXmlFallback(headers, rows, fileName) {
 
 function formatApdBadges(apd) {
   if (!apd) return '<span class="apd-tag none">Tidak Ada</span>';
-  if (typeof apd === 'string' && apd.toLowerCase().includes('tidak')) {
+  let rawApd = Array.isArray(apd) ? apd.join(', ') : String(apd);
+  rawApd = rawApd.replace(/\|?\s*\[K3_BRIEFED\]/gi, '').trim();
+  if (!rawApd) return '<span class="apd-tag none">Tidak Ada</span>';
+  if (rawApd.toLowerCase().includes('tidak')) {
     return '<span class="apd-tag none">⚠️ Tidak memakai APD</span>';
   }
-  const list = Array.isArray(apd) ? apd : String(apd).split(',').map(s => s.trim()).filter(Boolean);
+  const list = rawApd.split(',').map(s => s.trim()).filter(Boolean);
   if (list.length === 0) return '<span class="apd-tag none">Tidak Ada</span>';
   return list.map(item => `<span class="apd-tag">${esc(item)}</span>`).join(' ');
 }
@@ -386,12 +404,26 @@ function toggleVisitorBriefing(id) {
   }
   const r = data.find((x) => String(x.id) === String(id));
   if (!r) return;
-  const currentBriefed = (r.briefed === true || r.briefed === 'true' || r.briefed === 1);
+  const currentBriefed = (r.briefed === true || r.briefed === 'true' || r.briefed === 1 || String(r.apd || '').includes('[K3_BRIEFED]'));
   r.briefed = !currentBriefed;
-  store.set('vms-data', data);
-  if (typeof syncDataToServer === 'function') syncDataToServer(r);
+
+  let apdStr = Array.isArray(r.apd) ? r.apd.join(', ') : String(r.apd || '');
+  apdStr = apdStr.replace(/\|?\s*\[K3_BRIEFED\]/gi, '').trim();
+  if (r.briefed) {
+    apdStr = apdStr ? `${apdStr} | [K3_BRIEFED]` : '[K3_BRIEFED]';
+  }
+  r.apd = apdStr;
+
+  const briefedMap = (typeof store !== 'undefined' ? store.get('vms-briefed-ids', {}) : {}) || {};
+  briefedMap[String(r.id)] = r.briefed;
+  if (typeof store !== 'undefined') {
+    store.set('vms-briefed-ids', briefedMap);
+    store.set('vms-data', data);
+  }
+
   renderTable();
   showVisitorDetail(id);
+  if (typeof syncDataToServer === 'function') syncDataToServer(r);
   const msg = r.briefed
     ? `Tamu ${r.nama} telah selesai diberikan safety briefing K3.`
     : `Status safety briefing untuk ${r.nama} diubah menjadi belum briefing.`;
@@ -488,7 +520,7 @@ function renderTable() {
   };
 
   const getBriefingBtn = (r) => {
-    const isBriefed = (r.briefed === true || r.briefed === 'true' || r.briefed === 1);
+    const isBriefed = (r.briefed === true || r.briefed === 'true' || r.briefed === 1 || String(r.apd || '').includes('[K3_BRIEFED]'));
     const isK3 = (typeof adminRole !== 'undefined' && adminRole === 'admink3');
 
     if (isBriefed) {

@@ -94,6 +94,39 @@ let adminName = (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem(
 const DEFAULT_EASYVOICE_KEY = 'ev_a8dd782ce24e59571a03d3cbda4039cd73c68d9a0013647a9d295a6e7cc87e16';
 const DEFAULT_EASYVOICE_VOICE = 'af_heart';
 
+// Fungsi Penggabungan Data Server dan Status Briefing Lokal / APD Marker
+function mergeVisitorsWithLocalState(serverList) {
+  if (!Array.isArray(serverList)) return data || [];
+  const localMap = new Map((data || []).map(r => [String(r.id), r]));
+  const briefedMap = (typeof store !== 'undefined' ? store.get('vms-briefed-ids', {}) : {}) || {};
+
+  return serverList
+    .filter(r => r && r.id && !PURGED_DUMMY_IDS.has(String(r.id)))
+    .map(serverRow => {
+      const id = String(serverRow.id);
+      const localRow = localMap.get(id);
+
+      const hasServerExplicit = (serverRow.briefed === true || serverRow.briefed === 'true' || serverRow.briefed === 1);
+      const hasApdTag = String(serverRow.apd || '').includes('[K3_BRIEFED]');
+      const hasStored = !!briefedMap[id];
+      const hasLocal = localRow ? (localRow.briefed === true || localRow.briefed === 'true' || localRow.briefed === 1) : false;
+
+      let isBriefed = false;
+      if (serverRow.briefed !== undefined && serverRow.briefed !== null) {
+        isBriefed = hasServerExplicit || hasApdTag;
+      } else {
+        isBriefed = hasApdTag || hasStored || hasLocal;
+      }
+
+      briefedMap[id] = isBriefed;
+
+      return {
+        ...serverRow,
+        briefed: isBriefed
+      };
+    });
+}
+
 // Sinkronisasi Data Pengunjung Real-time Lintas Perangkat (Cloud Database)
 async function fetchVisitorsFromServer() {
   if (!location.protocol.startsWith('http')) return;
@@ -102,7 +135,7 @@ async function fetchVisitorsFromServer() {
     if (!res.ok) return;
     const json = await res.json();
     if (json && Array.isArray(json.data)) {
-      data = json.data.filter(r => r && r.id && !PURGED_DUMMY_IDS.has(String(r.id)));
+      data = mergeVisitorsWithLocalState(json.data);
       store.set('vms-data', data);
       if (typeof updateDbStatus === 'function') updateDbStatus(true, data.length);
       if (typeof renderTable === 'function') renderTable();
@@ -123,7 +156,7 @@ async function syncDataToServer(payload = data) {
     if (!res.ok) return;
     const json = await res.json();
     if (json && Array.isArray(json.data)) {
-      data = json.data;
+      data = mergeVisitorsWithLocalState(json.data);
       store.set('vms-data', data);
       if (typeof renderTable === 'function') renderTable();
     }

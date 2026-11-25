@@ -120,9 +120,9 @@ async function upsertSupabaseVisitors(records) {
         jml: r.jml ? String(r.jml) : null,
         apd: apdStr || null,
         foto: r.foto || null,
-        status: r.status || 'Menunggu',
+        status: r.status || 'Check In',
         briefed: isBriefed,
-        inAt: r.inAt || null,
+        inAt: r.inAt || (r.status === 'Selesai' ? null : (r.tgl || new Date().toISOString().slice(0, 10))),
         outAt: r.outAt || null,
         createdAt: r.createdAt || new Date().toISOString()
       };

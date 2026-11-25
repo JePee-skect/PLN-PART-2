@@ -362,12 +362,15 @@ function handleSubmit() {
 
   showConfirm(apd, noApd, () => {
     const uniqueId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const today = ymd();
     const rec = {
       id:        uniqueId,
-      tgl:       ymd(),
+      tgl:       today,
       apd:       noApd ? 'Tidak memakai APD' : apd.join(', '),
       foto:      photo,
-      status:    'Menunggu',
+      status:    'Check In',
+      inAt:      today,
+      briefed:   false,
       createdAt: new Date().toISOString()
     };
 

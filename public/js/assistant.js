@@ -68,13 +68,13 @@ const GUIDE_EN = [
 ];
 
 const ADMIN_HELP = {
-  how: 'Di menu Dashboard, tekan tombol Check In saat tamu tiba di lokasi. Saat tamu hendak pulang, tekan tombol Check Out pada baris tamu tersebut.',
+  how: 'Tamu yang selesai mengisi formulir pendaftaran otomatis berstatus Check In. Tekan tombol Check Out pada baris tamu saat mereka selesai berkunjung.',
   exp: 'Tekan tombol Export to Excel. File Excel akan langsung terunduh otomatis ke komputer Anda, dan nomor KTP sudah rapi dalam format teks 16 digit.',
   fil: 'Gunakan filter Tanggal Awal dan Tanggal Akhir untuk menentukan rentang waktu, atau ketik nama tamu pada kolom pencarian.'
 };
 
 const ADMIN_HELP_EN = {
-  how: 'On the Dashboard, click Check In when a guest arrives at the facility. When they are ready to depart, click Check Out on their row.',
+  how: 'Visitors who submit registration are automatically checked in. Click Check Out on their row when they finish their visit and depart.',
   exp: 'Click the Export to Excel button. The spreadsheet file will automatically download to your device with clean 16-digit ID numbers.',
   fil: 'Use the Start Date and End Date filters to choose a date range, or type the visitor\'s name in the search box.'
 };

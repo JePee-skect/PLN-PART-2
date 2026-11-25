@@ -114,7 +114,10 @@ function initDashboard() {
       const r = data.find((x) => String(x.id) === String(id));
       if (!r) return;
 
-      if (r.status === 'Menunggu') {
+      if (r.status === 'Check In') {
+        r.status = 'Selesai';
+        r.outAt  = ymd();
+      } else if (r.status === 'Menunggu') {
         r.status = 'Check In';
         r.inAt   = ymd();
       } else {
@@ -126,9 +129,9 @@ function initDashboard() {
       if (typeof syncDataToServer === 'function') syncDataToServer(r);
       renderTable();
 
-      const msg = (r.status === 'Check In')
-        ? `${r.nama} berhasil check in. Silakan masuk.`
-        : `${r.nama} sudah check out. Terima kasih atas kunjungannya.`;
+      const msg = (r.status === 'Selesai')
+        ? `${r.nama} sudah check out. Terima kasih atas kunjungannya.`
+        : `${r.nama} berhasil check in. Silakan masuk.`;
       say(msg);
     };
   }
@@ -387,10 +390,10 @@ function showVisitorDetail(id) {
     actionBtns += `<button class="btn ghost" style="border-color:${isBriefed ? '#e5483b' : '#27ae60'};color:${isBriefed ? '#e5483b' : '#27ae60'};" onclick="toggleVisitorBriefing('${r.id}')" title="Ubah status safety briefing (Khusus Admin K3)">${briefActionLabel}</button>`;
   }
 
-  if (r.status === 'Menunggu') {
-    actionBtns += `<button class="btn" onclick="updateVisitorStatus('${r.id}', 'Check In')">Check In Sekarang</button>`;
-  } else if (r.status === 'Check In') {
+  if (r.status === 'Check In') {
     actionBtns += `<button class="btn" onclick="updateVisitorStatus('${r.id}', 'Selesai')">Check Out Sekarang</button>`;
+  } else if (r.status === 'Menunggu') {
+    actionBtns += `<button class="btn" onclick="updateVisitorStatus('${r.id}', 'Check In')">Check In Sekarang</button>`;
   }
 
   if (typeof openDialog === 'function') {

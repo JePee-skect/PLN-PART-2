@@ -9,7 +9,7 @@ let currentUtterance = null;
 let userVoiceIndex = store.get('vms-voice-idx', -1);
 let userVoiceRate  = parseFloat(store.get('vms-voice-rate', 1.0)) || 1.0;
 
-let voiceOn        = true;
+let voiceOn        = (typeof store !== 'undefined' ? store.get('vms-voice-on', true) : true);
 let speaking       = false;
 let audioUnlocked  = false;
 let pendingSpeech  = null;
@@ -186,12 +186,23 @@ function initVoice() {
   // Tombol Toggle Suara Aktif/Mati
   const btnSpk = $('#spk');
   if (btnSpk) {
-    btnSpk.onclick = () => {
+    const updateSpkUI = () => {
+      btnSpk.innerHTML = voiceOn
+        ? '<span style="font-size:12px;line-height:1;">🔊</span><span>Aktif</span>'
+        : '<span style="font-size:12px;line-height:1;">🔇</span><span>Mati</span>';
+      btnSpk.classList.toggle('muted', !voiceOn);
+      btnSpk.title = voiceOn ? 'Klik untuk mematikan suara asisten' : 'Klik untuk menyalakan suara asisten';
+    };
+    updateSpkUI();
+
+    btnSpk.onclick = (e) => {
+      e.stopPropagation();
       voiceOn = !voiceOn;
+      if (typeof store !== 'undefined') store.set('vms-voice-on', voiceOn);
       if (!voiceOn) {
         stopAllAudio();
       }
-      btnSpk.textContent = voiceOn ? '🔊 Aktif' : '🔇 Mati';
+      updateSpkUI();
     };
   }
 

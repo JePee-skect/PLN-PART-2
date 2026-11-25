@@ -141,6 +141,18 @@ function mergeVisitors(existing, incoming) {
   });
 }
 
+const PURGED_IDS = new Set([
+  '1794798197275-ouvpwz',
+  '1794795914255-rhpiwj',
+  '1794681120848-ncgvkq',
+  '1794399629857-kzdtcg',
+  '1794399110702-83dw83',
+  '1794384138323',
+  '1794380051648-b3eqd2',
+  '1794374977824-lly8tf',
+  '1794374802339-jvugjs'
+]);
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -156,20 +168,17 @@ module.exports = async (req, res) => {
   if (req.method === 'GET') {
     try {
       let records = await fetchCloudVisitors();
-      const local = readLocalCache();
-
       if (records !== null) {
-        // Gabungkan dengan cache lokal untuk memastikan tidak ada data lokal yang hilang
-        records = mergeVisitors(records, local);
+        records = records.filter(r => r && r.id && !PURGED_IDS.has(String(r.id)));
         writeLocalCache(records);
       } else {
-        records = local;
+        records = readLocalCache().filter(r => r && r.id && !PURGED_IDS.has(String(r.id)));
       }
 
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
       res.end(JSON.stringify({ success: true, count: records.length, data: records }));
     } catch (e) {
-      const fallback = readLocalCache();
+      const fallback = readLocalCache().filter(r => r && r.id && !PURGED_IDS.has(String(r.id)));
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
       res.end(JSON.stringify({ success: true, count: fallback.length, data: fallback }));
     }
@@ -180,7 +189,7 @@ module.exports = async (req, res) => {
   if (req.method === 'POST') {
     let payload = req.body;
     if (typeof payload === 'string') {
-      try { payload = JSON.parse(payload); } catch (e) { payload = []; }
+      try { payload = JSON.parse(payload); } catch (e) { payload = {}; }
     } else if (!payload && !req.readableEnded) {
       let raw = '';
       await new Promise(r => {
@@ -188,20 +197,33 @@ module.exports = async (req, res) => {
         req.on('end', r);
         setTimeout(r, 1000);
       });
-      try { payload = JSON.parse(raw || '[]'); } catch (e) { payload = []; }
+      try { payload = JSON.parse(raw || '{}'); } catch (e) { payload = {}; }
     }
 
     try {
-      const incoming = Array.isArray(payload) ? payload : (payload.data ? payload.data : (payload.id ? [payload] : []));
-      
       // Ambil data cloud saat ini
       let currentRecords = await fetchCloudVisitors();
       if (currentRecords === null) {
         currentRecords = readLocalCache();
       }
+      currentRecords = (currentRecords || []).filter(r => r && r.id && !PURGED_IDS.has(String(r.id)));
+
+      // Aksi Hapus Pengunjung Tunggal
+      if (payload && payload.action === 'delete' && payload.deleteId) {
+        const delId = String(payload.deleteId);
+        currentRecords = currentRecords.filter(r => String(r.id) !== delId);
+        await saveCloudVisitors(currentRecords);
+        writeLocalCache(currentRecords);
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ success: true, count: currentRecords.length, data: currentRecords }));
+        return;
+      }
+
+      const incoming = (Array.isArray(payload) ? payload : (payload.data ? payload.data : (payload.id ? [payload] : [])))
+        .filter(r => r && r.id && !PURGED_IDS.has(String(r.id)));
 
       // Gabungkan data
-      const merged = mergeVisitors(currentRecords, incoming);
+      const merged = mergeVisitors(currentRecords, incoming).filter(r => r && r.id && !PURGED_IDS.has(String(r.id)));
 
       // Simpan ke cloud & cache lokal
       await saveCloudVisitors(merged);

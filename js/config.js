@@ -40,8 +40,21 @@ try {
   isAdminSession = (sessionStorage.getItem('vms-admin-auth') === 'true');
 } catch (e) {}
 
+const PURGED_DUMMY_IDS = new Set([
+  '1794798197275-ouvpwz',
+  '1794795914255-rhpiwj',
+  '1794681120848-ncgvkq',
+  '1794399629857-kzdtcg',
+  '1794399110702-83dw83',
+  '1794384138323',
+  '1794380051648-b3eqd2',
+  '1794374977824-lly8tf',
+  '1794374802339-jvugjs'
+]);
+
 let role  = isAdminSession ? 'admin' : 'user';
-let data  = store.get('vms-data', []);
+let data  = (store.get('vms-data', []) || []).filter(r => r && r.id && !PURGED_DUMMY_IDS.has(String(r.id)));
+store.set('vms-data', data);
 let photo = '';
 
 const ROLE_PAGES = ['dashboard', 'registrasi'];
@@ -66,28 +79,7 @@ async function fetchVisitorsFromServer() {
     if (!res.ok) return;
     const json = await res.json();
     if (json && Array.isArray(json.data)) {
-      const map = new Map();
-      (data || []).forEach(r => {
-        if (r && (r.id || r.nama)) {
-          const k = String(r.id || `${r.tgl}_${r.ktp}_${r.nama}`);
-          map.set(k, r);
-        }
-      });
-      json.data.forEach(r => {
-        if (r && (r.id || r.nama)) {
-          const k = String(r.id || `${r.tgl}_${r.ktp}_${r.nama}`);
-          if (map.has(k)) {
-            map.set(k, { ...map.get(k), ...r });
-          } else {
-            map.set(k, r);
-          }
-        }
-      });
-      data = Array.from(map.values()).sort((a, b) => {
-        const tA = Number(String(a.id || '').split('-')[0]) || (a.createdAt ? new Date(a.createdAt).getTime() : 0);
-        const tB = Number(String(b.id || '').split('-')[0]) || (b.createdAt ? new Date(b.createdAt).getTime() : 0);
-        return tB - tA;
-      });
+      data = json.data.filter(r => r && r.id && !PURGED_DUMMY_IDS.has(String(r.id)));
       store.set('vms-data', data);
       if (typeof updateDbStatus === 'function') updateDbStatus(true, data.length);
       if (typeof renderTable === 'function') renderTable();

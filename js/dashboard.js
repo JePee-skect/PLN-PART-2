@@ -341,6 +341,7 @@ function showVisitorDetail(id) {
   `;
 
   let actionBtns = `<button class="btn ghost" onclick="$('#ov').classList.add('hide')">Tutup</button>`;
+  actionBtns += `<button class="btn ghost" style="color:#e5483b;border-color:rgba(229,72,59,0.5);" onclick="deleteVisitor('${r.id}')" title="Hapus data tamu ini">🗑️ Hapus</button>`;
   if (r.status === 'Menunggu') {
     actionBtns += `<button class="btn" onclick="updateVisitorStatus('${r.id}', 'Check In')">Check In Sekarang</button>`;
   } else if (r.status === 'Check In') {
@@ -349,6 +350,26 @@ function showVisitorDetail(id) {
 
   if (typeof openDialog === 'function') {
     openDialog('Rincian Lengkap Data Tamu PLN', detailHtml, actionBtns);
+  }
+}
+
+function deleteVisitor(id) {
+  const r = data.find((x) => String(x.id) === String(id));
+  const nama = r ? r.nama : 'tamu ini';
+  if (!confirm(`Apakah Anda yakin ingin menghapus data ${nama}?`)) return;
+
+  data = data.filter((x) => String(x.id) !== String(id));
+  store.set('vms-data', data);
+  if ($('#ov')) $('#ov').classList.add('hide');
+  renderTable();
+
+  // Sinkronkan penghapusan ke cloud server
+  if (location.protocol.startsWith('http')) {
+    fetch('/api/data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', deleteId: String(id) })
+    }).catch(() => {});
   }
 }
 
@@ -369,6 +390,7 @@ function updateVisitorStatus(id, newStatus) {
 
 window.showVisitorDetail = showVisitorDetail;
 window.updateVisitorStatus = updateVisitorStatus;
+window.deleteVisitor = deleteVisitor;
 
 function updateDbStatus(isConnected, count = (data || []).length) {
   const badge = $('#db-status-badge');

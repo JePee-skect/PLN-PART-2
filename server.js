@@ -230,7 +230,8 @@ function matchesVisitorIdentity(target, source) {
   if (!target || !source) return false;
   const k1 = normalizeKtp(target.ktp);
   const k2 = normalizeKtp(source.ktp);
-  if (k1 && k2 && k1 === k2) return true;
+  const ktpMatch = !!(k1 && k2 && k1 === k2);
+  if (ktpMatch) return true;
 
   const u1 = normalizeCompany(target.usaha);
   const u2 = normalizeCompany(source.usaha);
@@ -245,20 +246,19 @@ function matchesVisitorIdentity(target, source) {
     const n1Ph = n1.replace(/y/g, 'i');
     const n2Ph = n2.replace(/y/g, 'i');
     if (n1 === n2 || n1Ph === n2Ph) return true;
-    // Toleransi spasi: "jepe cuy" vs "jepecuy"
     const n1Flat = n1Ph.replace(/\s+/g, '');
     const n2Flat = n2Ph.replace(/\s+/g, '');
     if (n1Flat && n2Flat && n1Flat === n2Flat) return true;
-    // Toleransi nama tidak lengkap: "jepe" cocok dengan "jepecuy" (prefix >= 3 karakter)
-    if (n1Flat && n2Flat && Math.min(n1Flat.length, n2Flat.length) >= 3) {
-      const shorter = n1Flat.length <= n2Flat.length ? n1Flat : n2Flat;
-      const longer  = n1Flat.length <= n2Flat.length ? n2Flat : n1Flat;
-      if (longer.startsWith(shorter)) return true;
-    }
     const w1 = n1Ph.split(' ').filter(Boolean);
     const w2 = n2Ph.split(' ').filter(Boolean);
     if (Math.min(w1.length, w2.length) >= 2 && (n1Ph.startsWith(n2Ph + ' ') || n2Ph.startsWith(n1Ph + ' '))) {
       return true;
+    }
+    // Prefix nama depan/panggilan: wajib KTP sama jika nama hanya cocok sebagian
+    if (n1Flat && n2Flat && Math.min(n1Flat.length, n2Flat.length) >= 3) {
+      const shorter = n1Flat.length <= n2Flat.length ? n1Flat : n2Flat;
+      const longer  = n1Flat.length <= n2Flat.length ? n2Flat : n1Flat;
+      if (longer.startsWith(shorter) && shorter.length < longer.length) return ktpMatch;
     }
   }
   return false;

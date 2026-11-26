@@ -137,9 +137,8 @@ function matchesVisitorIdentity(target, source) {
   // 1. Cek No. KTP
   const k1 = normalizeKtp(target.ktp);
   const k2 = normalizeKtp(source.ktp);
-  if (k1 && k2 && k1 === k2) {
-    return true;
-  }
+  const ktpMatch = !!(k1 && k2 && k1 === k2);
+  if (ktpMatch) return true;
 
   // 2. Cek Nama PT / Perusahaan
   const u1 = normalizeCompany(target.usaha);
@@ -151,33 +150,36 @@ function matchesVisitorIdentity(target, source) {
     }
   }
 
-  // 3. Cek Nama Tamu (toleransi variasi ejaan y/i seperti Rizky <-> Rizki & prefix multi-kata)
+  // 3. Cek Nama Tamu
   const n1 = normalizePersonName(target.nama);
   const n2 = normalizePersonName(source.nama);
   if (n1 && n2) {
     const n1Ph = n1.replace(/y/g, 'i');
     const n2Ph = n2.replace(/y/g, 'i');
-    if (n1 === n2 || n1Ph === n2Ph) {
-      return true;
-    }
-    // Toleransi spasi: "jepe cuy" vs "jepecuy"
+
+    // 3a. Nama persis sama (dengan toleransi y/i)
+    if (n1 === n2 || n1Ph === n2Ph) return true;
+
+    // 3b. Toleransi spasi: "jepe cuy" == "jepecuy"
     const n1Flat = n1Ph.replace(/\s+/g, '');
     const n2Flat = n2Ph.replace(/\s+/g, '');
-    if (n1Flat && n2Flat && n1Flat === n2Flat) {
-      return true;
-    }
-    // Toleransi nama tidak lengkap: "jepe" cocok dengan "jepecuy" (prefix >= 3 karakter)
-    if (n1Flat && n2Flat && Math.min(n1Flat.length, n2Flat.length) >= 3) {
-      const shorter = n1Flat.length <= n2Flat.length ? n1Flat : n2Flat;
-      const longer  = n1Flat.length <= n2Flat.length ? n2Flat : n1Flat;
-      if (longer.startsWith(shorter)) {
-        return true;
-      }
-    }
+    if (n1Flat && n2Flat && n1Flat === n2Flat) return true;
+
+    // 3c. Prefix multi-kata: "Ahmad Budi" vs "Ahmad Budi Santoso" (>= 2 kata lengkap)
     const w1 = n1Ph.split(' ').filter(Boolean);
     const w2 = n2Ph.split(' ').filter(Boolean);
     if (Math.min(w1.length, w2.length) >= 2 && (n1Ph.startsWith(n2Ph + ' ') || n2Ph.startsWith(n1Ph + ' '))) {
       return true;
+    }
+
+    // 3d. Prefix nama depan/panggilan (1 kata / potongan nama): "jepe" vs "jepecuy", "budi" vs "budi santoso"
+    //     Karena nama depan/panggilan bisa ambigu, wajib KTP sama untuk tervalidasi otomatis
+    if (n1Flat && n2Flat && Math.min(n1Flat.length, n2Flat.length) >= 3) {
+      const shorter = n1Flat.length <= n2Flat.length ? n1Flat : n2Flat;
+      const longer  = n1Flat.length <= n2Flat.length ? n2Flat : n1Flat;
+      if (longer.startsWith(shorter) && shorter.length < longer.length) {
+        return ktpMatch;
+      }
     }
   }
 

@@ -360,7 +360,16 @@ function handleSubmit() {
     return;
   }
 
-  showConfirm(apd, noApd, () => {
+  const previewRec = {
+    nama:  $('#nama')  ? $('#nama').value.trim()  : '',
+    usaha: $('#usaha') ? $('#usaha').value.trim() : '',
+    ktp:   $('#ktp')   ? $('#ktp').value.trim()   : ''
+  };
+  const isAutoBriefedPreview = (typeof isVisitorPreviouslyBriefed === 'function')
+    ? isVisitorPreviouslyBriefed(previewRec, data)
+    : false;
+
+  showConfirm(apd, noApd, isAutoBriefedPreview, () => {
     const uniqueId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const today = ymd();
     const rec = {
@@ -378,9 +387,32 @@ function handleSubmit() {
       rec[id] = $('#' + id) ? $('#' + id).value.trim() : '';
     });
 
+    // Validasi otomatis Briefing K3 (berdasarkan kesamaan Nama, Nama PT, atau No. KTP)
+    const isAutoBriefed = (typeof isVisitorPreviouslyBriefed === 'function')
+      ? isVisitorPreviouslyBriefed(rec, data)
+      : false;
+
+    if (isAutoBriefed) {
+      rec.briefed = true;
+      let apdStr = Array.isArray(rec.apd) ? rec.apd.join(', ') : String(rec.apd || '');
+      apdStr = apdStr.replace(/\|?\s*\[K3_BRIEFED\]/gi, '').trim();
+      rec.apd = apdStr ? `${apdStr} | [K3_BRIEFED]` : '[K3_BRIEFED]';
+
+      const briefedMap = (typeof store !== 'undefined' ? store.get('vms-briefed-ids', {}) : {}) || {};
+      briefedMap[String(rec.id)] = true;
+      if (typeof store !== 'undefined') {
+        store.set('vms-briefed-ids', briefedMap);
+      }
+      if (typeof registerBriefedVisitor === 'function') {
+        registerBriefedVisitor(rec);
+      }
+    } else {
+      rec.briefed = false;
+    }
+
     data.unshift(rec);
     store.set('vms-data', data);
-    if (typeof syncDataToServer === 'function') syncDataToServer(rec);
+    if (typeof syncDataToServer === 'function') syncDataToServer({ ...rec, _isNewRegistration: true });
 
     $('#f').reset();
     photo = '';
@@ -397,11 +429,16 @@ function handleSubmit() {
           ? ` Recommended PPE you are not wearing: ${lacking.join(', ')}. Please obtain them at the security post.`
           : ` APD yang belum Anda kenakan: ${lacking.join(', ')}. Harap ambil di petugas keamanan.`)
       : '';
+    const briefingNote = isAutoBriefed
+      ? (isEn
+          ? ' Your K3 safety briefing status is already verified automatically based on your previous record.'
+          : ' Status safety briefing K3 Anda telah tervalidasi otomatis karena sudah pernah mengikuti briefing sebelumnya.')
+      : '';
 
     say(isEn
-      ? `Registration successful. Thank you, ${rec.nama}. Please proceed to the security post to pick up your visitor badge.${apdNote}`
-      : `Registrasi berhasil. Terima kasih, ${rec.nama}. Silakan menuju petugas keamanan untuk mengambil kartu name tag.${apdNote}`);
-    showDone(rec.nama);
+      ? `Registration successful. Thank you, ${rec.nama}. Please proceed to the security post to pick up your visitor badge.${apdNote}${briefingNote}`
+      : `Registrasi berhasil. Terima kasih, ${rec.nama}. Silakan menuju petugas keamanan untuk mengambil kartu name tag.${apdNote}${briefingNote}`);
+    showDone(rec.nama, isAutoBriefed);
   });
 }
 
@@ -412,7 +449,11 @@ function openDialog(title, bodyHtml, actionsHtml) {
   $('#ov').classList.remove('hide');
 }
 
-function showConfirm(apd, noApd, onOk) {
+function showConfirm(apd, noApd, isAutoBriefed, onOk) {
+  if (typeof isAutoBriefed === 'function') {
+    onOk = isAutoBriefed;
+    isAutoBriefed = false;
+  }
   const isEn = (typeof currentLang !== 'undefined' && currentLang === 'en');
   const labels = {
     nama:    'Nama Tamu / Full Name',
@@ -437,12 +478,21 @@ function showConfirm(apd, noApd, onOk) {
     ? (isEn ? 'No PPE' : 'Tidak memakai APD')
     : apd.join(', ');
 
+  const briefingLabel = isEn ? 'K3 Safety Briefing' : 'Status Briefing K3';
+  const briefingText = isAutoBriefed
+    ? (isEn
+        ? '<span style="color:#27ae60;font-weight:700;">✓ Tervalidasi Otomatis (Automatically Verified)</span>'
+        : '<span style="color:#27ae60;font-weight:700;">✓ Tervalidasi Otomatis (Sudah Pernah Dibriefing)</span>')
+    : (isEn
+        ? '<span style="color:#e67e22;font-weight:600;">Waiting for K3 Officer</span>'
+        : '<span style="color:#e67e22;font-weight:600;">Belum Dibriefing (Cek oleh Admin K3)</span>');
+
   const btnReview = isEn ? 'Review Again' : 'Periksa Lagi';
   const btnConfirm = isEn ? 'Confirm' : 'Konfirmasi';
 
   openDialog(
     confirmTitle,
-    `<dl>${rows}<dt>${apdLabel}</dt><dd>${esc(apdText)}</dd></dl>`,
+    `<dl>${rows}<dt>${apdLabel}</dt><dd>${esc(apdText)}</dd><dt>${briefingLabel}</dt><dd>${briefingText}</dd></dl>`,
     `<button class="btn ghost" id="ovn">${btnReview}</button>` +
     `<button class="btn" id="ovy">${btnConfirm}</button>`
   );
@@ -463,13 +513,21 @@ function showConfirm(apd, noApd, onOk) {
   };
 }
 
-function showDone(name) {
+function showDone(name, isAutoBriefed = false) {
   const isEn = (typeof currentLang !== 'undefined' && currentLang === 'en');
+  const autoBriefBox = isAutoBriefed
+    ? `<div style="margin-top:12px;padding:10px 12px;border-radius:8px;background:rgba(39,174,96,0.12);border:1px solid rgba(39,174,96,0.35);color:#1e8449;font-size:12.5px;font-weight:600;">${
+        isEn
+          ? '✓ K3 Safety Briefing status has been automatically verified (previously briefed).'
+          : '✓ Status Safety Briefing K3 Anda otomatis tervalidasi (sudah pernah dibriefing sebelumnya).'
+      }</div>`
+    : '';
+
   openDialog(
     isEn ? '✓ Registration Successful' : '✓ Registrasi Berhasil',
     isEn
-      ? `<p>Thank you, <b>${esc(name)}</b>. Your visit details have been registered in our system. Please proceed to the security post to pick up your visitor badge.</p>`
-      : `<p>Terima kasih, <b>${esc(name)}</b>. Data kunjungan Anda sudah tersimpan di sistem. Silakan menuju petugas keamanan untuk mengambil name tag tamu.</p>`,
+      ? `<p>Thank you, <b>${esc(name)}</b>. Your visit details have been registered in our system. Please proceed to the security post to pick up your visitor badge.</p>${autoBriefBox}`
+      : `<p>Terima kasih, <b>${esc(name)}</b>. Data kunjungan Anda sudah tersimpan di sistem. Silakan menuju petugas keamanan untuk mengambil name tag tamu.</p>${autoBriefBox}`,
     `<button class="btn" id="ovd">${isEn ? 'Finish' : 'Selesai'}</button>`
   );
 

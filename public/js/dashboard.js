@@ -101,8 +101,16 @@ function initDashboard() {
           store.set('vms-data', data);
         }
 
+        if (r.briefed && typeof registerBriefedVisitor === 'function') {
+          registerBriefedVisitor(r);
+        } else if (!r.briefed && typeof unregisterBriefedVisitor === 'function') {
+          unregisterBriefedVisitor(r, data);
+        }
+
         renderTable();
-        if (typeof syncDataToServer === 'function') syncDataToServer(r);
+        if (typeof syncDataToServer === 'function') {
+          syncDataToServer(r.briefed ? r : { ...r, _manualBriefingOff: true });
+        }
 
         const msg = r.briefed
           ? `Tamu ${r.nama} telah selesai diberikan safety briefing K3.`
@@ -426,9 +434,17 @@ function toggleVisitorBriefing(id) {
     store.set('vms-data', data);
   }
 
+  if (r.briefed && typeof registerBriefedVisitor === 'function') {
+    registerBriefedVisitor(r);
+  } else if (!r.briefed && typeof unregisterBriefedVisitor === 'function') {
+    unregisterBriefedVisitor(r, data);
+  }
+
   renderTable();
   showVisitorDetail(id);
-  if (typeof syncDataToServer === 'function') syncDataToServer(r);
+  if (typeof syncDataToServer === 'function') {
+    syncDataToServer(r.briefed ? r : { ...r, _manualBriefingOff: true });
+  }
   const msg = r.briefed
     ? `Tamu ${r.nama} telah selesai diberikan safety briefing K3.`
     : `Status safety briefing untuk ${r.nama} diubah menjadi belum briefing.`;

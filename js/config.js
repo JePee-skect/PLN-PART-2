@@ -94,13 +94,177 @@ let adminName = (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem(
 const DEFAULT_EASYVOICE_KEY = 'ev_a8dd782ce24e59571a03d3cbda4039cd73c68d9a0013647a9d295a6e7cc87e16';
 const DEFAULT_EASYVOICE_VOICE = 'af_heart';
 
+// =====================================================================
+// SISTEM VALIDASI OTOMATIS STATUS BRIEFING K3
+// Kriteria: Nama Tamu, Nama PT/Perusahaan, atau No. KTP
+// =====================================================================
+const BRIEFING_INVALID_PLACEHOLDERS = new Set([
+  '-', '--', 'tidak ada', 'none', 'pribadi', 'individu', 'umum',
+  'perorangan', 'n/a', 'na', 'null', 'undefined'
+]);
+
+function normalizeKtp(ktp) {
+  if (!ktp) return '';
+  const digits = String(ktp).replace(/\D/g, '').trim();
+  if (digits.length < 6 || /^0+$/.test(digits)) return '';
+  return digits;
+}
+
+function normalizeCompany(usaha) {
+  if (!usaha) return '';
+  let str = String(usaha).toLowerCase().trim();
+  if (BRIEFING_INVALID_PLACEHOLDERS.has(str)) return '';
+  str = str.replace(/^(pt|cv|ud|po|fa|nv|pd|perum|koperasi|yayasan)\.?\s+/gi, '');
+  str = str.replace(/\s+(tbk|ltd|inc|co)\.?$/gi, '');
+  str = str.replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  if (str.length < 3 || BRIEFING_INVALID_PLACEHOLDERS.has(str)) return '';
+  return str;
+}
+
+function normalizePersonName(name) {
+  if (!name) return '';
+  let str = String(name).toLowerCase().trim();
+  if (BRIEFING_INVALID_PLACEHOLDERS.has(str)) return '';
+  str = str.replace(/^(bapak|bpk|ibu|bu|sdr|sdri|mr|mrs|ms|dr|ir|h|hj)\.?\s+/gi, '');
+  str = str.replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  if (str.length < 3 || BRIEFING_INVALID_PLACEHOLDERS.has(str)) return '';
+  return str;
+}
+
+function matchesVisitorIdentity(target, source) {
+  if (!target || !source) return false;
+
+  // 1. Cek No. KTP
+  const k1 = normalizeKtp(target.ktp);
+  const k2 = normalizeKtp(source.ktp);
+  if (k1 && k2 && k1 === k2) {
+    return true;
+  }
+
+  // 2. Cek Nama PT / Perusahaan
+  const u1 = normalizeCompany(target.usaha);
+  const u2 = normalizeCompany(source.usaha);
+  if (u1 && u2) {
+    if (u1 === u2) return true;
+    if (u1.length >= 4 && u2.length >= 4 && (u1.includes(u2) || u2.includes(u1))) {
+      return true;
+    }
+  }
+
+  // 3. Cek Nama Tamu (toleransi variasi ejaan y/i seperti Rizky <-> Rizki & prefix multi-kata)
+  const n1 = normalizePersonName(target.nama);
+  const n2 = normalizePersonName(source.nama);
+  if (n1 && n2) {
+    const n1Ph = n1.replace(/y/g, 'i');
+    const n2Ph = n2.replace(/y/g, 'i');
+    if (n1 === n2 || n1Ph === n2Ph) {
+      return true;
+    }
+    // Toleransi spasi: "jepe cuy" vs "jepecuy"
+    const n1Flat = n1Ph.replace(/\s+/g, '');
+    const n2Flat = n2Ph.replace(/\s+/g, '');
+    if (n1Flat && n2Flat && n1Flat === n2Flat) {
+      return true;
+    }
+    // Toleransi nama tidak lengkap: "jepe" cocok dengan "jepecuy" (prefix >= 3 karakter)
+    if (n1Flat && n2Flat && Math.min(n1Flat.length, n2Flat.length) >= 3) {
+      const shorter = n1Flat.length <= n2Flat.length ? n1Flat : n2Flat;
+      const longer  = n1Flat.length <= n2Flat.length ? n2Flat : n1Flat;
+      if (longer.startsWith(shorter)) {
+        return true;
+      }
+    }
+    const w1 = n1Ph.split(' ').filter(Boolean);
+    const w2 = n2Ph.split(' ').filter(Boolean);
+    if (Math.min(w1.length, w2.length) >= 2 && (n1Ph.startsWith(n2Ph + ' ') || n2Ph.startsWith(n1Ph + ' '))) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function registerBriefedVisitor(record) {
+  if (!record || typeof store === 'undefined') return;
+  const registry = store.get('vms-briefed-registry', []) || [];
+  const cleanEntry = {
+    nama: record.nama || '',
+    ktp: record.ktp || '',
+    usaha: record.usaha || '',
+    briefedAt: new Date().toISOString()
+  };
+
+  if (!normalizeKtp(cleanEntry.ktp) && !normalizeCompany(cleanEntry.usaha) && !normalizePersonName(cleanEntry.nama)) {
+    return;
+  }
+
+  const alreadyExact = registry.some(item =>
+    normalizePersonName(item.nama) === normalizePersonName(cleanEntry.nama) &&
+    normalizeCompany(item.usaha) === normalizeCompany(cleanEntry.usaha) &&
+    normalizeKtp(item.ktp) === normalizeKtp(cleanEntry.ktp)
+  );
+  if (!alreadyExact) {
+    registry.push(cleanEntry);
+    store.set('vms-briefed-registry', registry);
+  }
+}
+
+function unregisterBriefedVisitor(record, visitorList = data) {
+  if (!record || typeof store === 'undefined') return;
+  const registry = store.get('vms-briefed-registry', []) || [];
+
+  const activeBriefedRows = (Array.isArray(visitorList) ? visitorList : []).filter(r =>
+    r &&
+    String(r.id) !== String(record.id) &&
+    (r.briefed === true || r.briefed === 'true' || r.briefed === 1 || String(r.apd || '').includes('[K3_BRIEFED]'))
+  );
+
+  const nextRegistry = registry.filter(item => {
+    if (!matchesVisitorIdentity(record, item)) return true;
+    return activeBriefedRows.some(active => matchesVisitorIdentity(active, item));
+  });
+
+  store.set('vms-briefed-registry', nextRegistry);
+}
+
+function isVisitorPreviouslyBriefed(record, visitorList = data) {
+  if (!record) return false;
+
+  // 1. Cek di seluruh data riwayat kunjungan yang briefing-nya aktif
+  if (Array.isArray(visitorList)) {
+    const matchedHistory = visitorList.some(prev => {
+      if (!prev) return false;
+      if (prev.id && record.id && String(prev.id) === String(record.id)) return false;
+      const wasBriefed = (
+        prev.briefed === true ||
+        prev.briefed === 'true' ||
+        prev.briefed === 1 ||
+        String(prev.apd || '').includes('[K3_BRIEFED]')
+      );
+      if (!wasBriefed) return false;
+      return matchesVisitorIdentity(record, prev);
+    });
+    if (matchedHistory) return true;
+  }
+
+  // 2. Cek di registry lokal tamu yang sudah dibriefing
+  if (typeof store !== 'undefined') {
+    const registry = store.get('vms-briefed-registry', []) || [];
+    if (Array.isArray(registry) && registry.some(item => matchesVisitorIdentity(record, item))) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 // Fungsi Penggabungan Data Server dan Status Briefing Lokal / APD Marker
 function mergeVisitorsWithLocalState(serverList) {
   if (!Array.isArray(serverList)) return data || [];
   const localMap = new Map((data || []).map(r => [String(r.id), r]));
   const briefedMap = (typeof store !== 'undefined' ? store.get('vms-briefed-ids', {}) : {}) || {};
 
-  return serverList
+  const merged = serverList
     .filter(r => r && r.id && !PURGED_DUMMY_IDS.has(String(r.id)))
     .map(serverRow => {
       const id = String(serverRow.id);
@@ -119,12 +283,20 @@ function mergeVisitorsWithLocalState(serverList) {
       }
 
       briefedMap[id] = isBriefed;
+      if (isBriefed) {
+        registerBriefedVisitor(serverRow);
+      }
 
       return {
         ...serverRow,
         briefed: isBriefed
       };
     });
+
+  if (typeof store !== 'undefined') {
+    store.set('vms-briefed-ids', briefedMap);
+  }
+  return merged;
 }
 
 // Sinkronisasi Data Pengunjung Real-time Lintas Perangkat (Cloud Database)

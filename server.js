@@ -192,6 +192,78 @@ function mergeVisitors(existing, incoming) {
   });
 }
 
+// Helper Validasi Otomatis Briefing K3 (Nama, PT, No. KTP)
+const BRIEFING_INVALID_PLACEHOLDERS = new Set([
+  '-', '--', 'tidak ada', 'none', 'pribadi', 'individu', 'umum',
+  'perorangan', 'n/a', 'na', 'null', 'undefined'
+]);
+
+function normalizeKtp(ktp) {
+  if (!ktp) return '';
+  const digits = String(ktp).replace(/\D/g, '').trim();
+  if (digits.length < 6 || /^0+$/.test(digits)) return '';
+  return digits;
+}
+
+function normalizeCompany(usaha) {
+  if (!usaha) return '';
+  let str = String(usaha).toLowerCase().trim();
+  if (BRIEFING_INVALID_PLACEHOLDERS.has(str)) return '';
+  str = str.replace(/^(pt|cv|ud|po|fa|nv|pd|perum|koperasi|yayasan)\.?\s+/gi, '');
+  str = str.replace(/\s+(tbk|ltd|inc|co)\.?$/gi, '');
+  str = str.replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  if (str.length < 3 || BRIEFING_INVALID_PLACEHOLDERS.has(str)) return '';
+  return str;
+}
+
+function normalizePersonName(name) {
+  if (!name) return '';
+  let str = String(name).toLowerCase().trim();
+  if (BRIEFING_INVALID_PLACEHOLDERS.has(str)) return '';
+  str = str.replace(/^(bapak|bpk|ibu|bu|sdr|sdri|mr|mrs|ms|dr|ir|h|hj)\.?\s+/gi, '');
+  str = str.replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  if (str.length < 3 || BRIEFING_INVALID_PLACEHOLDERS.has(str)) return '';
+  return str;
+}
+
+function matchesVisitorIdentity(target, source) {
+  if (!target || !source) return false;
+  const k1 = normalizeKtp(target.ktp);
+  const k2 = normalizeKtp(source.ktp);
+  if (k1 && k2 && k1 === k2) return true;
+
+  const u1 = normalizeCompany(target.usaha);
+  const u2 = normalizeCompany(source.usaha);
+  if (u1 && u2) {
+    if (u1 === u2) return true;
+    if (u1.length >= 4 && u2.length >= 4 && (u1.includes(u2) || u2.includes(u1))) return true;
+  }
+
+  const n1 = normalizePersonName(target.nama);
+  const n2 = normalizePersonName(source.nama);
+  if (n1 && n2) {
+    const n1Ph = n1.replace(/y/g, 'i');
+    const n2Ph = n2.replace(/y/g, 'i');
+    if (n1 === n2 || n1Ph === n2Ph) return true;
+    // Toleransi spasi: "jepe cuy" vs "jepecuy"
+    const n1Flat = n1Ph.replace(/\s+/g, '');
+    const n2Flat = n2Ph.replace(/\s+/g, '');
+    if (n1Flat && n2Flat && n1Flat === n2Flat) return true;
+    // Toleransi nama tidak lengkap: "jepe" cocok dengan "jepecuy" (prefix >= 3 karakter)
+    if (n1Flat && n2Flat && Math.min(n1Flat.length, n2Flat.length) >= 3) {
+      const shorter = n1Flat.length <= n2Flat.length ? n1Flat : n2Flat;
+      const longer  = n1Flat.length <= n2Flat.length ? n2Flat : n1Flat;
+      if (longer.startsWith(shorter)) return true;
+    }
+    const w1 = n1Ph.split(' ').filter(Boolean);
+    const w2 = n2Ph.split(' ').filter(Boolean);
+    if (Math.min(w1.length, w2.length) >= 2 && (n1Ph.startsWith(n2Ph + ' ') || n2Ph.startsWith(n1Ph + ' '))) {
+      return true;
+    }
+  }
+  return false;
+}
+
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.css':  'text/css; charset=utf-8',
@@ -332,17 +404,55 @@ const server = http.createServer(async (req, res) => {
           }
 
           const incoming = Array.isArray(parsed) ? parsed : (parsed.data ? parsed.data : (parsed.id ? [parsed] : []));
-          if (incoming.length > 0) {
-            await upsertSupabaseVisitors(incoming);
-          }
-
-          let updated = await fetchSupabaseVisitors();
-          if (!updated && fs.existsSync(DATA_FILE)) {
+          let processedIncoming = incoming;
+          let localData = [];
+          if (fs.existsSync(DATA_FILE)) {
             try {
               const raw = fs.readFileSync(DATA_FILE, 'utf-8');
               const p = JSON.parse(raw);
-              updated = Array.isArray(p) ? p : (p.data || []);
-            } catch (e) { updated = []; }
+              localData = Array.isArray(p) ? p : (p.data || []);
+            } catch (e) { localData = []; }
+          }
+
+          if (incoming.length > 0) {
+            const needsCheck = incoming.some(r => r && r._isNewRegistration && !r._manualBriefingOff && !r.briefed);
+            if (needsCheck) {
+              let existing = await fetchSupabaseVisitors();
+              if (!existing) existing = localData;
+              processedIncoming = incoming.map(r => {
+                if (r && r._isNewRegistration && !r._manualBriefingOff) {
+                  const already = (r.briefed === true || r.briefed === 'true' || r.briefed === 1 || String(r.apd || '').includes('[K3_BRIEFED]'));
+                  const matched = !already && Array.isArray(existing) && existing.some(prev => {
+                    if (!prev || (prev.id && r.id && String(prev.id) === String(r.id))) return false;
+                    const wasBriefed = (prev.briefed === true || prev.briefed === 'true' || prev.briefed === 1 || String(prev.apd || '').includes('[K3_BRIEFED]'));
+                    return wasBriefed && matchesVisitorIdentity(r, prev);
+                  });
+                  if (matched) {
+                    let apdStr = Array.isArray(r.apd) ? r.apd.join(', ') : String(r.apd || '');
+                    apdStr = apdStr.replace(/\|?\s*\[K3_BRIEFED\]/gi, '').trim();
+                    return {
+                      ...r,
+                      briefed: true,
+                      apd: apdStr ? `${apdStr} | [K3_BRIEFED]` : '[K3_BRIEFED]'
+                    };
+                  }
+                }
+                return r;
+              });
+            }
+            await upsertSupabaseVisitors(processedIncoming);
+          }
+
+          let updated = await fetchSupabaseVisitors();
+          if (!updated) {
+            const cleanIncoming = processedIncoming.map(item => {
+              const c = { ...item };
+              delete c._isNewRegistration;
+              delete c._manualBriefingOff;
+              c.briefed = (c.briefed === true || c.briefed === 'true' || c.briefed === 1 || String(c.apd || '').includes('[K3_BRIEFED]'));
+              return c;
+            });
+            updated = mergeVisitors(localData, cleanIncoming);
           }
 
           try {

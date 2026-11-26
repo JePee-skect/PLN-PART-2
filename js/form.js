@@ -360,17 +360,8 @@ function handleSubmit() {
     return;
   }
 
-  const previewRec = {
-    nama:  $('#nama')  ? $('#nama').value.trim()  : '',
-    usaha: $('#usaha') ? $('#usaha').value.trim() : '',
-    ktp:   $('#ktp')   ? $('#ktp').value.trim()   : ''
-  };
-  const isAutoBriefedPreview = (typeof isVisitorPreviouslyBriefed === 'function')
-    ? isVisitorPreviouslyBriefed(previewRec, data)
-    : false;
-
-  showConfirm(apd, noApd, isAutoBriefedPreview, () => {
-    const uniqueId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  // Langsung proses registrasi data tanpa modal konfirmasi kedua
+  const uniqueId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const today = ymd();
     const rec = {
       id:        uniqueId,
@@ -439,7 +430,6 @@ function handleSubmit() {
       ? `Registration successful. Thank you, ${rec.nama}. Please proceed to the security post to pick up your visitor badge.${apdNote}${briefingNote}`
       : `Registrasi berhasil. Terima kasih, ${rec.nama}. Silakan menuju petugas keamanan untuk mengambil kartu name tag.${apdNote}${briefingNote}`);
     showDone(rec.nama, isAutoBriefed);
-  });
 }
 
 function openDialog(title, bodyHtml, actionsHtml) {

@@ -134,51 +134,47 @@ function normalizePersonName(name) {
 function matchesVisitorIdentity(target, source) {
   if (!target || !source) return false;
 
-  // 1. Cek No. KTP
+  // 1. Prioritas Utama: No. KTP (NIK Identitas Pribadi)
   const k1 = normalizeKtp(target.ktp);
   const k2 = normalizeKtp(source.ktp);
-  const ktpMatch = !!(k1 && k2 && k1 === k2);
-  if (ktpMatch) return true;
 
-  // 2. Cek Nama PT / Perusahaan
-  const u1 = normalizeCompany(target.usaha);
-  const u2 = normalizeCompany(source.usaha);
-  if (u1 && u2) {
-    if (u1 === u2) return true;
-    if (u1.length >= 4 && u2.length >= 4 && (u1.includes(u2) || u2.includes(u1))) {
-      return true;
-    }
+  // Jika kedua data memiliki No. KTP:
+  if (k1 && k2) {
+    // Jika No. KTP berbeda, PASTI bukan orang yang sama -> JANGAN diverifikasi (tetap pending)!
+    if (k1 !== k2) return false;
+    // Jika No. KTP sama persis, PASTI orang yang sama -> langsung otomatis terverifikasi!
+    return true;
   }
 
-  // 3. Cek Nama Tamu
+  // 2. Jika salah satu atau kedua data TIDAK memiliki No. KTP valid:
   const n1 = normalizePersonName(target.nama);
   const n2 = normalizePersonName(source.nama);
   if (n1 && n2) {
     const n1Ph = n1.replace(/y/g, 'i');
     const n2Ph = n2.replace(/y/g, 'i');
 
-    // 3a. Nama persis sama (dengan toleransi y/i)
+    // 2a. Nama persis sama (dengan toleransi y/i)
     if (n1 === n2 || n1Ph === n2Ph) return true;
 
-    // 3b. Toleransi spasi: "jepe cuy" == "jepecuy"
+    // 2b. Toleransi spasi: "jepe cuy" == "jepecuy"
     const n1Flat = n1Ph.replace(/\s+/g, '');
     const n2Flat = n2Ph.replace(/\s+/g, '');
     if (n1Flat && n2Flat && n1Flat === n2Flat) return true;
 
-    // 3c. Prefix multi-kata: "Ahmad Budi" vs "Ahmad Budi Santoso" (>= 2 kata lengkap)
+    // 2c. Prefix multi-kata: "Ahmad Budi" vs "Ahmad Budi Santoso" (>= 2 kata lengkap)
     const w1 = n1Ph.split(' ').filter(Boolean);
     const w2 = n2Ph.split(' ').filter(Boolean);
     if (Math.min(w1.length, w2.length) >= 2 && (n1Ph.startsWith(n2Ph + ' ') || n2Ph.startsWith(n1Ph + ' '))) {
       return true;
     }
 
-    // 3d. Prefix nama depan/panggilan (1 kata / potongan nama): "jepe" vs "jepecuy", "budi" vs "budi santoso"
-    //     Karena nama depan/panggilan bisa ambigu, wajib KTP sama untuk tervalidasi otomatis
+    // 2d. Prefix nama depan/panggilan (1 kata / potongan nama): "jepe" vs "jepecuy", "budi" vs "budi santoso"
+    //     Karena nama depan/panggilan bisa ambigu dan rawan tertukar, tanpa KTP sama TIDAK boleh auto-verifikasi
     if (n1Flat && n2Flat && Math.min(n1Flat.length, n2Flat.length) >= 3) {
       const shorter = n1Flat.length <= n2Flat.length ? n1Flat : n2Flat;
       const longer  = n1Flat.length <= n2Flat.length ? n2Flat : n1Flat;
       if (longer.startsWith(shorter) && shorter.length < longer.length) {
-        return ktpMatch;
+        return false;
       }
     }
   }

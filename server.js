@@ -228,18 +228,20 @@ function normalizePersonName(name) {
 
 function matchesVisitorIdentity(target, source) {
   if (!target || !source) return false;
+
+  // 1. Prioritas Utama: No. KTP (NIK Identitas Pribadi)
   const k1 = normalizeKtp(target.ktp);
   const k2 = normalizeKtp(source.ktp);
-  const ktpMatch = !!(k1 && k2 && k1 === k2);
-  if (ktpMatch) return true;
 
-  const u1 = normalizeCompany(target.usaha);
-  const u2 = normalizeCompany(source.usaha);
-  if (u1 && u2) {
-    if (u1 === u2) return true;
-    if (u1.length >= 4 && u2.length >= 4 && (u1.includes(u2) || u2.includes(u1))) return true;
+  // Jika kedua data memiliki No. KTP:
+  if (k1 && k2) {
+    // Jika No. KTP berbeda, PASTI bukan orang yang sama -> JANGAN diverifikasi (tetap pending)!
+    if (k1 !== k2) return false;
+    // Jika No. KTP sama persis, PASTI orang yang sama -> langsung otomatis terverifikasi!
+    return true;
   }
 
+  // 2. Jika salah satu atau kedua data TIDAK memiliki No. KTP valid:
   const n1 = normalizePersonName(target.nama);
   const n2 = normalizePersonName(source.nama);
   if (n1 && n2) {
@@ -254,11 +256,11 @@ function matchesVisitorIdentity(target, source) {
     if (Math.min(w1.length, w2.length) >= 2 && (n1Ph.startsWith(n2Ph + ' ') || n2Ph.startsWith(n1Ph + ' '))) {
       return true;
     }
-    // Prefix nama depan/panggilan: wajib KTP sama jika nama hanya cocok sebagian
+    // Prefix nama depan/panggilan: tanpa KTP sama tidak boleh auto-verifikasi
     if (n1Flat && n2Flat && Math.min(n1Flat.length, n2Flat.length) >= 3) {
       const shorter = n1Flat.length <= n2Flat.length ? n1Flat : n2Flat;
       const longer  = n1Flat.length <= n2Flat.length ? n2Flat : n1Flat;
-      if (longer.startsWith(shorter) && shorter.length < longer.length) return ktpMatch;
+      if (longer.startsWith(shorter) && shorter.length < longer.length) return false;
     }
   }
   return false;
